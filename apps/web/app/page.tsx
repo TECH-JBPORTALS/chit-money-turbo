@@ -6,11 +6,11 @@ export default function Page() {
     <div className="flex bg-linear-120 w-full flex-col from-primary/10 to-primary/5 items-center min-h-svh">
       <div className="size-[735px] rounded-full absolute -top-1/2 bg-primary" />
       <div className="flex z-20 bg-background/40 backdrop-blur-[180px] w-full flex-col items-center justify-center min-h-svh gap-4">
-        <h1 className="text-5xl font-bold w-2/4 text-center">
+        <h1 className="text-5xl font-heading font-black w-2/4 text-center">
           Modernize Your <span className="text-primary">Chit Fund</span>{" "}
           Management
         </h1>
-        <p className="text-base w-2/5 text-center text-muted-foreground">
+        <p className="text-lg w-2/5 text-center text-muted-foreground">
           Streamline operations, build trust, and grow your chit fund business
           with our digital management platform designed specifically for
           collectors.
