@@ -3,7 +3,7 @@
 ## TODO
 
 - [x] Make it work
-- [ ] Deploy the web app
-- [ ] Setup the theme for web app
+- [x] Deploy the web app
+- [ ] Setup the theme
 - [ ] Setup the expo app with expo router
 - [ ] Setup the app theme
