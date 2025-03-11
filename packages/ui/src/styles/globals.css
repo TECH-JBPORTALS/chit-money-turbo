@@ -118,6 +118,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-water-flow: water-flow 4s linear infinite;
 
   @keyframes accordion-down {
     from {
@@ -125,6 +126,24 @@
     }
     to {
       height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes water-flow {
+    0% {
+      transform: translateY(0) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-10%) rotate(1deg);
+    }
+    50% {
+      transform: translateY(0) rotate(0deg);
+    }
+    75% {
+      transform: translateY(10%) rotate(-1deg);
+    }
+    100% {
+      transform: translateY(0) rotate(0deg);
     }
   }
 

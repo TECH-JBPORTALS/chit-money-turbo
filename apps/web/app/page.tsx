@@ -13,9 +13,9 @@ export default function Page() {
             height={150}
             width={150}
             alt="Chit.Money Coin"
-            className="mb-10"
+            className="mb-10 animate-water-flow"
           />
-          <h2 className="text-3xl font-semibold text-center ">Chit.Money</h2>
+          <h2 className="text-3xl font-bold text-center ">Chit.Money</h2>
         </div>
         <h1 className="text-5xl font-heading font-black w-2/4 text-center">
           Modernize Your <span className="text-primary">Chit Fund</span>{" "}
