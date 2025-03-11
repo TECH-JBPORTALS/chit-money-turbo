@@ -1,11 +1,22 @@
 import { Button } from "@cmt/ui/components/button";
 import { ArrowRightIcon } from "lucide-react";
+import Image from "next/image";
 
 export default function Page() {
   return (
     <div className="flex bg-linear-120 w-full flex-col from-primary/10 to-primary/5 items-center min-h-svh">
       <div className="size-[735px] rounded-full absolute -top-1/2 bg-primary" />
       <div className="flex z-20 bg-background/40 backdrop-blur-[180px] w-full flex-col items-center justify-center min-h-svh gap-4">
+        <div className="flex flex-col">
+          <Image
+            src={"/chit-coin.png"}
+            height={150}
+            width={150}
+            alt="Chit.Money Coin"
+            className="mb-10"
+          />
+          <h2 className="text-3xl font-semibold text-center ">Chit.Money</h2>
+        </div>
         <h1 className="text-5xl font-heading font-black w-2/4 text-center">
           Modernize Your <span className="text-primary">Chit Fund</span>{" "}
           Management
