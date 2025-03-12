@@ -10,3 +10,5 @@
 - [ ] Setup the expo app with expo router
 - [ ] Setup the app theme
 - [ ] Setup Expo app fonts according to theme
+- [ ] Setup console nextjs app for collector console
+- [ ] Setup theme for console
