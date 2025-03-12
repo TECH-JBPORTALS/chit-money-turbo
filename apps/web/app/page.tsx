@@ -6,7 +6,7 @@ export default function Page() {
   return (
     <div className="flex bg-linear-120 w-full flex-col from-primary/10 to-primary/5 items-center min-h-svh">
       <div className="size-[735px] rounded-full absolute -top-1/2 bg-primary" />
-      <div className="flex z-20 bg-background/40 backdrop-blur-[180px] w-full flex-col items-center justify-center min-h-svh gap-4">
+      <div className="flex z-20 bg-background/40 backdrop-blur-[180px] w-full flex-col items-center pt-32  min-h-svh gap-4">
         <div className="flex flex-col">
           <Image
             src={"/chit-coin.png"}
@@ -39,6 +39,18 @@ export default function Page() {
             <ArrowRightIcon className=" group-hover:translate-x-1 transition-all duration-150" />
           </Button>
         </div>
+
+        <section className="px-24 py-20 w-full">
+          <div className="relative h-[846px]  w-full">
+            <Image
+              quality={100}
+              src={"/chrome-collector-home.png"}
+              fill
+              alt="Chrome Collector Home Page"
+              objectFit="contain"
+            />
+          </div>
+        </section>
       </div>
     </div>
   );
