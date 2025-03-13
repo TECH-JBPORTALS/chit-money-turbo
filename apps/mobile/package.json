@@ -13,6 +13,10 @@
   "dependencies": {
     "@alexaka1/tailwindcss-oklch": "^0.0.4",
     "@expo-google-fonts/urbanist": "^0.2.3",
+    "@rn-primitives/slot": "^1.1.0",
+    "@rn-primitives/types": "^1.1.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "expo": "~52.0.38",
     "expo-constants": "~17.0.8",
     "expo-font": "~13.0.4",
@@ -21,6 +25,7 @@
     "expo-splash-screen": "~0.29.22",
     "expo-status-bar": "~2.0.1",
     "expo-system-ui": "~4.0.8",
+    "lucide-react-native": "^0.479.0",
     "nativewind": "^4.1.23",
     "react": "catalog:react18",
     "react-native": "0.76.7",
@@ -28,7 +33,11 @@
     "react-native-reanimated": "3.16.2",
     "react-native-safe-area-context": "^4.12.0",
     "react-native-screens": "~4.4.0",
-    "tailwindcss": "catalog:tailwind3"
+    "react-native-svg": "15.8.0",
+    "tailwind-merge": "^3.0.1",
+    "tailwindcss": "catalog:tailwind3",
+    "tailwindcss-animate": "^1.0.7",
+    "use-isomorphic-layout-effect": "^1.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
