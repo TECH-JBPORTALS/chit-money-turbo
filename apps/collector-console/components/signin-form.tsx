@@ -22,7 +22,8 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSignIn } from "@clerk/nextjs";
 import { useSearchParams } from "next/navigation";
-import { Loader2Icon } from "lucide-react";
+import { EyeClosedIcon, EyeIcon, Loader2Icon } from "lucide-react";
+import { useState } from "react";
 
 const signInSchema = z.object({
   email: z.string().trim().min(1, {
@@ -102,23 +103,41 @@ export function SignInForm({
                     control={form.control}
                     name="password"
                     disabled={form.formState.isSubmitting || !isLoaded}
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex items-center">
-                          <FormLabel htmlFor="password">Password</FormLabel>
-                          <a
-                            href="#"
-                            className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                          >
-                            Forgot your password?
-                          </a>
-                        </div>
-                        <FormControl>
-                          <Input placeholder="•••••••••••••••••" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      const [eyeOpen, setEyeOpen] = useState(false);
+                      return (
+                        <FormItem>
+                          <div className="flex items-center">
+                            <FormLabel htmlFor="password">Password</FormLabel>
+                            <a
+                              href="#"
+                              className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                            >
+                              Forgot your password?
+                            </a>
+                          </div>
+                          <FormControl>
+                            <div className="inline-flex overflow-hidden relative">
+                              <Input
+                                type={eyeOpen ? "text" : "password"}
+                                placeholder="•••••••••••••••••"
+                                {...field}
+                              />
+                              <Button
+                                type="button"
+                                variant={"ghost"}
+                                onClick={() => setEyeOpen(!eyeOpen)}
+                                className="absolute rounded-none right-0"
+                                size={"icon"}
+                              >
+                                {eyeOpen ? <EyeIcon /> : <EyeClosedIcon />}
+                              </Button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
                 </div>
                 <div className="flex flex-col gap-3">
