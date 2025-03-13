@@ -1,5 +1,6 @@
 const { getDefaultConfig } = require("expo/metro-config");
 const path = require("path");
+const { withNativeWind } = require("nativewind/metro");
 
 // Find the project and workspace directories
 const projectRoot = __dirname;
@@ -16,4 +17,7 @@ config.resolver.nodeModulesPaths = [
   path.resolve(monorepoRoot, "node_modules"),
 ];
 
-module.exports = config;
+module.exports = withNativeWind(config, {
+  input: "./src/globals.css",
+  configPath: "./tailwind.config.ts",
+});
