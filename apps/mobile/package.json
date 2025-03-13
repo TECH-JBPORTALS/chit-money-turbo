@@ -6,10 +6,11 @@
     "dev:android": "expo start --android -c",
     "android": "expo run android --no-build-cache",
     "clean": "git clean -xdf .cache .expo .turbo android ios node_modules",
-    "clean:prebuild": "git clean -xdf android ios",
+    "clean:native": "git clean -xdf android ios .cache .expo",
     "ios": "expo run:ios"
   },
   "dependencies": {
+    "@cmt/ui": "workspace:*",
     "expo": "~52.0.38",
     "expo-constants": "~17.0.8",
     "expo-linking": "~7.0.5",
