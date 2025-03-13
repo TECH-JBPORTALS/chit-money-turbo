@@ -6,7 +6,7 @@
 - [x] Setup the app theme
 - [x] Setup Expo app fonts according to theme
 - [x] Setup rnr component library for reusable components
-- [ ] Create welcome screen for subscriber app
+- [x] Create welcome screen for subscriber app
 - [ ] Setup console nextjs app for collector console
 - [ ] Setup theme for console
 
