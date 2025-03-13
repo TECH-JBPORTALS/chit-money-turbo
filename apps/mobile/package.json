@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
+    "start": "expo start",
     "dev:android": "expo start --android -c",
     "android": "expo run android --no-build-cache",
     "clean": "git clean -xdf .cache .expo .turbo android ios node_modules",
@@ -10,6 +11,7 @@
     "ios": "expo run:ios"
   },
   "dependencies": {
+    "@alexaka1/tailwindcss-oklch": "^0.0.4",
     "@cmt/ui": "workspace:*",
     "expo": "~52.0.38",
     "expo-constants": "~17.0.8",

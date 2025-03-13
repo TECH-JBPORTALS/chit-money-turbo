@@ -34,6 +34,7 @@
   "exports": {
     "./globals.css": "./src/styles/globals.css",
     "./theme.css": "./src/styles/theme.css",
+    "./native.css": "./src/styles/native.css",
     "./postcss.config": "./postcss.config.mjs",
     "./lib/*": "./src/lib/*.ts",
     "./components/*": "./src/components/*.tsx",

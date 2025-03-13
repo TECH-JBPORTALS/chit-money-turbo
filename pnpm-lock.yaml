@@ -53,6 +53,9 @@ importers:
 
   apps/mobile:
     dependencies:
+      '@alexaka1/tailwindcss-oklch':
+        specifier: ^0.0.4
+        version: 0.0.4
       '@cmt/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -269,6 +272,9 @@ packages:
     peerDependenciesMeta:
       graphql:
         optional: true
+
+  '@alexaka1/tailwindcss-oklch@0.0.4':
+    resolution: {integrity: sha512-vtWSNMNnSMdpF132w4HHyS7JPKEZRTQq1eX99q3tUrDpcbNt/iTHvoWVYHbf5XkPN8MnPqeyA/YWa17RRYzOHQ==}
 
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
@@ -2278,6 +2284,9 @@ packages:
   color@4.2.3:
     resolution: {integrity: sha512-1rXeuUUiGGrykh+CeBdu5Ie7OJwinCgQY0bc7GCRxy5xVHy+moaqkpL/jqQq0MtQOeYcrqEz4abc5f0KtU7W4A==}
     engines: {node: '>=12.5.0'}
+
+  colorjs.io@0.5.2:
+    resolution: {integrity: sha512-twmVoizEW7ylZSN32OgKdXRmo1qg+wT5/6C3xu5b9QsWzSFAhHLn2xd8ro0diCsKfCj1RdaTP/nrcW+vAoQPIw==}
 
   combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
@@ -5514,6 +5523,10 @@ snapshots:
 
   '@0no-co/graphql.web@1.1.2': {}
 
+  '@alexaka1/tailwindcss-oklch@0.0.4':
+    dependencies:
+      colorjs.io: 0.5.2
+
   '@alloc/quick-lru@5.2.0': {}
 
   '@ampproject/remapping@2.3.0':
@@ -8125,6 +8138,8 @@ snapshots:
     dependencies:
       color-convert: 2.0.1
       color-string: 1.9.1
+
+  colorjs.io@0.5.2: {}
 
   combined-stream@1.0.8:
     dependencies:

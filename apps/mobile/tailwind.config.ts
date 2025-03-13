@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 // @ts-expect-error - no types
 import nativewind from "nativewind/preset";
+import oklchPlugin from "@alexaka1/tailwindcss-oklch";
 
 export default {
   darkMode: "class",
@@ -48,5 +49,5 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [oklchPlugin],
 } satisfies Config;
