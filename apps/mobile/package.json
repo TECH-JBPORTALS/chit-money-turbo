@@ -11,15 +11,17 @@
     "ios": "expo run:ios"
   },
   "dependencies": {
-    "@alexaka1/tailwindcss-oklch": "^0.0.4",
     "@expo-google-fonts/urbanist": "^0.2.3",
     "@rn-primitives/slot": "^1.1.0",
     "@rn-primitives/types": "^1.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "expo": "~52.0.38",
+    "expo-blur": "~14.0.3",
     "expo-constants": "~17.0.8",
     "expo-font": "~13.0.4",
+    "expo-image": "~2.0.6",
+    "expo-linear-gradient": "~14.0.2",
     "expo-linking": "~7.0.5",
     "expo-router": "~4.0.18",
     "expo-splash-screen": "~0.29.22",

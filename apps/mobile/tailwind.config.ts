@@ -1,7 +1,6 @@
 import type { Config } from "tailwindcss";
 // @ts-expect-error - no types
 import nativewind from "nativewind/preset";
-import defaultTheme from "tailwindcss/defaultTheme";
 import plugin from "tailwindcss/plugin";
 
 export default {

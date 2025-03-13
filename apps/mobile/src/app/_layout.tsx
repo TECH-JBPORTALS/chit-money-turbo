@@ -1,5 +1,5 @@
 import "../globals.css";
-import { Slot } from "expo-router";
+import { Slot, Stack } from "expo-router";
 import {
   useFonts,
   Urbanist_800ExtraBold,
@@ -76,7 +76,7 @@ function Outlet() {
         style={isDarkColorScheme ? "light" : "dark"}
         backgroundColor="transparent"
       />
-      <Slot />
+      <Stack />
     </ThemeProvider>
   );
 }
