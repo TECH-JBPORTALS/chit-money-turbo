@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 import "@cmt/ui/globals.css";
 import { Providers } from "@/components/providers";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const fontSans = Urbanist({
   subsets: ["latin"],
@@ -31,12 +32,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${fontSans.variable} ${fontGeist.variable}  ${fontMono.variable} font-sans antialiased `}
-      >
-        <Providers>{children}</Providers>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body
+          className={`${fontSans.variable} ${fontGeist.variable}  ${fontMono.variable} font-sans antialiased `}
+        >
+          <Providers>{children}</Providers>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
