@@ -13,7 +13,7 @@
 - [x] Setup console nextjs app for collector console
 - [x] Setup the fonts collector console
 - [x] Setup theme for collector console
-- [ ] Create sign in form
-- [ ] Create sign up form
+- [x] Create sign in form
 - [ ] Add clerk auth to collector console
+- [ ] Create sign up form
 - [ ] Make it deploy

@@ -16,7 +16,7 @@ export function SignInForm({
 }: React.ComponentProps<"div">) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="bg-transparent border-none">
+      <Card className="bg-transparent border-none shadow-none">
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Sign in to your account</CardTitle>
           <CardDescription>
@@ -27,7 +27,7 @@ export function SignInForm({
           <form>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Email address</Label>
                 <Input
                   id="email"
                   type="email"

@@ -36,7 +36,7 @@
   }
 
   .dark:root {
-    --background: oklch(0.2 0.05 156);
+    /* --background: oklch(0.2 0.05 156);
     --foreground: oklch(0.95 0.01 150);
     --card: oklch(0.25 0.06 156);
     --card-foreground: oklch(0.95 0.01 150);
@@ -67,6 +67,6 @@
     --sidebar-accent: oklch(0.269 0 0);
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(0.269 0 0);
-    --sidebar-ring: oklch(0.439 0 0);
+    --sidebar-ring: oklch(0.439 0 0); */
   }
 }
