@@ -2,13 +2,14 @@
 
 ## TODO
 
-- [x] Make it work
-- [x] Deploy the web app
-- [x] Setup the theme
-- [x] Add landing page contents
-- [x] Setup fonts for web app
 - [x] Setup the expo app with expo router
-- [ ] Setup the app theme
+- [x] Setup the app theme
 - [ ] Setup Expo app fonts according to theme
 - [ ] Setup console nextjs app for collector console
 - [ ] Setup theme for console
+
+### 13/03/2025 Tasks
+
+- [ ] Setup console nextjs app for collector console
+- [ ] Setup theme for console
+- [ ] Add clerk auth to console

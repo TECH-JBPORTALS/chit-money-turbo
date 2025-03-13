@@ -1,7 +1,8 @@
 import type { Config } from "tailwindcss";
 // @ts-expect-error - no types
 import nativewind from "nativewind/preset";
-import oklchPlugin from "@alexaka1/tailwindcss-oklch";
+import defaultTheme from "tailwindcss/defaultTheme";
+import plugin from "tailwindcss/plugin";
 
 export default {
   darkMode: "class",
@@ -49,5 +50,23 @@ export default {
       },
     },
   },
-  plugins: [oklchPlugin],
+  plugins: [
+    plugin(({ addUtilities }) => {
+      const newUtilities = {
+        ".font-thin": { fontFamily: "Urbanist_100Thin" },
+        ".font-extralight": { fontFamily: "Urbanist_200ExtraLight" },
+        ".font-light": { fontFamily: "Urbanist_300Light" },
+        ".font-normal": { fontFamily: "Urbanist_400Regular" },
+        ".font-medium": { fontFamily: "Urbanist_500Medium" },
+        ".font-semibold": { fontFamily: "Urbanist_600SemiBold" },
+        ".font-bold": { fontFamily: "Urbanist_700Bold", fontWeight: "unset" },
+        ".font-extrabold": {
+          fontFamily: "Urbanist_800ExtraBold",
+          fontWeight: "unset",
+        },
+        ".font-black": { fontFamily: "Urbanist_900Black", fontWeight: "unset" },
+      };
+      addUtilities(newUtilities);
+    }),
+  ],
 } satisfies Config;
