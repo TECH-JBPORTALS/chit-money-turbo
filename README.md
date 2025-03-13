@@ -10,7 +10,7 @@
 
 ### 13/03/2025 Tasks
 
-- [ ] Setup console nextjs app for collector
-- [ ] Setup the fonts
-- [ ] Setup theme for console
-- [ ] Add clerk auth to console
+- [x] Setup console nextjs app for collector console
+- [x] Setup the fonts collector console
+- [x] Setup theme for collector console
+- [ ] Add clerk auth to collector console
