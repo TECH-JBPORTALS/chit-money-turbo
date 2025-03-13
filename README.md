@@ -7,11 +7,10 @@
 - [x] Setup Expo app fonts according to theme
 - [x] Setup rnr component library for reusable components
 - [x] Create welcome screen for subscriber app
-- [ ] Setup console nextjs app for collector
-- [ ] Setup theme for console
 
 ### 13/03/2025 Tasks
 
-- [ ] Setup console nextjs app for collector console
+- [ ] Setup console nextjs app for collector
+- [ ] Setup the fonts
 - [ ] Setup theme for console
 - [ ] Add clerk auth to console
