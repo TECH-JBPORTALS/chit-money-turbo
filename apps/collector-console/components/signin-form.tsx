@@ -130,7 +130,11 @@ export function SignInForm({
                                 className="absolute rounded-none right-0"
                                 size={"icon"}
                               >
-                                {eyeOpen ? <EyeIcon /> : <EyeClosedIcon />}
+                                {eyeOpen ? (
+                                  <EyeIcon className="text-muted-foreground" />
+                                ) : (
+                                  <EyeClosedIcon className="text-muted-foreground" />
+                                )}
                               </Button>
                             </div>
                           </FormControl>

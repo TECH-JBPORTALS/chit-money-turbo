@@ -17,12 +17,12 @@
 - [x] Add clerk auth to collector console
 - [x] Add authorization to main dashboard route
 - [x] Create custom flow for signing in the user
-- [ ] Create sign up form
+- [x] Create sign up form
 - [ ] Make it deploy
 
 ### 14/03/2025
 
-- [ ] Create signup flow from the invitation link
+- [x] Create signup flow from the invitation link
 - [ ] Create Onboarding pages
 - [ ] let users get into their dashboard after completion of onboarding
 - [ ] Subscriber signin and signup screen designs
