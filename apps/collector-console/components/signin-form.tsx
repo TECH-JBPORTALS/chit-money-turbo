@@ -24,6 +24,8 @@ import { useSignIn } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { EyeClosedIcon, EyeIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
+import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
+import Link from "next/link";
 
 const signInSchema = z.object({
   email: z.string().trim().min(1, {
@@ -67,8 +69,9 @@ export function SignInForm({
         }
       }
     } catch (e) {
-      console.log(e);
-      form.setError("root", { message: "Email or password is incorrect" });
+      if (isClerkAPIResponseError(e)) {
+        form.setError("root", { message: e.message.split(".").at(0) });
+      }
     }
   }
 
@@ -121,7 +124,7 @@ export function SignInForm({
                             </a>
                           </div>
                           <FormControl>
-                            <div className="inline-flex overflow-hidden relative">
+                            <div className="inline-flex relative">
                               <Input
                                 type={eyeOpen ? "text" : "password"}
                                 placeholder="•••••••••••••••••"
@@ -157,14 +160,19 @@ export function SignInForm({
                     {form.formState.isSubmitting ? (
                       <Loader2Icon className="animate-spin" />
                     ) : (
-                      "Continue"
+                      "Sign In with Password"
                     )}
                   </Button>
                 </div>
               </div>
-              <div className="mt-4 text-center text-sm">
-                By clicking continue, you agree to our Terms of Service and
-                Privacy Policy.
+              <div className="text-sm  text-center">
+                Don't have an account?{" "}
+                <Link
+                  href={"/sign-up"}
+                  className="text-primary hover:underline"
+                >
+                  Create Account
+                </Link>
               </div>
             </form>
           </Form>

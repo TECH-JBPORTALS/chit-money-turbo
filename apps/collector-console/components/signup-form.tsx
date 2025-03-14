@@ -27,12 +27,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { EyeClosedIcon, EyeIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
 import type { Invitation } from "@clerk/nextjs/server";
+import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
+import Link from "next/link";
 
 const signInSchema = z
   .object({
     email: z.string().trim().min(1, {
       message: "Email address must be fill to continue.",
     }),
+    //:TODO
     // first_name: z.string().trim().min(1, {
     //   message: "Required",
     // }),
@@ -53,18 +56,18 @@ const signInSchema = z
 
 export function SignUpForm({
   className,
-  email,
+  emailAddress,
   clerkTicket,
   ...props
 }: React.ComponentProps<"div"> & {
-  email: Invitation["emailAddress"];
-  clerkTicket: string;
+  emailAddress?: Invitation["emailAddress"];
+  clerkTicket?: string;
 }) {
   const form = useForm({
     resolver: zodResolver(signInSchema),
     mode: "onChange",
     defaultValues: {
-      email,
+      email: emailAddress ?? "",
       password: "",
       confirm_password: "",
     },
@@ -81,7 +84,7 @@ export function SignUpForm({
         const { createdSessionId, status } = await signUp.create({
           ticket: clerkTicket,
           password: values.password,
-          strategy: "ticket",
+          emailAddress: emailAddress,
           // firstName: values.first_name,
           // lastName: values.last_name,
           redirectUrl: redirectUrl ?? undefined,
@@ -93,8 +96,9 @@ export function SignUpForm({
         }
       }
     } catch (e) {
-      console.log(e);
-      form.setError("root", { message: "Email or password is incorrect" });
+      if (isClerkAPIResponseError(e)) {
+        form.setError("root", { message: e.message });
+      }
     }
   }
 
@@ -102,10 +106,10 @@ export function SignUpForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="bg-transparent border-none shadow-none">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">
-            Complete Your Account Creation
-          </CardTitle>
-          <CardDescription>Enter given below details to signup</CardDescription>
+          <CardTitle className="text-xl">Create an account</CardTitle>
+          <CardDescription>
+            Enter given below details to create your account
+          </CardDescription>
           <p className="text-sm text-destructive text-sm">
             {form.formState.errors.root?.message}
           </p>
@@ -123,15 +127,19 @@ export function SignUpForm({
                       <FormLabel htmlFor="email">Email address</FormLabel>
                       <FormControl>
                         <Input
-                          readOnly
-                          className="bg-muted text-muted-foreground"
-                          placeholder="No email found"
+                          readOnly={!!clerkTicket}
+                          className={cn(
+                            clerkTicket && "bg-muted text-muted-foreground"
+                          )}
+                          placeholder="joe@example.com"
                           {...field}
                         />
                       </FormControl>
-                      <FormDescription>
-                        Account will be created for this email address.
-                      </FormDescription>
+                      {clerkTicket && (
+                        <FormDescription>
+                          Account will be created for this email address.
+                        </FormDescription>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -234,6 +242,7 @@ export function SignUpForm({
                 data-cl-theme="dark"
                 data-cl-size="flexible"
               ></div>
+
               <div className="flex flex-col gap-3">
                 <Button
                   disabled={form.formState.isSubmitting || !isLoaded}
@@ -243,14 +252,22 @@ export function SignUpForm({
                   {form.formState.isSubmitting ? (
                     <Loader2Icon className="animate-spin" />
                   ) : (
-                    "Continue"
+                    "Create Account"
                   )}
                 </Button>
               </div>
-              <div className="mt-4 text-center text-sm">
-                By clicking continue, you agree to our Terms of Service and
-                Privacy Policy.
-              </div>
+
+              {!clerkTicket && (
+                <div className="text-sm  text-center">
+                  Already have an account?{" "}
+                  <Link
+                    href={"/sign-in"}
+                    className="text-primary hover:underline"
+                  >
+                    Sign in
+                  </Link>
+                </div>
+              )}
             </form>
           </Form>
         </CardContent>

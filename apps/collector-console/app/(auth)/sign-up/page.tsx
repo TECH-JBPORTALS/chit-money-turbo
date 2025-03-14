@@ -16,15 +16,12 @@ type ClerkTicketPayload = {
   st: string;
 };
 
-export default async function Page({ searchParams }: PageProps) {
-  const { __clerk_status, __clerk_ticket } =
-    await loadSearchParams(searchParams);
-
-  // 1.Check valid config
-  if (!__clerk_status || !__clerk_ticket) throw Error("Not valid config path");
+async function getInvitaion(clerkTicket: string | null) {
+  // 1. Check for clerk ticket
+  if (!clerkTicket) return;
 
   // 2. Convert jwt ticket to get payload
-  const payload = jwtDecode<ClerkTicketPayload>(__clerk_ticket);
+  const payload = jwtDecode<ClerkTicketPayload>(clerkTicket);
 
   // 3. Get user pending invitaion associated with the token
   const cleint = await clerkClient();
@@ -32,11 +29,18 @@ export default async function Page({ searchParams }: PageProps) {
     query: payload.sid,
     status: "pending",
   });
-  const inviation = data.at(0);
+  return data.at(0);
+}
 
-  if (!inviation) throw Error("No invitation found");
+export default async function Page({ searchParams }: PageProps) {
+  const { __clerk_ticket } = await loadSearchParams(searchParams);
+
+  const invitaion = await getInvitaion(__clerk_ticket);
 
   return (
-    <SignUpForm email={inviation.emailAddress} clerkTicket={__clerk_ticket} />
+    <SignUpForm
+      emailAddress={invitaion?.emailAddress}
+      clerkTicket={__clerk_ticket ?? undefined}
+    />
   );
 }
