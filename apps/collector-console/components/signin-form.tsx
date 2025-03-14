@@ -21,7 +21,7 @@ import {
 } from "@cmt/ui/components/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSignIn } from "@clerk/nextjs";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { EyeClosedIcon, EyeIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
 
@@ -50,6 +50,7 @@ export function SignInForm({
   const { isLoaded, signIn, setActive } = useSignIn();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect_url");
+  const router = useRouter();
 
   async function onSubmit(values: z.infer<typeof signInSchema>) {
     try {
@@ -60,7 +61,10 @@ export function SignInForm({
           redirectUrl: redirectUrl ?? undefined,
         });
 
-        if (status === "complete") setActive({ session: createdSessionId });
+        if (status === "complete") {
+          setActive({ session: createdSessionId });
+          router.refresh();
+        }
       }
     } catch (e) {
       console.log(e);
