@@ -121,12 +121,12 @@ export function SignUpForm({
                 <FormField
                   control={form.control}
                   name="email"
-                  disabled={form.formState.isSubmitting || !isLoaded}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel htmlFor="email">Email address</FormLabel>
                       <FormControl>
                         <Input
+                          disabled={form.formState.isSubmitting || !isLoaded}
                           readOnly={!!clerkTicket}
                           className={cn(
                             clerkTicket && "bg-muted text-muted-foreground"
@@ -183,7 +183,6 @@ export function SignUpForm({
                 <FormField
                   control={form.control}
                   name="password"
-                  disabled={form.formState.isSubmitting || !isLoaded}
                   render={({ field }) => {
                     const [eyeOpen, setEyeOpen] = useState(false);
                     return (
@@ -192,6 +191,9 @@ export function SignUpForm({
                         <FormControl>
                           <div className="inline-flex relative">
                             <Input
+                              disabled={
+                                form.formState.isSubmitting || !isLoaded
+                              }
                               type={eyeOpen ? "text" : "password"}
                               placeholder="•••••••••••••••••"
                               {...field}
@@ -220,12 +222,12 @@ export function SignUpForm({
                 <FormField
                   control={form.control}
                   name="confirm_password"
-                  disabled={form.formState.isSubmitting || !isLoaded}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel htmlFor="password">Confirm password</FormLabel>
                       <FormControl>
                         <Input
+                          disabled={form.formState.isSubmitting || !isLoaded}
                           type={"password"}
                           placeholder="•••••••••••••••••"
                           {...field}

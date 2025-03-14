@@ -21,11 +21,11 @@
     "react-dom": "catalog:react18"
   },
   "devDependencies": {
+    "@cmt/eslint-config": "workspace:^",
+    "@cmt/typescript-config": "workspace:*",
     "@types/node": "^20",
     "@types/react": "catalog:react18",
     "@types/react-dom": "catalog:react18",
-    "@cmt/eslint-config": "workspace:^",
-    "@cmt/typescript-config": "workspace:*",
     "typescript": "catalog:"
   }
 }

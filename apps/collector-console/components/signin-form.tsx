@@ -94,12 +94,15 @@ export function SignInForm({
                 <FormField
                   control={form.control}
                   name="email"
-                  disabled={form.formState.isSubmitting || !isLoaded}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel htmlFor="email">Email address</FormLabel>
                       <FormControl>
-                        <Input placeholder="m@example.com" {...field} />
+                        <Input
+                          disabled={form.formState.isSubmitting || !isLoaded}
+                          placeholder="m@example.com"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -109,7 +112,6 @@ export function SignInForm({
                   <FormField
                     control={form.control}
                     name="password"
-                    disabled={form.formState.isSubmitting || !isLoaded}
                     render={({ field }) => {
                       const [eyeOpen, setEyeOpen] = useState(false);
                       return (
@@ -126,6 +128,9 @@ export function SignInForm({
                           <FormControl>
                             <div className="inline-flex relative">
                               <Input
+                                disabled={
+                                  form.formState.isSubmitting || !isLoaded
+                                }
                                 type={eyeOpen ? "text" : "password"}
                                 placeholder="•••••••••••••••••"
                                 {...field}
