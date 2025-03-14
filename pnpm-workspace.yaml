@@ -11,14 +11,13 @@ catalogs:
 
   tailwind3:
     tailwindcss: 3.4.17
-    
+
   tailwind4:
     tailwindcss: ^4.0.8
 
-  
-catalog:  
- # Typescript
- typescript: ^5.7.3
- react-hook-form: ^7.53.0
- "@hookform/resolvers": ^3.9.0
- zod: ^3.24.2
+catalog:
+  # Typescript
+  typescript: ^5.7.3
+  react-hook-form: ^7.53.0
+  "@hookform/resolvers": ^3.6.0
+  zod: ^3.24.2

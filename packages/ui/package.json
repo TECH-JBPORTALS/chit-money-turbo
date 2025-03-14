@@ -8,7 +8,7 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
-    "@hookform/resolvers": "catalog:",
+    "@hookform/resolvers": "^3.6.0",
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.2",
     "class-variance-authority": "^0.7.1",
@@ -17,7 +17,7 @@
     "next-themes": "^0.4.4",
     "react": "catalog:react18",
     "react-dom": "catalog:react18",
-    "react-hook-form": "catalog:",
+    "react-hook-form": "^7.53.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
     "zod": "catalog:"
