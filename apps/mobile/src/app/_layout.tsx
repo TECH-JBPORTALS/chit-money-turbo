@@ -45,7 +45,7 @@ SplashScreen.preventAutoHideAsync();
 
 //Setting things app before loading the app
 function Outlet() {
-  const [loaded, error] = useFonts({
+  const [fontsLoaded, error] = useFonts({
     Urbanist_100Thin,
     Urbanist_200ExtraLight,
     Urbanist_300Light,
@@ -59,7 +59,7 @@ function Outlet() {
   const hasMounted = React.useRef(false);
   const { isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
-  const { isSignedIn, isLoaded, user } = useUser();
+  const { isSignedIn, isLoaded } = useUser();
   const segments = useSegments();
   const router = useRouter();
 
@@ -68,9 +68,32 @@ function Outlet() {
     hasMounted.current = true;
   }, []);
 
+  // useEffect(() => {
+  //   (async () => {
+  //     const theme = await AsyncStorage.getItem("theme");
+
+  //     if (!theme) {
+  //       setAndroidNavigationBar(colorScheme);
+  //       AsyncStorage.setItem("theme", colorScheme);
+  //       setIsColorSchemeLoaded(true);
+  //       return;
+  //     }
+  //     const colorTheme = theme === "dark" ? "dark" : "light";
+  //     setAndroidNavigationBar(colorTheme);
+
+  //     if (colorTheme !== colorScheme) {
+  //       setColorScheme(colorTheme);
+  //       setIsColorSchemeLoaded(true);
+  //       return;
+  //     }
+
+  //     setIsColorSchemeLoaded(true);
+  //   })();
+  // }, [isSignedIn, isLoaded, isColorSchemeLoaded]);
+
   useFocusEffect(
     useCallback(() => {
-      if (isLoaded) {
+      if (isLoaded && fontsLoaded) {
         const isAuthSegment = segments["0"] === "(auth)";
         const isHomeSegment = segments["0"] === "(home)";
 
@@ -79,17 +102,14 @@ function Outlet() {
         } else if (!isSignedIn && isHomeSegment) {
           router.replace("/(auth)");
         }
-        if (
-          hasMounted.current &&
-          (loaded || error) &&
-          isLoaded &&
-          isColorSchemeLoaded
-        ) {
+        if (isColorSchemeLoaded) {
           SplashScreen.hideAsync();
         }
       }
-    }, [loaded, error, isLoaded, isColorSchemeLoaded])
+    }, [isLoaded, fontsLoaded, isSignedIn, isColorSchemeLoaded])
   );
+
+  if (!fontsLoaded || error) return null;
 
   return (
     <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>

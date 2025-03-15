@@ -133,7 +133,7 @@ export default function Page() {
         />
 
         <Button
-          isLoading={form.formState.isLoading}
+          isLoading={form.formState.isSubmitting}
           className="w-full"
           onPress={form.handleSubmit(onSubmit)}
         >
