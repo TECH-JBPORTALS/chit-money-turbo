@@ -26,3 +26,8 @@
 - [ ] Create Onboarding pages
 - [ ] let users get into their dashboard after completion of onboarding
 - [ ] Subscriber signin and signup screen designs
+
+## 15/03/2024
+
+- [ ] Signin and signup screens for subscriber app
+- [ ] Signin and signup clerkauth implementation

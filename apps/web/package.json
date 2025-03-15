@@ -23,7 +23,7 @@
   "devDependencies": {
     "@cmt/eslint-config": "workspace:^",
     "@cmt/typescript-config": "workspace:*",
-    "@types/node": "^20",
+    "@types/node": "catalog:react18",
     "@types/react": "catalog:react18",
     "@types/react-dom": "catalog:react18",
     "typescript": "catalog:"
