@@ -1,5 +1,5 @@
 import "../globals.css";
-import { Stack } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import { tokenCache } from "~/lib/cache";
 import {
   useFonts,
@@ -14,7 +14,7 @@ import {
   Urbanist_900Black,
 } from "@expo-google-fonts/urbanist";
 import * as SplashScreen from "expo-splash-screen";
-import { ClerkProvider, useClerk } from "@clerk/clerk-expo";
+import { ClerkProvider, useClerk, useUser } from "@clerk/clerk-expo";
 import {
   Theme,
   ThemeProvider,
@@ -59,15 +59,26 @@ function Outlet() {
   const hasMounted = React.useRef(false);
   const { isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
-  const { loaded: isClerkLoaded } = useClerk();
+  const { isSignedIn, isLoaded, user } = useUser();
+  const segments = useSegments();
+  const router = useRouter();
 
   useIsomorphicLayoutEffect(() => {
-    if (hasMounted.current && (loaded || error) && isClerkLoaded) {
+    if (hasMounted.current && (loaded || error) && isLoaded && isLoaded) {
+      const isAuthSegment = segments["0"] === "(auth)";
+      const isHomeSegment = segments["0"] === "(home)";
+
+      if (isSignedIn && isAuthSegment) {
+        router.replace("/(home)");
+      } else if (!isSignedIn && isHomeSegment) {
+        router.replace("/(auth)");
+      }
+
       SplashScreen.hideAsync();
     }
     setIsColorSchemeLoaded(true);
     hasMounted.current = true;
-  }, [loaded, error, isClerkLoaded]);
+  }, [loaded, error, isLoaded]);
 
   if (!isColorSchemeLoaded || (!loaded && !error)) {
     return null;
