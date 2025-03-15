@@ -1,5 +1,5 @@
-import React from "react";
+import OnboardingMultiStepForm from "@/components/onboarding-multistep-form";
 
 export default function OnboardingPage() {
-  return <div>OnboardingPage</div>;
+  return <OnboardingMultiStepForm />;
 }

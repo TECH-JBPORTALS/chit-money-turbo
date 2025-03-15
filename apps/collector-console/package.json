@@ -27,6 +27,7 @@
     "react": "catalog:react18",
     "react-dom": "catalog:react18",
     "react-hook-form": "catalog:rfh752",
+    "react-step-builder": "^3.0.6",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -84,7 +84,7 @@ export function SignUpForm({
         const { createdSessionId, status } = await signUp.create({
           ticket: clerkTicket,
           password: values.password,
-          emailAddress: emailAddress,
+          emailAddress: emailAddress ?? values.email,
           // firstName: values.first_name,
           // lastName: values.last_name,
           redirectUrl: redirectUrl ?? undefined,

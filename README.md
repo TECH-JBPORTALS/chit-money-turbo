@@ -13,3 +13,4 @@
 
 - [x] Signin and signup screens for subscriber app
 - [x] Signin and signup clerkauth implementation
+- [x] Setuped react-step-builder and added 3 forms to onboarding phase
