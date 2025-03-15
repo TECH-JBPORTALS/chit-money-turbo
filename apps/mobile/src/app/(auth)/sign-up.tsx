@@ -168,6 +168,7 @@ export default function SignUpScreen() {
               <FormControl>
                 <Input
                   {...field}
+                  secureTextEntry
                   editable={!form.formState.isSubmitting || isLoaded}
                   autoCapitalize="none"
                   onChangeText={field.onChange}
@@ -187,6 +188,7 @@ export default function SignUpScreen() {
               <FormControl>
                 <Input
                   {...field}
+                  secureTextEntry
                   editable={!form.formState.isSubmitting || isLoaded}
                   autoCapitalize="none"
                   onChangeText={field.onChange}

@@ -18,6 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import Spinner from "~/components/ui/spinner";
 
 const signInSchema = z.object({
   email: z.string().trim().min(1, {
@@ -44,7 +45,7 @@ export default function Page() {
   // Handle the submission of the sign-in form
   async function onSubmit(values: z.infer<typeof signInSchema>) {
     if (!isLoaded) return;
-
+    console.log("warn");
     // Start the sign-in process using the email and password provided
     try {
       const signInAttempt = await signIn.create({
@@ -63,12 +64,12 @@ export default function Page() {
         console.error(JSON.stringify(signInAttempt, null, 2));
       }
     } catch (err) {
-      const clerkError = err as ClerkAPIError;
+      const clerkError = err as any;
       // See https://clerk.com/docs/custom-flows/error-handling
       // for more info on error handling
-      console.log(JSON.stringify(clerkError, null, 2));
+      console.warn(JSON.stringify(clerkError, null, 2));
 
-      form.setError("root", { message: clerkError.longMessage });
+      form.setError("root", { message: clerkError.errors.at(0)?.message });
     }
   }
 
@@ -96,7 +97,7 @@ export default function Page() {
                 <Input
                   {...field}
                   autoFocus
-                  editable={!form.formState.isSubmitting || isLoaded}
+                  editable={!form.formState.isLoading || isLoaded}
                   autoCapitalize="none"
                   onChangeText={field.onChange}
                 />
@@ -120,7 +121,8 @@ export default function Page() {
               <FormControl>
                 <Input
                   {...field}
-                  editable={!form.formState.isSubmitting || isLoaded}
+                  secureTextEntry
+                  editable={!form.formState.isLoading || isLoaded}
                   autoCapitalize="none"
                   onChangeText={field.onChange}
                 />
@@ -130,7 +132,11 @@ export default function Page() {
           )}
         />
 
-        <Button className="w-full" onPress={form.handleSubmit(onSubmit)}>
+        <Button
+          isLoading={form.formState.isLoading}
+          className="w-full"
+          onPress={form.handleSubmit(onSubmit)}
+        >
           <Text>Continue</Text>
         </Button>
       </Form>

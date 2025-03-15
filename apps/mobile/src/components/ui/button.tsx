@@ -3,6 +3,7 @@ import * as React from "react";
 import { Pressable } from "react-native";
 import { cn } from "~/lib/utils";
 import { TextClassContext } from "~/components/ui/text";
+import Spinner from "./spinner";
 
 const buttonVariants = cva(
   "group flex-row gap-2 items-center justify-center rounded-md web:ring-offset-background web:transition-colors web:focus-visible:outline-none web:focus-visible:ring-2 web:focus-visible:ring-ring web:focus-visible:ring-offset-2",
@@ -60,32 +61,47 @@ const buttonTextVariants = cva(
 );
 
 type ButtonProps = React.ComponentPropsWithoutRef<typeof Pressable> &
-  VariantProps<typeof buttonVariants>;
+  VariantProps<typeof buttonVariants> & { isLoading?: boolean };
 
 const Button = React.forwardRef<
   React.ElementRef<typeof Pressable>,
   ButtonProps
->(({ className, variant, size, ...props }, ref) => {
-  return (
-    <TextClassContext.Provider
-      value={buttonTextVariants({
-        variant,
-        size,
-        className: "web:pointer-events-none",
-      })}
-    >
-      <Pressable
-        className={cn(
-          props.disabled && "opacity-50 web:pointer-events-none",
-          buttonVariants({ variant, size, className })
-        )}
-        ref={ref}
-        role="button"
-        {...props}
-      />
-    </TextClassContext.Provider>
-  );
-});
+>(
+  (
+    {
+      className,
+      isLoading = false,
+      disabled = isLoading,
+      variant,
+      size,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    return (
+      <TextClassContext.Provider
+        value={buttonTextVariants({
+          variant,
+          size,
+          className: "web:pointer-events-none",
+        })}
+      >
+        <Pressable
+          className={cn(
+            disabled && "opacity-50 web:pointer-events-none",
+            buttonVariants({ variant, size, className })
+          )}
+          ref={ref}
+          role="button"
+          disabled={disabled}
+          children={isLoading ? <Spinner size={16} /> : children}
+          {...props}
+        />
+      </TextClassContext.Provider>
+    );
+  }
+);
 Button.displayName = "Button";
 
 export { Button, buttonTextVariants, buttonVariants };

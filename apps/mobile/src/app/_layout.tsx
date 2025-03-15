@@ -1,5 +1,5 @@
 import "../globals.css";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Slot, useFocusEffect, useRouter, useSegments } from "expo-router";
 import { tokenCache } from "~/lib/cache";
 import {
   useFonts,
@@ -14,14 +14,14 @@ import {
   Urbanist_900Black,
 } from "@expo-google-fonts/urbanist";
 import * as SplashScreen from "expo-splash-screen";
-import { ClerkProvider, useClerk, useUser } from "@clerk/clerk-expo";
+import { ClerkProvider, useUser } from "@clerk/clerk-expo";
 import {
   Theme,
   ThemeProvider,
   DefaultTheme,
   DarkTheme,
 } from "@react-navigation/native";
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
 import useIsomorphicLayoutEffect from "use-isomorphic-layout-effect";
@@ -64,25 +64,32 @@ function Outlet() {
   const router = useRouter();
 
   useIsomorphicLayoutEffect(() => {
-    if (hasMounted.current && (loaded || error) && isLoaded && isLoaded) {
-      const isAuthSegment = segments["0"] === "(auth)";
-      const isHomeSegment = segments["0"] === "(home)";
-
-      if (isSignedIn && isAuthSegment) {
-        router.replace("/(home)");
-      } else if (!isSignedIn && isHomeSegment) {
-        router.replace("/(auth)");
-      }
-
-      SplashScreen.hideAsync();
-    }
     setIsColorSchemeLoaded(true);
     hasMounted.current = true;
-  }, [loaded, error, isLoaded]);
+  }, []);
 
-  if (!isColorSchemeLoaded || (!loaded && !error)) {
-    return null;
-  }
+  useFocusEffect(
+    useCallback(() => {
+      if (isLoaded) {
+        const isAuthSegment = segments["0"] === "(auth)";
+        const isHomeSegment = segments["0"] === "(home)";
+
+        if (isSignedIn && isAuthSegment) {
+          router.replace("/(home)");
+        } else if (!isSignedIn && isHomeSegment) {
+          router.replace("/(auth)");
+        }
+        if (
+          hasMounted.current &&
+          (loaded || error) &&
+          isLoaded &&
+          isColorSchemeLoaded
+        ) {
+          SplashScreen.hideAsync();
+        }
+      }
+    }, [loaded, error, isLoaded, isColorSchemeLoaded])
+  );
 
   return (
     <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
@@ -90,11 +97,7 @@ function Outlet() {
         style={isDarkColorScheme ? "light" : "dark"}
         backgroundColor="transparent"
       />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      />
+      <Slot />
     </ThemeProvider>
   );
 }
