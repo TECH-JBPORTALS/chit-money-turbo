@@ -21,7 +21,7 @@ import {
 
 const signUpSchema = z
   .object({
-    email: z.string().trim().min(1, {
+    email: z.string().trim().email().min(1, {
       message: "Email address must be fill to continue.",
     }),
     //:TODO
@@ -43,6 +43,18 @@ const signUpSchema = z
     path: ["confirm_password"],
   });
 
+const verificationSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .min(6, {
+      message: "Code must be 6 digit number",
+    })
+    .max(6, {
+      message: "Code must be 6 digit number",
+    }),
+});
+
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const router = useRouter();
@@ -55,8 +67,14 @@ export default function SignUpScreen() {
       confirm_password: "",
     },
   });
+  const verificationForm = useForm({
+    resolver: zodResolver(verificationSchema),
+    mode: "onChange",
+    defaultValues: {
+      code: "",
+    },
+  });
   const [pendingVerification, setPendingVerification] = React.useState(false);
-  const [code, setCode] = React.useState("");
 
   // Handle submission of sign-up form
   async function onSubmit(values: z.infer<typeof signUpSchema>) {
@@ -78,12 +96,14 @@ export default function SignUpScreen() {
     } catch (err) {
       // See https://clerk.com/docs/custom-flows/error-handling
       // for more info on error handling
-      console.error(JSON.stringify(err, null, 2));
+      const clerkError = err as any;
+      console.warn(JSON.stringify(clerkError, null, 2));
+      form.setError("root", { message: clerkError.errors.at(0)?.longMessage });
     }
   }
 
   // Handle submission of verification form
-  const onVerifyPress = async () => {
+  async function onVerifyPress({ code }: z.infer<typeof verificationSchema>) {
     if (!isLoaded) return;
 
     try {
@@ -102,26 +122,58 @@ export default function SignUpScreen() {
         // complete further steps.
         console.error(JSON.stringify(signUpAttempt, null, 2));
       }
-    } catch (err) {
+    } catch (err: any) {
       // See https://clerk.com/docs/custom-flows/error-handling
       // for more info on error handling
-      console.error(JSON.stringify(err, null, 2));
+      const clerkError = err as any;
+      console.warn(JSON.stringify(clerkError, null, 2));
+      verificationForm.setError("root", {
+        message: clerkError.errors.at(0)?.longMessage,
+      });
     }
-  };
+  }
 
   if (pendingVerification) {
     return (
-      <>
-        <Text>Verify your email</Text>
-        <Input
-          value={code}
-          placeholder="Enter your verification code"
-          onChangeText={(code) => setCode(code)}
-        />
-        <Button onPress={onVerifyPress}>
-          <Text>Verify</Text>
-        </Button>
-      </>
+      <View className="items-center gap-6  px-5 py-6">
+        <Form {...verificationForm}>
+          <Muted>6 digit code has been sent your email address</Muted>
+          {verificationForm.formState.errors.root?.message && (
+            <Small className="text-destructive">
+              {verificationForm.formState.errors.root.message}
+            </Small>
+          )}
+          <FormField
+            control={verificationForm.control}
+            name="code"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormControl>
+                  <Input
+                    {...field}
+                    autoFocus
+                    editable={
+                      !verificationForm.formState.isSubmitting || isLoaded
+                    }
+                    keyboardType="number-pad"
+                    textAlign="center"
+                    className="native:text-xl font-bold text-primary"
+                    onChangeText={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button
+            className="w-full"
+            isLoading={verificationForm.formState.isSubmitting}
+            onPress={verificationForm.handleSubmit(onVerifyPress)}
+          >
+            <Text>Verify</Text>
+          </Button>
+        </Form>
+      </View>
     );
   }
 
@@ -199,7 +251,11 @@ export default function SignUpScreen() {
           )}
         />
 
-        <Button className="w-full" onPress={form.handleSubmit(onSubmit)}>
+        <Button
+          className="w-full"
+          isLoading={form.formState.isSubmitting}
+          onPress={form.handleSubmit(onSubmit)}
+        >
           <Text>Continue</Text>
         </Button>
       </Form>

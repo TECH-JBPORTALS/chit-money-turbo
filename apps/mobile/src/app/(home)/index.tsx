@@ -1,4 +1,5 @@
 import { useAuth, useSession, useSignIn, useUser } from "@clerk/clerk-expo";
+import { Image } from "expo-image";
 import { useState } from "react";
 import { View } from "react-native";
 import { Button } from "~/components/ui/button";
@@ -11,7 +12,11 @@ export default function Page() {
   const [isSigningOut, setSigningOut] = useState(false);
 
   return (
-    <View className="px-5 py-6 gap-6">
+    <View className="px-5 py-6 items-center gap-6">
+      <Image
+        source={{ uri: user?.imageUrl }}
+        style={{ width: 64, height: 64, borderRadius: 9999 }}
+      />
       <Large>Hello {user?.emailAddresses.at(0)?.emailAddress}</Large>
       <Button
         onPress={async () => {
@@ -20,6 +25,7 @@ export default function Page() {
           setSigningOut(false);
         }}
         variant={"outline"}
+        className="w-full"
         isLoading={isSigningOut}
       >
         <Text>Sign Out</Text>
