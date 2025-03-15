@@ -4,7 +4,7 @@ import { Text } from "~/components/ui/text";
 import { H1, Muted } from "~/components/ui/typography";
 import { ArrowRight } from "~/lib/icons/ArrowRight";
 import { Image } from "expo-image";
-import { Stack } from "expo-router";
+import { Link, Stack } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 
@@ -35,13 +35,17 @@ export default function Welcome() {
           </Muted>
         </View>
         <View className="w-full gap-2">
-          <Button size={"lg"}>
-            <Text>Get Started</Text>
-            <ArrowRight className="size-4 text-primary-foreground" />
-          </Button>
-          <Button size={"lg"} variant={"secondary"}>
-            <Text>Sign In</Text>
-          </Button>
+          <Link asChild href={"/sign-up"}>
+            <Button size={"lg"}>
+              <Text>Get Started</Text>
+              <ArrowRight className="size-4 text-primary-foreground" />
+            </Button>
+          </Link>
+          <Link asChild href={"/sign-in"}>
+            <Button size={"lg"} variant={"secondary"}>
+              <Text>Sign In</Text>
+            </Button>
+          </Link>
         </View>
       </View>
     </View>

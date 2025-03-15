@@ -1,5 +1,6 @@
 import "../globals.css";
-import { Slot, Stack } from "expo-router";
+import { Stack } from "expo-router";
+import { tokenCache } from "~/lib/cache";
 import {
   useFonts,
   Urbanist_800ExtraBold,
@@ -13,6 +14,7 @@ import {
   Urbanist_900Black,
 } from "@expo-google-fonts/urbanist";
 import * as SplashScreen from "expo-splash-screen";
+import { ClerkProvider, useClerk } from "@clerk/clerk-expo";
 import {
   Theme,
   ThemeProvider,
@@ -57,14 +59,15 @@ function Outlet() {
   const hasMounted = React.useRef(false);
   const { isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
+  const { loaded: isClerkLoaded } = useClerk();
 
   useIsomorphicLayoutEffect(() => {
-    if (hasMounted.current && (loaded || error)) {
+    if (hasMounted.current && (loaded || error) && isClerkLoaded) {
       SplashScreen.hideAsync();
     }
     setIsColorSchemeLoaded(true);
     hasMounted.current = true;
-  }, [loaded, error]);
+  }, [loaded, error, isClerkLoaded]);
 
   if (!isColorSchemeLoaded || (!loaded && !error)) {
     return null;
@@ -76,12 +79,26 @@ function Outlet() {
         style={isDarkColorScheme ? "light" : "dark"}
         backgroundColor="transparent"
       />
-      <Stack />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      />
     </ThemeProvider>
   );
 }
 
 //Entry Layout
 export default function RootLayout() {
-  return <Outlet />;
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+
+  if (!publishableKey) {
+    throw new Error("Add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to your .env file");
+  }
+
+  return (
+    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+      <Outlet />
+    </ClerkProvider>
+  );
 }

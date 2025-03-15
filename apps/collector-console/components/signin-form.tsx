@@ -113,7 +113,7 @@ export function SignInForm({
                     control={form.control}
                     name="password"
                     render={({ field }) => {
-                      const [eyeOpen, setEyeOpen] = useState(false);
+                      const [eyeOpen, setEyeOpen] = useState(false); //:TODO
                       return (
                         <FormItem>
                           <div className="flex items-center">
@@ -171,7 +171,7 @@ export function SignInForm({
                 </div>
               </div>
               <div className="text-sm  text-center">
-                Don't have an account?{" "}
+                {"Don't have an account? "}
                 <Link
                   href={"/sign-up"}
                   className="text-primary hover:underline"

@@ -3,12 +3,29 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": [
+        "./src/*"
+      ]
     },
     "jsx": "react-native",
+    "types": [
+      "nativewind/types"
+    ],
     "checkJs": false,
-    "moduleSuffixes": [".ios", ".android", ".native", ""]
+    "moduleSuffixes": [
+      ".ios",
+      ".android",
+      ".native",
+      ""
+    ]
   },
-  "include": ["src", "*.ts", "*.js", "nativewind-env.d.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src",
+    "*.ts",
+    "*.js",
+    "nativewind-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
