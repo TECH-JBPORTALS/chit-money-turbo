@@ -17,9 +17,9 @@
 
 # 17/03/2025
 
-- [ ] Persist the current step and state of onboarding CC app [cc]
-  - [ ] Prepare clerk mutation layer to update the current state of form
-  - [ ] Retrieve the current state and pass the current state of the form
+- [x] Persist the current step and state of onboarding CC app [cc]
+  - [x] Prepare clerk mutation layer to update the current state of form
+  - [x] Retrieve the current state and pass the current state of the form
   - [ ] Add uploadthing api to upload document files
 - [ ] Create screens for onboarding subscriber app [mobile]
 - [ ] Persist the current step and state of onboarding [mobile]

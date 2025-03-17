@@ -12,19 +12,42 @@ import {
 import { z } from "zod";
 import { onboardingSchema } from "@/lib/validators";
 import { updateUserPrivateMetadata } from "@/lib/actions";
+import { useEffect, useState } from "react";
+import { Loader2Icon } from "lucide-react";
+import Image from "next/image";
 
 export function OnboardingMultiStepForm({
   initialState,
 }: {
   initialState: z.infer<typeof onboardingSchema>;
 }) {
+  const [hydrated, setHydrated] = useState(false);
   const { next, prev, current: currentStep, total } = useSteps();
+  // Ensure the component is fully hydrated before rendering Steps
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  if (!hydrated) {
+    return (
+      <Loader2Icon className="animate-spin size-6 m-auto text-muted-foreground" />
+    ); // Placeholder to maintain layout height
+  }
 
   return (
     <div>
-      <h1 className="text-xl text-center font-semibold text-muted-foreground">
+      <div className="flex justify-center py-4 gap-1 items-center">
+        <Image
+          alt="Chit Coin Logo"
+          src={"/chit-coin.png"}
+          height={52}
+          width={52}
+        />
+        <h1 className="text-3xl font-black">Chit.Money</h1>
+      </div>
+      <h3 className="text-xl text-center font-semibold text-muted-foreground">
         {currentStep}/{total}
-      </h1>
+      </h3>
 
       <div className="flex gap-2 py-8">
         {Array.from({ length: total })
