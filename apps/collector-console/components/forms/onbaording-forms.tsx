@@ -22,7 +22,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@cmt/ui/components/form";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  RefreshCcwIcon,
+  RefreshCwIcon,
+  RotateCcwIcon,
+} from "lucide-react";
 import { StepProps, StepWithPrevProps } from "@/types/step-form";
 import {
   bankInfoSchema,
@@ -32,8 +38,9 @@ import {
   personalInfoSchema,
 } from "@/lib/validators";
 import _ from "lodash";
-import { getUTFile, UploadDropzone } from "@/utils/uploadthing";
+import { getUTFile, UploadButton, UploadDropzone } from "@/utils/uploadthing";
 import Image from "next/image";
+import Uploader from "../uploader";
 
 export function PersonalInfoForm({
   setState,
@@ -570,45 +577,19 @@ export function DocumentsForm({
                   <FormItem>
                     <FormLabel>Registration Certificate</FormLabel>
                     <FormControl>
-                      {field.value ? (
-                        <div className="w-full rounded-md border bg-card object-contain relative h-60">
-                          <Image
-                            src={getUTFile(field.value)}
-                            fill
-                            alt={field.value}
-                            objectFit="contain"
-                          />
-                        </div>
-                      ) : (
-                        <UploadDropzone
-                          input="registeration_certificate_url"
-                          appearance={{
-                            button: {
-                              background: "var(--secondary)",
-                              color: "var(--secondary-foreground)",
-                            },
-                            container: {
-                              borderColor: "var(--border)",
-                            },
-                            allowedContent: {
-                              color: "var(--muted-foreground)",
-                            },
-                            label: {
-                              color: "var(--foreground)",
-                            },
-                          }}
-                          endpoint={"documentsUploader"}
-                          onUploadError={(e) => {
-                            form.setError("registeration_certificate_url", {
-                              message: e.message,
-                            });
-                          }}
-                          onClientUploadComplete={(res) => {
-                            field.onChange(res.at(0)?.key);
-                          }}
-                          config={{ appendOnPaste: true, mode: "auto" }}
-                        />
-                      )}
+                      <Uploader
+                        fileKey={field.value}
+                        input="registeration_certificate_url"
+                        endpoint={"documentsUploader"}
+                        onUploadError={(e) => {
+                          form.setError("registeration_certificate_url", {
+                            message: e.message,
+                          });
+                        }}
+                        onClientUploadComplete={(res) => {
+                          field.onChange(res.at(0)?.key);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -622,45 +603,19 @@ export function DocumentsForm({
                   <FormItem className="w-full">
                     <FormLabel>Adhar Card Front</FormLabel>
                     <FormControl>
-                      {field.value ? (
-                        <div className="w-full rounded-md border bg-card object-contain relative h-60">
-                          <Image
-                            src={getUTFile(field.value)}
-                            fill
-                            alt={field.value}
-                            objectFit="contain"
-                          />
-                        </div>
-                      ) : (
-                        <UploadDropzone
-                          input="aadhar_card_front_url"
-                          appearance={{
-                            button: {
-                              background: "var(--secondary)",
-                              color: "var(--secondary-foreground)",
-                            },
-                            container: {
-                              borderColor: "var(--border)",
-                            },
-                            allowedContent: {
-                              color: "var(--muted-foreground)",
-                            },
-                            label: {
-                              color: "var(--foreground)",
-                            },
-                          }}
-                          endpoint={"documentsUploader"}
-                          onUploadError={(e) => {
-                            form.setError("aadhar_card_front_url", {
-                              message: e.message,
-                            });
-                          }}
-                          onClientUploadComplete={(res) => {
-                            field.onChange(res.at(0)?.key);
-                          }}
-                          config={{ appendOnPaste: true, mode: "auto" }}
-                        />
-                      )}
+                      <Uploader
+                        fileKey={field.value}
+                        input="aadhar_card_front_url"
+                        endpoint={"documentsUploader"}
+                        onUploadError={(e) => {
+                          form.setError("aadhar_card_front_url", {
+                            message: e.message,
+                          });
+                        }}
+                        onClientUploadComplete={(res) => {
+                          field.onChange(res.at(0)?.key);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -672,47 +627,21 @@ export function DocumentsForm({
                 name="aadhar_card_back_url"
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel>Aadhar Back</FormLabel>
+                    <FormLabel>Aadhar Card Back</FormLabel>
                     <FormControl>
-                      {field.value ? (
-                        <div className="w-full rounded-md border bg-card object-contain relative h-60">
-                          <Image
-                            src={getUTFile(field.value)}
-                            fill
-                            alt={field.value}
-                            objectFit="contain"
-                          />
-                        </div>
-                      ) : (
-                        <UploadDropzone
-                          input="aadhar_card_front_url"
-                          appearance={{
-                            button: {
-                              background: "var(--secondary)",
-                              color: "var(--secondary-foreground)",
-                            },
-                            container: {
-                              borderColor: "var(--border)",
-                            },
-                            allowedContent: {
-                              color: "var(--muted-foreground)",
-                            },
-                            label: {
-                              color: "var(--foreground)",
-                            },
-                          }}
-                          endpoint={"documentsUploader"}
-                          onUploadError={(e) => {
-                            form.setError("aadhar_card_back_url", {
-                              message: e.message,
-                            });
-                          }}
-                          onClientUploadComplete={(res) => {
-                            field.onChange(res.at(0)?.key);
-                          }}
-                          config={{ appendOnPaste: true, mode: "auto" }}
-                        />
-                      )}
+                      <Uploader
+                        fileKey={field.value}
+                        input="aadhar_card_back_url"
+                        endpoint={"documentsUploader"}
+                        onUploadError={(e) => {
+                          form.setError("aadhar_card_back_url", {
+                            message: e.message,
+                          });
+                        }}
+                        onClientUploadComplete={(res) => {
+                          field.onChange(res.at(0)?.key);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
