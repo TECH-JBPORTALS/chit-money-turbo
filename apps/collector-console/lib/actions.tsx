@@ -3,20 +3,25 @@
 import { z } from "zod";
 import { onboardingSchema } from "./validators";
 import { auth, clerkClient } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 
-export async function updateUserPrivateMetadata(
-  privateMetadata: z.infer<typeof onboardingSchema>
-) {
+export async function updateOnboardingData({
+  onboardingComplete = false,
+  ...privateMetadata
+}: z.infer<typeof onboardingSchema> & { onboardingComplete?: boolean }) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
   try {
     const client = await clerkClient();
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
-    // const currentPrivateMetadata = await client.users.ge
-    const data = await client.users.updateUserMetadata(userId, {
+    await client.users.updateUserMetadata(userId, {
       privateMetadata,
+      publicMetadata: {
+        onboardingComplete,
+      },
     });
 
-    return JSON.stringify(data.privateMetadata);
+    revalidatePath("/onboarding");
   } catch (e) {
     console.log("Error while updating privateMetadata", e);
   }

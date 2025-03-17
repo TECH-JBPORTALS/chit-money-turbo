@@ -7,6 +7,6 @@ export default async function OnboardingPage() {
 
   if (!userId) throw new Error("Unauthorized request");
   const data = await client.users.getUser(userId);
-  const initialPrivateMetadata = data.privateMetadata;
-  return <OnboardingMultiStepForm initialState={initialPrivateMetadata} />;
+  const initialState = data.privateMetadata;
+  return <OnboardingMultiStepForm {...{ initialState }} />;
 }

@@ -11,10 +11,12 @@ import {
 } from "./forms/onbaording-forms";
 import { z } from "zod";
 import { onboardingSchema } from "@/lib/validators";
-import { updateUserPrivateMetadata } from "@/lib/actions";
 import { useEffect, useState } from "react";
 import { Loader2Icon } from "lucide-react";
 import Image from "next/image";
+import { useUser } from "@clerk/nextjs";
+import { updateOnboardingData } from "@/lib/actions";
+import { useRouter } from "next/navigation";
 
 export function OnboardingMultiStepForm({
   initialState,
@@ -23,6 +25,8 @@ export function OnboardingMultiStepForm({
 }) {
   const [hydrated, setHydrated] = useState(false);
   const { next, prev, current: currentStep, total } = useSteps();
+  const { user } = useUser();
+  const router = useRouter();
   // Ensure the component is fully hydrated before rendering Steps
   useEffect(() => {
     setHydrated(true);
@@ -67,43 +71,49 @@ export function OnboardingMultiStepForm({
         startsFrom={initialState.currentStep}
         onStepChange={() => {
           //On each step update the current step
-          updateUserPrivateMetadata({ ...initialState, currentStep });
+          updateOnboardingData({ ...initialState, currentStep });
         }}
       >
         <PersonalInfoForm
           {...{ next }}
           setState={(values) =>
-            updateUserPrivateMetadata({ ...initialState, personalInfo: values })
+            updateOnboardingData({ ...initialState, personalInfo: values })
           }
           state={initialState.personalInfo}
         />
         <ContactInfoForm
           {...{ prev, next }}
           setState={(values) =>
-            updateUserPrivateMetadata({ ...initialState, contactInfo: values })
+            updateOnboardingData({ ...initialState, contactInfo: values })
           }
           state={initialState.contactInfo}
         />
         <OrgInfoForm
           {...{ prev, next }}
           setState={(values) =>
-            updateUserPrivateMetadata({ ...initialState, orgInfo: values })
+            updateOnboardingData({ ...initialState, orgInfo: values })
           }
           state={initialState.orgInfo}
         />
         <BankInfoForm
           {...{ prev, next }}
           setState={(values) =>
-            updateUserPrivateMetadata({ ...initialState, bankInfo: values })
+            updateOnboardingData({ ...initialState, bankInfo: values })
           }
           state={initialState.bankInfo}
         />
 
         <DocumentsForm
           {...{ prev, next }}
-          setState={(values) =>
-            updateUserPrivateMetadata({ ...initialState, documents: values })
-          }
+          setState={async (values) => {
+            await updateOnboardingData({
+              ...initialState,
+              documents: values,
+              onboardingComplete: true,
+            });
+            await user?.reload();
+            router.refresh();
+          }}
           state={initialState.documents}
         />
       </Steps>
