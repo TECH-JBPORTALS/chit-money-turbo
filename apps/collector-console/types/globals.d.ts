@@ -1,3 +1,6 @@
+import { onboardingSchema } from "@/lib/validators";
+import { z } from "zod";
+
 export {};
 
 declare global {
@@ -6,4 +9,6 @@ declare global {
       onboardingComplete?: boolean;
     };
   }
+
+  interface UserPrivateMetadata extends z.infer<typeof onboardingSchema> {}
 }

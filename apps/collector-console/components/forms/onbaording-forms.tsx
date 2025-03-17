@@ -3,6 +3,7 @@
 import { Input } from "@cmt/ui/components/input";
 import { Button } from "@cmt/ui/components/button";
 import { useForm } from "react-hook-form";
+
 import {
   Card,
   CardContent,
@@ -23,15 +24,14 @@ import {
 } from "@cmt/ui/components/form";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { StepProps, StepWithPrevProps } from "@/types/step-form";
-
-const personalInfoSchema = z.object({
-  first_name: z
-    .string()
-    .trim()
-    .min(2, "First name must be at least 2 characters long"),
-  last_name: z.string().trim(),
-  date_of_birth: z.string().min(1),
-});
+import {
+  bankInfoSchema,
+  contactInfoSchema,
+  documentsSchema,
+  orgInfoSchema,
+  personalInfoSchema,
+} from "@/lib/validators";
+import _ from "lodash";
 
 export function PersonalInfoForm({
   setState,
@@ -40,13 +40,15 @@ export function PersonalInfoForm({
 }: StepProps<z.infer<typeof personalInfoSchema>>) {
   const form = useForm<z.infer<typeof personalInfoSchema>>({
     resolver: zodResolver(personalInfoSchema),
-    defaultValues: state,
+    defaultValues: {
+      date_of_birth: state?.date_of_birth ?? "",
+      first_name: state?.first_name ?? "",
+      last_name: state?.last_name ?? "",
+    },
   });
 
-  const onSubmit = (values: z.infer<typeof personalInfoSchema>) => {
-    setState("first_name", values.first_name);
-    setState("last_name", values.last_name);
-    setState("date_of_birth", values.date_of_birth);
+  const onSubmit = async (values: z.infer<typeof personalInfoSchema>) => {
+    await setState(values);
     next();
   };
 
@@ -101,7 +103,7 @@ export function PersonalInfoForm({
                 )}
               />
             </div>
-            <Button className="w-full">
+            <Button className="w-full" isLoading={form.formState.isSubmitting}>
               Next <ArrowRightIcon />
             </Button>
           </form>
@@ -111,18 +113,6 @@ export function PersonalInfoForm({
   );
 }
 
-const contactInfoSchema = z.object({
-  primary_phone_number: z
-    .string()
-    .trim()
-    .min(10, "Phone number must be 10 digit")
-    .max(10, "Phone number must be 10 digit"),
-  contact_address: z.string().trim().min(4),
-  contact_pincode: z.string().trim().min(6, "Invalid pincode"),
-  contact_city: z.string().trim().min(1, "Required"),
-  contact_state: z.string().trim().min(1, "Required"),
-});
-
 export function ContactInfoForm({
   next,
   prev,
@@ -131,15 +121,17 @@ export function ContactInfoForm({
 }: StepWithPrevProps<z.infer<typeof contactInfoSchema>>) {
   const form = useForm<z.infer<typeof contactInfoSchema>>({
     resolver: zodResolver(contactInfoSchema),
-    defaultValues: state,
+    defaultValues: {
+      primary_phone_number: state?.primary_phone_number ?? "",
+      contact_address: state?.contact_address ?? "",
+      contact_city: state?.contact_city ?? "",
+      contact_pincode: state?.contact_pincode ?? "",
+      contact_state: state?.contact_state ?? "",
+    },
   });
 
-  const onSubmit = (values: z.infer<typeof contactInfoSchema>) => {
-    setState("primary_phone_number", values.primary_phone_number);
-    setState("contact_address", values.contact_address);
-    setState("contact_pincode", values.contact_pincode);
-    setState("contact_city", values.contact_city);
-    setState("contact_state", values.contact_state);
+  const onSubmit = async (values: z.infer<typeof contactInfoSchema>) => {
+    await setState(values);
     next();
   };
 
@@ -226,7 +218,7 @@ export function ContactInfoForm({
                 )}
               />
             </div>
-            <Button className="w-full">
+            <Button className="w-full" isLoading={form.formState.isSubmitting}>
               Next <ArrowRightIcon />
             </Button>
             <Button
@@ -244,14 +236,6 @@ export function ContactInfoForm({
   );
 }
 
-const orgInfoSchema = z.object({
-  company_fullname: z.string().trim().min(1, "Required"),
-  company_address: z.string().trim().min(4),
-  company_pincode: z.string().trim().min(6, "Invalid pincode"),
-  company_city: z.string().trim().min(1, "Required"),
-  company_state: z.string().trim().min(1, "Required"),
-});
-
 export function OrgInfoForm({
   next,
   prev,
@@ -260,15 +244,17 @@ export function OrgInfoForm({
 }: StepWithPrevProps<z.infer<typeof orgInfoSchema>>) {
   const form = useForm<z.infer<typeof orgInfoSchema>>({
     resolver: zodResolver(orgInfoSchema),
-    defaultValues: state,
+    defaultValues: {
+      company_address: state?.company_address ?? "",
+      company_city: state?.company_city ?? "",
+      company_fullname: state?.company_fullname ?? "",
+      company_pincode: state?.company_pincode ?? "",
+      company_state: state?.company_state ?? "",
+    },
   });
 
-  const onSubmit = (values: z.infer<typeof orgInfoSchema>) => {
-    setState("company_address", values.company_address);
-    setState("company_fullname", values.company_fullname);
-    setState("company_pincode", values.company_pincode);
-    setState("company_city", values.company_city);
-    setState("company_state", values.company_state);
+  const onSubmit = async (values: z.infer<typeof orgInfoSchema>) => {
+    await setState(values);
     next();
   };
 
@@ -356,7 +342,7 @@ export function OrgInfoForm({
                 )}
               />
             </div>
-            <Button className="w-full">
+            <Button className="w-full" isLoading={form.formState.isSubmitting}>
               Next <ArrowRightIcon />
             </Button>
             <Button
@@ -374,21 +360,6 @@ export function OrgInfoForm({
   );
 }
 
-const bankInfoSchema = z.object({
-  account_number: z
-    .string()
-    .trim()
-    .min(10, "Phone number must be 10 digit")
-    .max(10, "Phone number must be 10 digit"),
-  confirm_account_number: z.string().trim().min(4),
-  account_holder_name: z.string().trim().min(6, "Invalid pincode"),
-  branch_name: z.string().trim().min(1, "Required"),
-  ifsc_code: z.string().trim().min(1, "Required"),
-  bank_address_pincode: z.string().trim().min(1, "Required"),
-  bank_city: z.string().trim().min(1, "Required"),
-  bank_state: z.string().trim().min(1, "Required"),
-});
-
 export function BankInfoForm({
   next,
   prev,
@@ -397,18 +368,20 @@ export function BankInfoForm({
 }: StepWithPrevProps<z.infer<typeof bankInfoSchema>>) {
   const form = useForm<z.infer<typeof bankInfoSchema>>({
     resolver: zodResolver(bankInfoSchema),
-    defaultValues: state,
+    defaultValues: {
+      account_holder_name: state?.account_holder_name ?? "",
+      account_number: state?.account_number ?? "",
+      bank_address_pincode: state?.bank_address_pincode ?? "",
+      bank_city: state?.bank_city ?? "",
+      bank_state: state?.bank_state ?? "",
+      branch_name: state?.branch_name ?? "",
+      confirm_account_number: state?.confirm_account_number ?? "",
+      ifsc_code: state?.ifsc_code ?? "",
+    },
   });
 
-  const onSubmit = (values: z.infer<typeof bankInfoSchema>) => {
-    setState("account_number", values.account_number);
-    setState("confirm_account_number", values.confirm_account_number);
-    setState("account_holder_name", values.account_holder_name);
-    setState("branch_name", values.branch_name);
-    setState("ifsc_code", values.ifsc_code);
-    setState("bank_address_pincode", values.bank_address_pincode);
-    setState("bank_city", values.bank_city);
-    setState("bank_state", values.bank_state);
+  const onSubmit = async (values: z.infer<typeof bankInfoSchema>) => {
+    await setState(values);
 
     next();
   };
@@ -537,7 +510,7 @@ export function BankInfoForm({
                 )}
               />
             </div>
-            <Button className="w-full">
+            <Button className="w-full" isLoading={form.formState.isSubmitting}>
               Next <ArrowRightIcon />
             </Button>
             <Button
@@ -555,12 +528,6 @@ export function BankInfoForm({
   );
 }
 
-const documentsSchema = z.object({
-  registeration_certificate_url: z.string().trim().min(1, "Required"),
-  aadhar_card_front_url: z.string().trim().min(1, "Required"),
-  aadhar_card_back_url: z.string().trim().min(1, "Required"),
-});
-
 export function DocumentsForm({
   next,
   prev,
@@ -569,16 +536,15 @@ export function DocumentsForm({
 }: StepWithPrevProps<z.infer<typeof documentsSchema>>) {
   const form = useForm<z.infer<typeof documentsSchema>>({
     resolver: zodResolver(documentsSchema),
-    defaultValues: state,
+    defaultValues: {
+      aadhar_card_back_url: state?.aadhar_card_back_url ?? "",
+      aadhar_card_front_url: state?.aadhar_card_front_url ?? "",
+      registeration_certificate_url: state?.registeration_certificate_url ?? "",
+    },
   });
 
-  const onSubmit = (values: z.infer<typeof documentsSchema>) => {
-    setState("aadhar_card_back_url", values.registeration_certificate_url);
-    setState("aadhar_card_front_url", values.aadhar_card_front_url);
-    setState(
-      "registeration_certificate_url",
-      values.registeration_certificate_url
-    );
+  const onSubmit = async (values: z.infer<typeof documentsSchema>) => {
+    await setState(values);
 
     next();
   };
@@ -641,7 +607,9 @@ export function DocumentsForm({
                 />
               </div>
             </div>
-            <Button className="w-full">Complete</Button>
+            <Button className="w-full" isLoading={form.formState.isSubmitting}>
+              Complete
+            </Button>
             <Button
               type="button"
               onClick={prev}
