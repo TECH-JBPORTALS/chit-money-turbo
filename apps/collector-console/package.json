@@ -17,6 +17,7 @@
     "@clerk/nextjs": "^6.12.5",
     "@hookform/resolvers": "catalog:rfh752",
     "@t3-oss/env-nextjs": "^0.12.0",
+    "@uploadthing/react": "^7.3.0",
     "dotenv-cli": "^8.0.0",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
@@ -28,6 +29,7 @@
     "react-dom": "catalog:react18",
     "react-hook-form": "catalog:rfh752",
     "react-step-builder": "^3.0.6",
+    "uploadthing": "^7.5.2",
     "zod": "catalog:"
   },
   "devDependencies": {
