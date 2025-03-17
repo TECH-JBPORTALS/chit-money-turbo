@@ -83,7 +83,7 @@ export function SignInForm({
           <CardDescription>
             Enter your email below to login to your account
           </CardDescription>
-          <p className="text-sm text-destructive text-sm">
+          <p className="text-sm text-destructive">
             {form.formState.errors.root?.message}
           </p>
         </CardHeader>

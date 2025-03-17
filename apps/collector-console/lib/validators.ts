@@ -60,3 +60,10 @@ export const onboardingSchema = z.object({
   bankInfo: bankInfoSchema,
   documents: documentsSchema,
 });
+
+const documentKeys = Object.keys(documentsSchema.shape) as [
+  string,
+  ...string[],
+];
+
+export const DocumentKeysEnum = z.enum(documentKeys);

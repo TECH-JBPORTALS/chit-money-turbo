@@ -42,6 +42,7 @@ function Button({
   size,
   asChild = false,
   isLoading = false,
+  disabled = isLoading,
   children,
   ...props
 }: React.ComponentProps<"button"> &
@@ -56,6 +57,7 @@ function Button({
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
+      disabled={disabled}
       children={isLoading ? <Loader2Icon className="animate-spin" /> : children}
     />
   );

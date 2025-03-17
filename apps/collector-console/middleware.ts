@@ -2,11 +2,16 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
+const isUploadthingRoute = createRouteMatcher(["/api/uploadthing(.*)"]);
 const isOnboardingRoute = createRouteMatcher(["/onboarding"]);
 
 export default clerkMiddleware(
   async (auth, req: NextRequest) => {
     const { userId, sessionClaims, redirectToSignIn } = await auth();
+    //For uploading files, don't try to redirect
+    if (isUploadthingRoute(req)) {
+      return NextResponse.next();
+    }
 
     // For users visiting /onboarding, don't try to redirect
     if (userId && isOnboardingRoute(req)) {
