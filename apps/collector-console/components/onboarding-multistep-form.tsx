@@ -1,10 +1,14 @@
 "use client";
 
 import { Steps, StepsProvider, useSteps } from "react-step-builder";
-import { PersonalInfoForm } from "./forms/personal-info-form";
-import { ContactInfoForm } from "./forms/contact-info-form";
 import { cn } from "@cmt/ui/lib/utils";
-import { OrgInfoForm } from "./forms/org-info-form";
+import {
+  BankInfoForm,
+  ContactInfoForm,
+  DocumentsForm,
+  OrgInfoForm,
+  PersonalInfoForm,
+} from "./forms/onbaording-forms";
 
 function OnboardingMultiStepForm() {
   const { next, prev, current, total } = useSteps();
@@ -28,7 +32,7 @@ function OnboardingMultiStepForm() {
           ))}
       </div>
 
-      <Steps startsFrom={2} onStepChange={() => {}}>
+      <Steps startsFrom={5} onStepChange={() => {}}>
         <PersonalInfoForm
           {...{ next }}
           setState={() => {}}
@@ -54,6 +58,30 @@ function OnboardingMultiStepForm() {
             company_pincode: "",
             company_city: "",
             company_state: "",
+          }}
+        />
+        <BankInfoForm
+          {...{ prev, next }}
+          setState={() => {}}
+          state={{
+            account_number: "",
+            confirm_account_number: "",
+            account_holder_name: "",
+            branch_name: "",
+            ifsc_code: "",
+            bank_address_pincode: "",
+            bank_city: "",
+            bank_state: "",
+          }}
+        />
+
+        <DocumentsForm
+          {...{ prev, next }}
+          setState={() => {}}
+          state={{
+            registeration_certificate_url: "",
+            aadhar_card_back_url: "",
+            aadhar_card_front_url: "",
           }}
         />
       </Steps>

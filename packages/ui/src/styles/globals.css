@@ -4,10 +4,9 @@
 @source "../**/*.{ts,tsx}";
 
 @plugin "tailwindcss-animate";
+@import "./theme.css";
 
 @custom-variant dark (&:is(.dark *));
-
-@import "./theme.css";
 
 @theme inline {
   --font-heading: var(--font-geist);

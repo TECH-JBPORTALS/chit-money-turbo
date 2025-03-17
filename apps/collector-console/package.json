@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.12.5",
-    "@cmt/ui": "workspace:*",
     "@hookform/resolvers": "catalog:rfh752",
     "@t3-oss/env-nextjs": "^0.12.0",
     "dotenv-cli": "^8.0.0",
@@ -33,6 +32,7 @@
   "devDependencies": {
     "@cmt/eslint-config": "workspace:^",
     "@cmt/typescript-config": "workspace:*",
+    "@cmt/ui": "workspace:*",
     "@types/node": "catalog:react18",
     "@types/react": "catalog:react18",
     "@types/react-dom": "catalog:react18",

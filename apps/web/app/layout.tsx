@@ -1,7 +1,7 @@
 import { Urbanist, Geist_Mono, Geist } from "next/font/google";
 import type { Metadata } from "next";
 
-import "@cmt/ui/globals.css";
+import "./globals.css";
 import { Providers } from "@/components/providers";
 
 const fontSans = Urbanist({

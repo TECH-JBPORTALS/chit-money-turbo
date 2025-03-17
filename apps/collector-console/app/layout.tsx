@@ -1,7 +1,7 @@
 import { Urbanist, Geist_Mono, Geist } from "next/font/google";
 import type { Metadata } from "next";
 
-import "@cmt/ui/globals.css";
+import "./globals.css";
 import { Providers } from "@/components/providers";
 import { ClerkProvider } from "@clerk/nextjs";
 
@@ -35,7 +35,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body
-          className={`${fontSans.variable} ${fontGeist.variable}  ${fontMono.variable} font-sans antialiased `}
+          className={`${fontSans.variable} ${fontGeist.variable} ${fontMono.variable} font-sans antialiased `}
         >
           <Providers>{children}</Providers>
         </body>
