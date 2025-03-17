@@ -604,43 +604,44 @@ export function DocumentsForm({
                   <FormItem>
                     <FormLabel>Registration Certificate</FormLabel>
                     <FormControl>
-                      <div className="w-full" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="aadhar_card_front_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Account Number</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
+                      <div className="w-full h-52 rounded-md border border-dashed " />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="aadhar_card_back_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Account Holder Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="flex gap-3 w-full">
+                <FormField
+                  control={form.control}
+                  name="aadhar_card_front_url"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>Confirm Account Number</FormLabel>
+                      <FormControl>
+                        <div className="w-full h-32 rounded-md border border-dashed " />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="aadhar_card_back_url"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>Account Holder Name</FormLabel>
+                      <FormControl>
+                        <div className="w-full h-32 rounded-md border border-dashed " />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
-            <Button className="w-full">
-              Next <ArrowRightIcon />
-            </Button>
+            <Button className="w-full">Complete</Button>
             <Button
               type="button"
               onClick={prev}
