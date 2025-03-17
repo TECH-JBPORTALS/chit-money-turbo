@@ -1,5 +1,3 @@
-import { updateUserPrivateMetadata } from "@/lib/actions";
-import { DocumentKeysEnum, documentsSchema } from "@/lib/validators";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";

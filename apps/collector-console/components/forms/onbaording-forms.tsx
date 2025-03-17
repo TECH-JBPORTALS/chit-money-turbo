@@ -1,7 +1,6 @@
 "use client";
-
 import { Input } from "@cmt/ui/components/input";
-import { Button, buttonVariants } from "@cmt/ui/components/button";
+import { Button } from "@cmt/ui/components/button";
 import { useForm } from "react-hook-form";
 
 import {
@@ -22,13 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@cmt/ui/components/form";
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  RefreshCcwIcon,
-  RefreshCwIcon,
-  RotateCcwIcon,
-} from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { StepProps, StepWithPrevProps } from "@/types/step-form";
 import {
   bankInfoSchema,
@@ -37,9 +30,6 @@ import {
   orgInfoSchema,
   personalInfoSchema,
 } from "@/lib/validators";
-import _ from "lodash";
-import { getUTFile, UploadButton, UploadDropzone } from "@/utils/uploadthing";
-import Image from "next/image";
 import Uploader from "../uploader";
 
 export function PersonalInfoForm({

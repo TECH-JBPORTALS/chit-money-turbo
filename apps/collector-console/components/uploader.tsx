@@ -1,11 +1,8 @@
 "use client";
-
 import { getUTFile, UploadButton, UploadDropzone } from "@/utils/uploadthing";
-import { buttonVariants } from "@cmt/ui/components/button";
 import { cn } from "@cmt/ui/lib/utils";
-import { Rotate3DIcon, RotateCcwIcon, RotateCwIcon } from "lucide-react";
+import { RotateCwIcon } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
 
 interface UploaderProps
   extends Pick<
