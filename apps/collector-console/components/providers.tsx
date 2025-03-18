@@ -4,6 +4,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import * as React from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { StepsProvider } from "react-step-builder";
+import { TooltipProvider } from "@cmt/ui/components/tooltip";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -16,7 +17,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         enableColorScheme
       > */}
       <StepsProvider>
-        <>{children}</>
+        <TooltipProvider>
+          <>{children}</>
+        </TooltipProvider>
       </StepsProvider>
       {/* </NextThemesProvider> */}
     </NuqsAdapter>

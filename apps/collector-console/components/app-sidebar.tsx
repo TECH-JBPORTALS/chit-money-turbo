@@ -34,6 +34,11 @@ import {
   CollapsibleTrigger,
 } from "@cmt/ui/components/collapsible";
 import { Button } from "@cmt/ui/components/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@cmt/ui/components/tooltip";
 
 // Menu items.
 const items = [
@@ -119,9 +124,14 @@ export function AppSidebar() {
                 </Button>
               </CollapsibleTrigger>
               ACTIVE BATCHES{" "}
-              <SidebarGroupAction className="size-6 ml-auto">
-                <PlusIcon />
-              </SidebarGroupAction>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <SidebarGroupAction className="size-6 ml-auto">
+                    <PlusIcon />
+                  </SidebarGroupAction>
+                </TooltipTrigger>
+                <TooltipContent side="right">Create New Batch</TooltipContent>
+              </Tooltip>
             </SidebarGroupLabel>
             <CollapsibleContent className="pl-2" asChild>
               <SidebarContent>
