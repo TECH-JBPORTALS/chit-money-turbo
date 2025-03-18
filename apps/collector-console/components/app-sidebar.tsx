@@ -21,6 +21,7 @@ import {
   ChevronDown,
   ChevronDownIcon,
   ChevronRight,
+  ChevronRightIcon,
   HomeIcon,
   PlusIcon,
   UserCircleIcon,
@@ -118,9 +119,9 @@ export function AppSidebar() {
                 <Button
                   size={"icon"}
                   variant={"ghost"}
-                  className="w-fit mr-2 rounded-xs group"
+                  className="w-fit data-[state=open]:[&_svg]:rotate-90 mr-2 rounded-xs"
                 >
-                  <ChevronRight />
+                  <ChevronRightIcon />
                 </Button>
               </CollapsibleTrigger>
               ACTIVE BATCHES{" "}
@@ -148,9 +149,9 @@ export function AppSidebar() {
                               <Button
                                 size={"icon"}
                                 variant={"ghost"}
-                                className="w-fit group"
+                                className="w-fit data-[state=open]:[&_svg]:rotate-90"
                               >
-                                <ChevronDownIcon className="size-4 group-[data-state=open]:rotate-180 group-[data-state=closed]:rotate-90" />
+                                <ChevronRightIcon className="size-4" />
                               </Button>
                             </CollapsibleTrigger>
                             <BookIcon />
@@ -211,7 +212,7 @@ export function AppSidebar() {
                 <Button
                   size={"icon"}
                   variant={"ghost"}
-                  className="w-fit mr-2 rounded-xs group"
+                  className="w-fit mr-2 data-[state=open]:[&_svg]:rotate-90 rounded-xs group"
                 >
                   <ChevronRight />
                 </Button>
@@ -234,9 +235,9 @@ export function AppSidebar() {
                               <Button
                                 size={"icon"}
                                 variant={"ghost"}
-                                className="w-fit group"
+                                className="w-fit data-[state=open]:[&_svg]:rotate-90"
                               >
-                                <ChevronDownIcon className="size-4 group-[data-state=open]:rotate-180 group-[data-state=closed]:rotate-90" />
+                                <ChevronRightIcon className="size-4" />
                               </Button>
                             </CollapsibleTrigger>
                             <BookIcon />
