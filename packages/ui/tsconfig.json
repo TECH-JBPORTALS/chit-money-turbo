@@ -4,8 +4,7 @@
     "baseUrl": ".",
     "paths": {
       "@cmt/ui/*": ["./src/*"]
-    },
-    "lib": ["DOM"]
+    }
   },
   "include": ["."],
   "exclude": ["node_modules", "dist"]

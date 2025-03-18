@@ -76,20 +76,12 @@ const batches = [
 export function AppSidebar() {
   // const pathname = usePathname();
   return (
-    <Sidebar>
+    <Sidebar className="pt-6">
       <SidebarContent>
-        <SidebarHeader>
-          <div className="flex py-4 gap-1 items-center">
-            {/* <Image
-            alt="Chit Coin Logo"
-            src={"/chit-coin.png"}
-            height={32}
-            width={32}
-          /> */}
-            <h1 className="text-xl font-semibold text-foreground">
-              Chit.Money
-            </h1>
-          </div>
+        <SidebarHeader className="px-4">
+          <h1 className="text-xl font-bold text-primary dark:text-foreground">
+            Chit.Money
+          </h1>
         </SidebarHeader>
 
         {/** Application */}
