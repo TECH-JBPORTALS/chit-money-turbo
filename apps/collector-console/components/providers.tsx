@@ -8,17 +8,17 @@ import { StepsProvider } from "react-step-builder";
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <NuqsAdapter>
-      <NextThemesProvider
+      {/* <NextThemesProvider
         attribute="class"
         defaultTheme="system"
         enableSystem
         disableTransitionOnChange
         enableColorScheme
-      >
-        <StepsProvider>
-          <>{children}</>
-        </StepsProvider>
-      </NextThemesProvider>
+      > */}
+      <StepsProvider>
+        <>{children}</>
+      </StepsProvider>
+      {/* </NextThemesProvider> */}
     </NuqsAdapter>
   );
 }
