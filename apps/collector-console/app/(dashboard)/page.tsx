@@ -26,7 +26,7 @@ export default async function Page() {
         </p>
       </div>
       {/* Overview stat cards  grid*/}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid lg:grid-cols-4 xl:grid-cols-5 gap-2">
         <Card className="@container/card">
           <CardHeader className="relative">
             <CardDescription>Total Batches</CardDescription>
@@ -104,7 +104,7 @@ export default async function Page() {
         </p>
       </div>
       {/* This month stat cards grid */}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid lg:grid-cols-4 xl:grid-cols-5 gap-2">
         <Card className="@container/card">
           <CardHeader className="relative">
             <CardDescription>Total Collection</CardDescription>

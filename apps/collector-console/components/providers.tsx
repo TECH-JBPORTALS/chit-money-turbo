@@ -9,19 +9,19 @@ import { TooltipProvider } from "@cmt/ui/components/tooltip";
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <NuqsAdapter>
-      {/* <NextThemesProvider
+      <NextThemesProvider
         attribute="class"
         defaultTheme="system"
         enableSystem
         disableTransitionOnChange
         enableColorScheme
-      > */}
-      <StepsProvider>
-        <TooltipProvider>
-          <>{children}</>
-        </TooltipProvider>
-      </StepsProvider>
-      {/* </NextThemesProvider> */}
+      >
+        <StepsProvider>
+          <TooltipProvider>
+            <>{children}</>
+          </TooltipProvider>
+        </StepsProvider>
+      </NextThemesProvider>
     </NuqsAdapter>
   );
 }
