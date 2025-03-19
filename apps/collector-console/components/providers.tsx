@@ -5,23 +5,26 @@ import * as React from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { StepsProvider } from "react-step-builder";
 import { TooltipProvider } from "@cmt/ui/components/tooltip";
+import { QueryProvider } from "@/utils/api";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <NuqsAdapter>
-      <NextThemesProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-        enableColorScheme
-      >
-        <StepsProvider>
-          <TooltipProvider>
-            <>{children}</>
-          </TooltipProvider>
-        </StepsProvider>
-      </NextThemesProvider>
+      <QueryProvider>
+        <NextThemesProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+          enableColorScheme
+        >
+          <StepsProvider>
+            <TooltipProvider>
+              <>{children}</>
+            </TooltipProvider>
+          </StepsProvider>
+        </NextThemesProvider>
+      </QueryProvider>
     </NuqsAdapter>
   );
 }

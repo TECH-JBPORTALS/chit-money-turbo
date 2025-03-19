@@ -8,12 +8,14 @@ import {
 } from "@cmt/ui/components/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@cmt/ui/components/avatar";
 import { Progress } from "@cmt/ui/components/progress";
+import { api } from "@cmt/api";
 export default async function Page() {
   const { userId } = await auth();
 
   if (!userId) throw Error("No user");
   const { users } = await clerkClient();
   const data = await users.getUser(userId);
+
   return (
     <div className="flex flex-col gap-8 text-2xl h-svh">
       {/* Chit Fund Title */}

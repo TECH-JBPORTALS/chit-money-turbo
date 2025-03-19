@@ -17,6 +17,7 @@
     "@clerk/nextjs": "^6.12.5",
     "@hookform/resolvers": "catalog:rfh752",
     "@t3-oss/env-nextjs": "^0.12.0",
+    "@tanstack/react-query": "^5.69.0",
     "@uploadthing/react": "^7.3.0",
     "dotenv-cli": "^8.0.0",
     "jwt-decode": "^4.0.0",
@@ -33,9 +34,11 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@cmt/api": "workspace:*",
     "@cmt/eslint-config": "workspace:^",
     "@cmt/typescript-config": "workspace:*",
     "@cmt/ui": "workspace:*",
+    "@tanstack/eslint-plugin-query": "^5.68.0",
     "@types/lodash": "^4.17.16",
     "@types/node": "catalog:react18",
     "@types/react": "catalog:react18",

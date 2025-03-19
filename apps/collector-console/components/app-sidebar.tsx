@@ -1,3 +1,4 @@
+"use client";
 import {
   Sidebar,
   SidebarContent,
@@ -18,8 +19,6 @@ import {
   ArrowDownLeftIcon,
   ArrowUpRightIcon,
   BookIcon,
-  ChevronDown,
-  ChevronDownIcon,
   ChevronRight,
   ChevronRightIcon,
   HomeIcon,
@@ -27,7 +26,6 @@ import {
   UserCircleIcon,
   UsersIcon,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   Collapsible,
@@ -40,6 +38,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@cmt/ui/components/tooltip";
+import { usePathname } from "next/navigation";
+import { queryClient } from "@/utils/api";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@cmt/api";
 
 // Menu items.
 const items = [
@@ -80,12 +82,17 @@ const batches = [
 ];
 
 export function AppSidebar() {
-  // const pathname = usePathname();
+  const pathname = usePathname();
+  const { data, isLoading } = useQuery({
+    queryKey: ["batches"],
+    queryFn: () =>
+      api.getAllBatches({ collecter_id: "bea623d0-f365-11ef-b192-525418b1" }),
+  });
   return (
     <Sidebar className="pt-6">
       <SidebarContent>
         <SidebarHeader className="px-4">
-          <h1 className="text-xl font-bold text-primary dark:text-foreground">
+          <h1 className="text-xl font-semibold text-primary dark:text-foreground/70">
             Chit.Money
           </h1>
         </SidebarHeader>
@@ -96,10 +103,7 @@ export function AppSidebar() {
             <SidebarMenu className="gap-2">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    // isActive={pathname === item.url}
-                    asChild
-                  >
+                  <SidebarMenuButton isActive={"/" === item.url} asChild>
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
@@ -140,10 +144,7 @@ export function AppSidebar() {
                   {batches.map((batch, index) => (
                     <SidebarMenuItem key={index}>
                       <Collapsible className="group/collapsible">
-                        <SidebarMenuButton
-                          // isActive={pathname === item.url}
-                          asChild
-                        >
+                        <SidebarMenuButton asChild>
                           <Link href={"#"}>
                             <CollapsibleTrigger asChild>
                               <Button
@@ -206,7 +207,7 @@ export function AppSidebar() {
 
         {/** Completed Semester */}
         <SidebarGroup>
-          <Collapsible defaultOpen>
+          <Collapsible>
             <SidebarGroupLabel>
               <CollapsibleTrigger asChild>
                 <Button

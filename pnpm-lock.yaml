@@ -75,6 +75,9 @@ importers:
       '@t3-oss/env-nextjs':
         specifier: ^0.12.0
         version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
+      '@tanstack/react-query':
+        specifier: ^5.69.0
+        version: 5.69.0(react@18.3.1)
       '@uploadthing/react':
         specifier: ^7.3.0
         version: 7.3.0(next@15.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(uploadthing@7.5.2(next@15.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(tailwindcss@4.0.14))
@@ -118,6 +121,9 @@ importers:
         specifier: 'catalog:'
         version: 3.24.2
     devDependencies:
+      '@cmt/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@cmt/eslint-config':
         specifier: workspace:^
         version: link:../../packages/eslint-config
@@ -127,6 +133,9 @@ importers:
       '@cmt/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@tanstack/eslint-plugin-query':
+        specifier: ^5.68.0
+        version: 5.68.0(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)
       '@types/lodash':
         specifier: ^4.17.16
         version: 4.17.16
@@ -316,6 +325,31 @@ importers:
         specifier: 'catalog:'
         version: 5.8.2
 
+  packages/api:
+    dependencies:
+      '@zodios/core':
+        specifier: ^10.9.6
+        version: 10.9.6(axios@1.8.3)(zod@3.24.2)
+      zod:
+        specifier: 'catalog:'
+        version: 3.24.2
+    devDependencies:
+      '@cmt/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@cmt/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: catalog:react18
+        version: 20.17.24
+      tailwindcss:
+        specifier: catalog:tailwind4
+        version: 4.0.14
+      typescript:
+        specifier: 'catalog:'
+        version: 5.8.2
+
   packages/eslint-config:
     devDependencies:
       '@next/eslint-plugin-next':
@@ -448,7 +482,7 @@ importers:
         specifier: catalog:tailwind4
         version: 4.0.14
       typescript:
-        specifier: ^5.7.3
+        specifier: 'catalog:'
         version: 5.8.2
 
 packages:
@@ -2318,6 +2352,19 @@ packages:
   '@tailwindcss/postcss@4.0.14':
     resolution: {integrity: sha512-+uIR6KtKhla1XeIanF27KtrfYy+PX+R679v5LxbkmEZlhQe3g8rk+wKj7Xgt++rWGRuFLGMXY80Ek8JNn+kN/g==}
 
+  '@tanstack/eslint-plugin-query@5.68.0':
+    resolution: {integrity: sha512-w/+y5LILV1GTWBB2R/lKfUzgocKXU1B7O6jipLUJhmxCKPmJFy5zpfR1Vx7c6yCEsQoKcTbhuR/tIy+1sIGaiA==}
+    peerDependencies:
+      eslint: ^8.57.0 || ^9.0.0
+
+  '@tanstack/query-core@5.69.0':
+    resolution: {integrity: sha512-Kn410jq6vs1P8Nm+ZsRj9H+U3C0kjuEkYLxbiCyn3MDEiYor1j2DGVULqAz62SLZtUZ/e9Xt6xMXiJ3NJ65WyQ==}
+
+  '@tanstack/react-query@5.69.0':
+    resolution: {integrity: sha512-Ift3IUNQqTcaFa1AiIQ7WCb/PPy8aexZdq9pZWLXhfLcLxH0+PZqJ2xFImxCpdDZrFRZhLJrh76geevS5xjRhA==}
+    peerDependencies:
+      react: ^18 || ^19
+
   '@tootallnate/quickjs-emscripten@0.23.0':
     resolution: {integrity: sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==}
 
@@ -2501,6 +2548,12 @@ packages:
     resolution: {integrity: sha512-2WALfTl4xo2SkGCYRt6rDTFfk9R1czmBvUQy12gK2KuRKIpWEhcbbzy8EZXtz/jkRqHX8bFEc6FC1HjX4TUWYw==}
     engines: {node: '>=10.0.0'}
 
+  '@zodios/core@10.9.6':
+    resolution: {integrity: sha512-aH4rOdb3AcezN7ws8vDgBfGboZMk2JGGzEq/DtW65MhnRxyTGRuLJRWVQ/2KxDgWvV2F5oTkAS+5pnjKbl0n+A==}
+    peerDependencies:
+      axios: ^0.x || ^1.0.0
+      zod: ^3.x
+
   '@zxcvbn-ts/core@3.0.4':
     resolution: {integrity: sha512-aQeiT0F09FuJaAqNrxynlAwZ2mW/1MdXakKWNmGM1Qp/VaY6CnB/GfnMS2T8gB2231Esp1/maCWd8vTG4OuShw==}
 
@@ -2680,6 +2733,9 @@ packages:
   available-typed-arrays@1.0.7:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
+
+  axios@1.8.3:
+    resolution: {integrity: sha512-iP4DebzoNlP/YN2dpwCgb8zoCmhtkajzS48JvwmkSkXvPI3DHc7m+XYL5tGnSlJtR6nImXZmdCuN5aP8dh1d8A==}
 
   babel-core@7.0.0-bridge.0:
     resolution: {integrity: sha512-poPX9mZH/5CSanm50Q+1toVci6pv5KSRv/5TWCwtzQS5XEwn40BcCrgIeMFWP9CKKIniKXNxoIOnOq4VVlGXhg==}
@@ -3777,6 +3833,15 @@ packages:
     resolution: {integrity: sha512-YH50TTYgnzDnuaZlAxLYQ0UZtXSbbizMO3OCpoY8obvLReJmvQ5UUW22efsC3SZJmze/tATfQ0PtkKul2XwWBw==}
     engines: {node: '>=0.4.0'}
 
+  follow-redirects@1.15.9:
+    resolution: {integrity: sha512-gew4GsXizNgdoRyqmyfMHyAmXsZDk6mHkSxZFCzW9gwlbtOW44CDtYavM+y+72qD/Vq2l550kMF52DT8fOLJqQ==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+
   fontfaceobserver@2.3.0:
     resolution: {integrity: sha512-6FPvD/IVyT4ZlNe7Wcn5Fb/4ChigpucKYSvD6a+0iMoLn2inpo711eyIcKjmDtE5XNcgAkSH9uN/nfAeZzHEfg==}
 
@@ -3790,6 +3855,10 @@ packages:
 
   form-data@3.0.3:
     resolution: {integrity: sha512-q5YBMeWy6E2Un0nMGWMgI65MAKtaylxfNJGJxpGh45YDciZB4epbWpaAfImil6CPAPTYB4sh0URQNDRIZG5F2w==}
+    engines: {node: '>= 6'}
+
+  form-data@4.0.2:
+    resolution: {integrity: sha512-hGfm/slu0ZabnNt4oaRZ6uREyfCj6P4fT/n6A1rGV+Z0VdGXjfOhVUpkn6qVQONHGIFwmveGXyDs75+nr6FM8w==}
     engines: {node: '>= 6'}
 
   freeport-async@2.0.0:
@@ -8989,6 +9058,21 @@ snapshots:
       postcss: 8.5.3
       tailwindcss: 4.0.14
 
+  '@tanstack/eslint-plugin-query@5.68.0(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)':
+    dependencies:
+      '@typescript-eslint/utils': 8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)
+      eslint: 9.22.0(jiti@2.4.2)
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
+
+  '@tanstack/query-core@5.69.0': {}
+
+  '@tanstack/react-query@5.69.0(react@18.3.1)':
+    dependencies:
+      '@tanstack/query-core': 5.69.0
+      react: 18.3.1
+
   '@tootallnate/quickjs-emscripten@0.23.0': {}
 
   '@tsconfig/node10@1.0.11': {}
@@ -9059,7 +9143,7 @@ snapshots:
   '@types/glob@7.2.0':
     dependencies:
       '@types/minimatch': 5.1.2
-      '@types/node': 20.17.24
+      '@types/node': 22.13.10
 
   '@types/graceful-fs@4.1.9':
     dependencies:
@@ -9115,7 +9199,7 @@ snapshots:
 
   '@types/through@0.0.33':
     dependencies:
-      '@types/node': 20.17.24
+      '@types/node': 22.13.10
 
   '@types/tinycolor2@1.4.6': {}
 
@@ -9234,6 +9318,11 @@ snapshots:
   '@xmldom/xmldom@0.7.13': {}
 
   '@xmldom/xmldom@0.8.10': {}
+
+  '@zodios/core@10.9.6(axios@1.8.3)(zod@3.24.2)':
+    dependencies:
+      axios: 1.8.3
+      zod: 3.24.2
 
   '@zxcvbn-ts/core@3.0.4':
     dependencies:
@@ -9417,6 +9506,14 @@ snapshots:
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.1.0
+
+  axios@1.8.3:
+    dependencies:
+      follow-redirects: 1.15.9
+      form-data: 4.0.2
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
 
   babel-core@7.0.0-bridge.0(@babel/core@7.26.10):
     dependencies:
@@ -10763,6 +10860,8 @@ snapshots:
 
   flow-parser@0.265.3: {}
 
+  follow-redirects@1.15.9: {}
+
   fontfaceobserver@2.3.0: {}
 
   for-each@0.3.5:
@@ -10775,6 +10874,13 @@ snapshots:
       signal-exit: 4.1.0
 
   form-data@3.0.3:
+    dependencies:
+      asynckit: 0.4.0
+      combined-stream: 1.0.8
+      es-set-tostringtag: 2.1.0
+      mime-types: 2.1.35
+
+  form-data@4.0.2:
     dependencies:
       asynckit: 0.4.0
       combined-stream: 1.0.8
