@@ -2,6 +2,7 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupAction,
   SidebarGroupContent,
@@ -33,6 +34,7 @@ import {
   CollapsibleTrigger,
 } from "@cmt/ui/components/collapsible";
 import { Button } from "@cmt/ui/components/button";
+import { ModeToggle } from "@cmt/ui/components/theme";
 import {
   Tooltip,
   TooltipContent,
@@ -42,6 +44,7 @@ import { usePathname } from "next/navigation";
 import { queryClient } from "@/utils/api";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@cmt/api";
+import { cn } from "@cmt/ui/lib/utils";
 
 // Menu items.
 const items = [
@@ -52,30 +55,34 @@ const items = [
   },
   {
     title: "All Subscribers",
-    url: "#",
+    url: "/all-subscribers",
     icon: UsersIcon,
   },
   {
     title: "My Profile",
-    url: "#",
+    url: "/my-profile",
     icon: UserCircleIcon,
   },
 ];
 
 const batches = [
   {
+    id: "dhdkd9-dkdk-ff7f9d",
     title: "Janaury 2024",
     url: "#",
   },
   {
+    id: "ui23-d389fk9k-ff7f83d",
     title: "JP Nagar 2024",
     url: "#",
   },
   {
+    id: "ud23-d8009k-ff7f83d",
     title: "Raguvanahalli KSIT College and Staff",
     url: "#",
   },
   {
+    id: "ud289-d8009k-ff7f83d",
     title: "Native 2024",
     url: "#",
   },
@@ -91,7 +98,7 @@ export function AppSidebar() {
   return (
     <Sidebar className="pt-6">
       <SidebarContent>
-        <SidebarHeader className="px-4">
+        <SidebarHeader className="px-4 justify-between flex">
           <h1 className="text-xl font-semibold text-primary dark:text-foreground/70">
             Chit.Money
           </h1>
@@ -103,7 +110,7 @@ export function AppSidebar() {
             <SidebarMenu className="gap-2">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton isActive={"/" === item.url} asChild>
+                  <SidebarMenuButton isActive={pathname === item.url} asChild>
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
@@ -144,8 +151,15 @@ export function AppSidebar() {
                   {batches.map((batch, index) => (
                     <SidebarMenuItem key={index}>
                       <Collapsible className="group/collapsible">
-                        <SidebarMenuButton asChild>
-                          <Link href={"#"}>
+                        <SidebarMenuButton
+                          isActive={pathname.startsWith(`/batches/${batch.id}`)}
+                          asChild
+                          className={cn(
+                            pathname !== `/batches/${batch.id}` &&
+                              "data-[active=true]:bg-transparent data-[active=true]:[&_*]:text-primary"
+                          )}
+                        >
+                          <Link href={`/batches/${batch.id}`}>
                             <CollapsibleTrigger asChild>
                               <Button
                                 size={"icon"}
@@ -163,10 +177,12 @@ export function AppSidebar() {
                           <SidebarMenuSub>
                             <SidebarMenuSubItem>
                               <SidebarMenuSubButton
-                                // isActive={pathname === item.url}
+                                isActive={pathname.startsWith(
+                                  `/batches/${batch.id}/subscribers`
+                                )}
                                 asChild
                               >
-                                <Link href={"#"}>
+                                <Link href={`/batches/${batch.id}/subscribers`}>
                                   <UsersIcon />
                                   <span>Subscribers</span>
                                 </Link>
@@ -174,10 +190,12 @@ export function AppSidebar() {
                             </SidebarMenuSubItem>
                             <SidebarMenuSubItem>
                               <SidebarMenuSubButton
-                                // isActive={pathname === item.url}
+                                isActive={pathname.startsWith(
+                                  `/batches/${batch.id}/payments`
+                                )}
                                 asChild
                               >
-                                <Link href={"#"}>
+                                <Link href={`/batches/${batch.id}/payments`}>
                                   <ArrowDownLeftIcon />
                                   <span>Payments</span>
                                 </Link>
@@ -185,10 +203,12 @@ export function AppSidebar() {
                             </SidebarMenuSubItem>
                             <SidebarMenuSubItem>
                               <SidebarMenuSubButton
-                                // isActive={pathname === item.url}
+                                isActive={pathname.startsWith(
+                                  `/batches/${batch.id}/payouts`
+                                )}
                                 asChild
                               >
-                                <Link href={"#"}>
+                                <Link href={`/batches/${batch.id}/payouts`}>
                                   <ArrowUpRightIcon />
                                   <span>Payouts</span>
                                 </Link>
@@ -291,6 +311,11 @@ export function AppSidebar() {
           </Collapsible>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarGroupLabel className="justify-between">
+          Toggle Theme <ModeToggle />
+        </SidebarGroupLabel>
+      </SidebarFooter>
     </Sidebar>
   );
 }
