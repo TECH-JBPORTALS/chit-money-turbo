@@ -1,25 +1,70 @@
-# Chit.Money Turbo Repo
+### Chit.Money
 
-## TODO
+## Modernize Your Chit Fund Management
 
-- [ ] Create screens for onboarding subscriber app [mobile]
-- [ ] Persist the current step and state of onboarding [mobile]
-- [ ] Create Bottom Tabs for subscriber app [mobie]
+Streamline operations, build trust, and grow your chit fund business with our digital management platform designed specifically for collectors.
 
-## 19/03/2025
+## Quick Start
 
-- [x] Setup react-query for queries
-- [ ] Create Batch
-- [ ] Get Active batches
-- [ ] Get Completed batches
-- [ ] Get Home-Dashboard details
+1. **Install dependencies**
 
-## 20/03/2025
+   ```bash
+   pnpm install
+   ```
 
-- [ ] Empty state of All subscriber page
-- [ ] All subscribers listing page
-- [ ] All subscribers search functionality with searchParams
-- [ ] View subscriber details
-  - [ ] General section UI
-  - [ ] Subscribed batches section UI
-  - [ ] Credit score right section UI
+2. **Set up environment**
+   Copy `.env.example` to `.env` and add your keys.
+
+3. **Start development**
+
+   ```bash
+   # Web App
+   pnpm run dev --filter=web
+
+   # Collector Console App
+   pnpm run dev --filter=collector-console
+
+   # Mobile App (Subscriber App)
+   pnpm dev:mobile
+
+   # All apps
+   pnpm dev
+   ```
+
+## Project Structure
+
+```
+chit.money/
+├── apps/
+│   ├── collector-console/ # Collector console
+│   ├── mobile/            # Expo mobile app
+│   └── web/               # Next.js web app for main application
+├── packages/
+│   ├── api/                # Shared API
+│   ├── eslint-config/      # Shared ES Lint Configuration
+│   ├── typescript-config/  # Shared typescript Configuration
+│   └── ui/                 # Shared UI (Shadcn ui reusable components)
+```
+
+## Technologies
+
+- **Monorepo**: Turborepo with pnpm
+- **Web**: Next.js
+- **Mobile**: Expo/React Native
+- **Auth**: Clerk
+- **File Uploads**: Uploadthing
+
+## Environment Variables
+
+Required environment variables:
+
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `CLERK_SECRET_KEY`
+- `UPLOADTHING_TOKEN`
+- Clerk redirect URLs
+
+## Commands
+
+- `pnpm dev` - Start all apps
+- `pnpm build` - Build all apps
+- `pnpm lint` - Run linting
