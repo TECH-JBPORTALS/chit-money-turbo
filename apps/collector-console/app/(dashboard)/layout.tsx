@@ -4,7 +4,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider defaultOpen={true} className="px-4">
       <AppSidebar />
-      <main className="w-full py-8">{children}</main>
+      <main className="w-full h-svh py-8">{children}</main>
     </SidebarProvider>
   );
 }
