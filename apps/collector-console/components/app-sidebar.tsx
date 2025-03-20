@@ -96,8 +96,8 @@ export function AppSidebar() {
       api.getAllBatches({ collecter_id: "bea623d0-f365-11ef-b192-525418b1" }),
   });
   return (
-    <Sidebar className="pt-6">
-      <SidebarContent>
+    <Sidebar>
+      <SidebarContent className="pt-6">
         <SidebarHeader className="px-4 justify-between flex">
           <h1 className="text-xl font-semibold text-primary dark:text-foreground/70">
             Chit.Money
@@ -135,7 +135,7 @@ export function AppSidebar() {
                   <ChevronRightIcon />
                 </Button>
               </CollapsibleTrigger>
-              ACTIVE BATCHES{" "}
+              Active Batches
               <Tooltip>
                 <TooltipTrigger asChild>
                   <SidebarGroupAction className="size-6 ml-auto">
@@ -238,7 +238,7 @@ export function AppSidebar() {
                   <ChevronRight />
                 </Button>
               </CollapsibleTrigger>
-              COMPLETED BATCHES{" "}
+              Completed Batches
               <SidebarMenuBadge className="ml-auto px-4">3</SidebarMenuBadge>
             </SidebarGroupLabel>
             <CollapsibleContent className="pl-2" asChild>
