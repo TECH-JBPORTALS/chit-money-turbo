@@ -3,6 +3,7 @@ import { Input } from "@cmt/ui/components/input";
 import { PlusCircleIcon, SearchIcon } from "lucide-react";
 import { columns, Subscriber } from "./columns";
 import { Button } from "@cmt/ui/components/button";
+import AddSubscribersDialog from "@/components/dialogs/add-subscribers-dialog";
 
 const data: Subscriber[] = [
   {
@@ -43,10 +44,12 @@ export default function Page() {
             All subscribers for this batch
           </p>
         </div>
-        <Button>
-          <PlusCircleIcon />
-          Add Subscribers
-        </Button>
+        <AddSubscribersDialog>
+          <Button>
+            <PlusCircleIcon />
+            Add Subscribers
+          </Button>
+        </AddSubscribersDialog>
       </div>
 
       <div className="relative flex w-[600px] items-center">

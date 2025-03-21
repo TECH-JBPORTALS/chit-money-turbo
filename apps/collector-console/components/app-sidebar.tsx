@@ -45,6 +45,7 @@ import { queryClient } from "@/utils/api";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@cmt/api";
 import { cn } from "@cmt/ui/lib/utils";
+import CreateBatchDialog from "./dialogs/create-batch-dialog";
 
 // Menu items.
 const items = [
@@ -137,11 +138,13 @@ export function AppSidebar() {
               </CollapsibleTrigger>
               Active Batches
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <SidebarGroupAction className="size-6 ml-auto">
-                    <PlusIcon />
-                  </SidebarGroupAction>
-                </TooltipTrigger>
+                <CreateBatchDialog>
+                  <TooltipTrigger asChild>
+                    <SidebarGroupAction className="size-6 ml-auto">
+                      <PlusIcon />
+                    </SidebarGroupAction>
+                  </TooltipTrigger>
+                </CreateBatchDialog>
                 <TooltipContent side="right">Create New Batch</TooltipContent>
               </Tooltip>
             </SidebarGroupLabel>
