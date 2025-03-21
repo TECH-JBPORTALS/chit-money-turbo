@@ -1,6 +1,6 @@
 import EmptyState from "@/components/empty-state";
 import { columns, Subscriber } from "./columns";
-import { DataTable } from "./data-table";
+import { DataTable } from "../../../../components/data-table";
 import { Input } from "@cmt/ui/components/input";
 import { SearchIcon } from "lucide-react";
 

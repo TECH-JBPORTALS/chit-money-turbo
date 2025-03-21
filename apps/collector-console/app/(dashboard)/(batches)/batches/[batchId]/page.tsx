@@ -11,25 +11,63 @@ import {
 } from "@cmt/ui/components/card";
 import { Input } from "@cmt/ui/components/input";
 import { Progress } from "@cmt/ui/components/progress";
+import { Badge } from "@cmt/ui/components/badge";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@cmt/ui/components/tabs";
-import { BadgeCheckIcon, SearchIcon } from "lucide-react";
+import { BadgeCheckIcon, SearchIcon, SettingsIcon } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@cmt/ui/components/tooltip";
+import Link from "next/link";
 
 export default function Page() {
   return (
     <div className="flex flex-col gap-8">
       {/* Batch Title */}
-      <div>
-        <h2 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">
-          January 2024
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          All over details in this chit fund
-        </p>
+      <div className="inline-flex justify-between">
+        <div>
+          <h2 className="scroll-m-20 pb-2 text-3xl font-bold tracking-tight first:mt-0">
+            January 2024
+          </h2>
+          <div className="space-x-2">
+            <Badge
+              variant={"secondary"}
+              className=" font-semibold rounded-full"
+            >
+              ₹1,00,000
+            </Badge>
+
+            <Badge
+              variant={"secondary"}
+              className=" font-semibold rounded-full"
+            >
+              20 Months Fund
+            </Badge>
+            <Badge
+              variant={"secondary"}
+              className=" font-semibold rounded-full"
+            >
+              ₹ 5,000 / Month
+            </Badge>
+          </div>
+        </div>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button size={"icon"} asChild variant={"outline"}>
+              <Link href={"#"}>
+                <SettingsIcon />
+              </Link>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Batch Settings</TooltipContent>
+        </Tooltip>
       </div>
       {/* Overview stat cards  grid*/}
       <div className="grid lg:grid-cols-3 xl:grid-cols-4 gap-2">
@@ -65,7 +103,7 @@ export default function Page() {
         <Card className="@container/card">
           <CardHeader className="relative">
             <CardDescription>This Month Chit Holder</CardDescription>
-            <div className="inline-flex items-center">
+            <div className="inline-flex items-center gap-2">
               <Avatar className="border-3 border-card size-10">
                 <AvatarImage
                   src="https://github.com/shadcn.png"
