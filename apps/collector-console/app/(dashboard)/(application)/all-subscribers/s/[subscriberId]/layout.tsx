@@ -22,7 +22,7 @@ export default function Layout({
   return (
     <section className="w-full h-full flex">
       <ScrollArea className="flex-1">
-        <div className="flex flex-col  w-full gap-6 py-8 px-4 pb-20">
+        <div className="flex flex-col  w-full gap-6 py-8 pr-4 pb-20">
           {/* Subscriber Header*/}
           <div className="flex items-center gap-4">
             <Button className="rounded-full" variant={"outline"} size={"icon"}>

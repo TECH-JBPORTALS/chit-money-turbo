@@ -17,7 +17,7 @@ export default async function Page() {
   const data = await users.getUser(userId);
 
   return (
-    <div className="flex flex-col  py-8 px-4 gap-8">
+    <div className="flex flex-col  py-8 gap-8">
       {/* Chit Fund Title */}
       <div>
         <h2 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">

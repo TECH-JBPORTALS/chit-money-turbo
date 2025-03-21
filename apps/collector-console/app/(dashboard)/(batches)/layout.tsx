@@ -1,3 +1,3 @@
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <section className=" p-8">{children}</section>;
+  return <section className="py-8">{children}</section>;
 }
