@@ -30,7 +30,7 @@ const data: Subscriber[] = [
 
 export default function Page() {
   return (
-    <div className="flex flex-col gap-6 text-2xl h-full min-h-full">
+    <div className="flex flex-col px-4  py-8 gap-6 h-full min-h-full">
       {/* Chit Fund Title */}
       <div>
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">

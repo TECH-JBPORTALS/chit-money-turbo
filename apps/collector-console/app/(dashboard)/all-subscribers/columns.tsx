@@ -5,6 +5,7 @@ import { Button } from "@cmt/ui/components/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNowStrict } from "date-fns";
 import { MoreHorizontal } from "lucide-react";
+import Link from "next/link";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -29,7 +30,12 @@ export const columns: ColumnDef<Subscriber>[] = [
             <AvatarFallback>S</AvatarFallback>
           </Avatar>
           <div>
-            <span>{row.full_name}</span>
+            <Link
+              className="hover:underline"
+              href={`/all-subscribers/s/${row.id}`}
+            >
+              <span>{row.full_name}</span>
+            </Link>
             <p className="text-muted-foreground text-sm">{row.email}</p>
           </div>
         </div>
