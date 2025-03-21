@@ -2,15 +2,27 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Button } from "@cmt/ui/components/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@cmt/ui/components/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNowStrict } from "date-fns";
-import { MoreHorizontal } from "lucide-react";
+import {
+  ArrowUpRightIcon,
+  DeleteIcon,
+  MoreHorizontal,
+  PercentIcon,
+} from "lucide-react";
 import Link from "next/link";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Subscriber = {
   id: string;
+  chit_id: string;
   full_name: string;
   commision_rate: string;
   email: string;
@@ -18,6 +30,17 @@ export type Subscriber = {
 };
 
 export const columns: ColumnDef<Subscriber>[] = [
+  {
+    accessorKey: "chit_id",
+    header: "Chit ID",
+    cell(props) {
+      return (
+        <div className="text-sm text-muted-foreground">
+          {props.row.original.chit_id}
+        </div>
+      );
+    },
+  },
   {
     accessorKey: "id",
     header: "Subscriber",
@@ -77,9 +100,26 @@ export const columns: ColumnDef<Subscriber>[] = [
     cell(props) {
       return (
         <div className="text-right px-4">
-          <Button size={"icon"} variant={"ghost"}>
-            <MoreHorizontal />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size={"icon"} variant={"ghost"}>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>
+                <ArrowUpRightIcon /> Payment History
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <PercentIcon />
+                Edit Commision
+              </DropdownMenuItem>
+              <DropdownMenuItem variant="destructive">
+                <DeleteIcon />
+                Remove
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       );
     },

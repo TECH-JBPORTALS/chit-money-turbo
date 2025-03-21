@@ -7,6 +7,7 @@ import { Button } from "@cmt/ui/components/button";
 const data: Subscriber[] = [
   {
     id: "1",
+    chit_id: "#738392J",
     email: "jhon@gmail.com",
     full_name: "Jhon Abraham",
     commision_rate: "2%",
@@ -14,6 +15,7 @@ const data: Subscriber[] = [
   },
   {
     id: "1",
+    chit_id: "#738392J",
     email: "jhon@gmail.com",
     full_name: "Jhon Abraham",
     commision_rate: "2%",
@@ -21,6 +23,7 @@ const data: Subscriber[] = [
   },
   {
     id: "1",
+    chit_id: "#738392J",
     email: "jhon@gmail.com",
     full_name: "Jhon Abraham",
     commision_rate: "2%",
