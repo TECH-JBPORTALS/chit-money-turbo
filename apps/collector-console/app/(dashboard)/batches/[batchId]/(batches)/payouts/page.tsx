@@ -13,7 +13,7 @@ const data: Payout[] = [
     status: "Disbursed",
     payout_month: "1. March 2024",
     full_name: "Hunaid",
-    joined_on: new Date(2024, 3, 1),
+    joined_on: new Date(2025, 3, 10),
   },
   {
     id: "hellowiiddkejkeje",
@@ -33,7 +33,7 @@ const data: Payout[] = [
     status: "Approved",
     payout_month: "1. March 2024",
     full_name: "Hunaid",
-    joined_on: new Date(2024, 3, 1),
+    joined_on: new Date(2025, 2, 1),
   },
   {
     id: "hellowiiddkejkeje",

@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@cmt/ui/components/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
-import { formatDistanceToNowStrict } from "date-fns";
+import { format, formatDistanceToNowStrict } from "date-fns";
 import {
   MoreHorizontal,
   PercentIcon,
@@ -61,7 +61,7 @@ export const columns: ColumnDef<Payout>[] = [
   },
   {
     accessorKey: "payout_month",
-    header: "Payout Amount",
+    header: "Payout Month",
     cell(props) {
       return (
         <div className="font-bold">₹{props.row.original.payout_month}</div>
@@ -70,20 +70,31 @@ export const columns: ColumnDef<Payout>[] = [
   },
   {
     accessorKey: "amount",
-    header: "Subscription Amount",
+    header: () => <div className="text-right">Payout Amount</div>,
     cell(props) {
-      return <div className="font-bold">₹{props.row.original.amount}</div>;
+      return (
+        <div className="font-bold text-right">₹{props.row.original.amount}</div>
+      );
     },
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: () => <div className="text-right">Status</div>,
     cell(props) {
       const row = props.row.original;
 
-      if (row.status === "Disbursed") return <Badge>Disbursed</Badge>;
+      if (row.status === "Disbursed")
+        return (
+          <div className="text-right">
+            <Badge>Disbursed</Badge>
+          </div>
+        );
       else if (row.status === "Approved")
-        return <Badge variant={"secondary"}>Approved</Badge>;
+        return (
+          <div className="text-right">
+            <Badge variant={"secondary"}>Approved</Badge>
+          </div>
+        );
     },
   },
   {
@@ -95,9 +106,7 @@ export const columns: ColumnDef<Payout>[] = [
       return (
         <div className="text-right">
           <time className="text-sm text-muted-foreground">
-            {formatDistanceToNowStrict(props.row.original.joined_on, {
-              addSuffix: true,
-            })}
+            {format(props.row.original.joined_on, "dd MMM, yyyy")}
           </time>
         </div>
       );
