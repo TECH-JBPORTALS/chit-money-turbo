@@ -1,5 +1,7 @@
 "use client";
 
+import EditCommisionsDialog from "@/components/dialogs/edit-commission-dialog";
+import PaymentHistoryDialog from "@/components/dialogs/payment-history-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Badge } from "@cmt/ui/components/badge";
 import { Button } from "@cmt/ui/components/button";
@@ -118,13 +120,17 @@ export const columns: ColumnDef<Payment>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <ArrowUpRightIcon /> Payment History
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <PercentIcon />
-                Edit Commision
-              </DropdownMenuItem>
+              <PaymentHistoryDialog>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <ArrowUpRightIcon /> Payment History
+                </DropdownMenuItem>
+              </PaymentHistoryDialog>
+              <EditCommisionsDialog>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <PercentIcon />
+                  Edit Commision
+                </DropdownMenuItem>
+              </EditCommisionsDialog>
               <DropdownMenuItem variant="destructive">
                 <DeleteIcon />
                 Remove

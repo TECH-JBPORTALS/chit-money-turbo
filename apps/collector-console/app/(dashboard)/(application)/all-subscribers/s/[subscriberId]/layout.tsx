@@ -11,6 +11,7 @@ import { ArrowLeftIcon, Circle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@cmt/ui/components/tabs";
 import { ScrollArea, ScrollBar } from "@cmt/ui/components/scroll-area";
 import Link from "next/link";
+import PaymentCard from "@/components/payment-card";
 
 export default function Layout({
   children,
@@ -106,16 +107,7 @@ export default function Layout({
           {Array.from({ length: 20 })
             .fill(0)
             .map((_, i) => (
-              <Card key={i} className="flex-row px-3 py-4 justify-between">
-                <CardHeader className="w-full p-0">
-                  <CardTitle>JNANA 2024</CardTitle>
-                  <CardDescription>24 Jun, 2024</CardDescription>
-                </CardHeader>
-                <CardFooter className="w-full flex flex-col items-end text-right p-0">
-                  <p className="text-right">₹3,000</p>
-                  <span className="text-primary text-right">+5</span>
-                </CardFooter>
-              </Card>
+              <PaymentCard key={i} />
             ))}
         </aside>
       </ScrollArea>
