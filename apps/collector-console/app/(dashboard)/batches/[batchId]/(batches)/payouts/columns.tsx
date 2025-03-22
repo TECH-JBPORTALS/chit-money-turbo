@@ -2,6 +2,7 @@
 
 import EditCommisionsDialog from "@/components/dialogs/edit-commission-dialog";
 import PaymentHistoryDialog from "@/components/dialogs/payment-history-dialog";
+import { ViewPayoutDialog } from "@/components/dialogs/view-payout-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Badge } from "@cmt/ui/components/badge";
 import { Button } from "@cmt/ui/components/button";
@@ -122,11 +123,11 @@ export const columns: ColumnDef<Payout>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <PaymentHistoryDialog>
+              <ViewPayoutDialog>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                   <ScrollTextIcon /> View Details
                 </DropdownMenuItem>
-              </PaymentHistoryDialog>
+              </ViewPayoutDialog>
 
               {props.row.original.status === "Approved" && (
                 <EditCommisionsDialog>
