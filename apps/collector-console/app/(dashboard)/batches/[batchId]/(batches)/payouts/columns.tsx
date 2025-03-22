@@ -63,9 +63,7 @@ export const columns: ColumnDef<Payout>[] = [
     accessorKey: "payout_month",
     header: "Payout Month",
     cell(props) {
-      return (
-        <div className="font-bold">₹{props.row.original.payout_month}</div>
-      );
+      return <div className="font-bold">{props.row.original.payout_month}</div>;
     },
   },
   {

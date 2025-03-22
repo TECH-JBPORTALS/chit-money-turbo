@@ -1,8 +1,9 @@
 import SearchInput from "@/components/search-input";
 import { Button } from "@cmt/ui/components/button";
-import { BellIcon, PlusCircleIcon } from "lucide-react";
+import { PlusCircleIcon } from "lucide-react";
 import { columns, Payout } from "./columns";
 import { DataTable } from "@/components/data-table";
+import { PayoutRequestsButton } from "@/components/payout-requests-popover";
 
 const data: Payout[] = [
   {
@@ -85,9 +86,7 @@ export default function Page() {
             <PlusCircleIcon />
             Add Payout
           </Button>
-          <Button size={"icon"} className="size-9.5" variant={"outline"}>
-            <BellIcon />
-          </Button>
+          <PayoutRequestsButton />
         </div>
       </div>
 
