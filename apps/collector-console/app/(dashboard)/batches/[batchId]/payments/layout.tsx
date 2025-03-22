@@ -4,8 +4,8 @@ import { ScrollArea } from "@cmt/ui/components/scroll-area";
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <section className="w-full flex h-full">
-      <ScrollArea className="flex-1 ">
-        <div className="flex-1 pr-4 py-8">{children}</div>
+      <ScrollArea className="flex-1">
+        <div className="flex-1 pl-1 pr-4 py-8">{children}</div>
       </ScrollArea>
       <ScrollArea className="h-full w-[250px] max-h-svh border-l">
         <aside className=" w-full flex flex-col gap-4 py-8">

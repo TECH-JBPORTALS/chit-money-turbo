@@ -45,7 +45,7 @@ export default function Page() {
         </p>
       </div>
 
-      <div className="relative flex w-[600px] items-center">
+      <div className="relative flex w-[600px] overflow-x-visible  items-center">
         <SearchIcon className="absolute ml-2.5 mr-2.5 size-4 text-muted-foreground" />
         <Input placeholder="Search..." className="h-10 ps-8" />
       </div>

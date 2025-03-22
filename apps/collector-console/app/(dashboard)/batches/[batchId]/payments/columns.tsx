@@ -71,30 +71,19 @@ export const columns: ColumnDef<Payment>[] = [
   },
   {
     accessorKey: "status",
-    header(props) {
-      return <div className="text-center">Status</div>;
-    },
+    header: "Status",
     cell(props) {
       const row = props.row.original;
 
-      if (row.status === "Paid")
-        return (
-          <div className="text-center font-bold">
-            <Badge>Paid</Badge>
-          </div>
-        );
+      if (row.status === "Paid") return <Badge>Paid</Badge>;
       else if (row.status === "Not Paid")
-        return (
-          <div className="text-center font-bold">
-            <Badge variant={"outline"}>Not Paid</Badge>
-          </div>
-        );
+        return <Badge variant={"outline"}>Not Paid</Badge>;
     },
   },
   {
     accessorKey: "joined_on",
     header(props) {
-      return <div className="text-right">Joined On</div>;
+      return <div className="text-right font-bold">Joined On</div>;
     },
     cell(props) {
       return (
