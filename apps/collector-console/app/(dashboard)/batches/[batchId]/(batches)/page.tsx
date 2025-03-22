@@ -18,13 +18,20 @@ import {
   TabsList,
   TabsTrigger,
 } from "@cmt/ui/components/tabs";
-import { BadgeCheckIcon, SearchIcon, SettingsIcon } from "lucide-react";
+import {
+  ArrowUpRightIcon,
+  BadgeCheckIcon,
+  PlusIcon,
+  SearchIcon,
+  SettingsIcon,
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@cmt/ui/components/tooltip";
 import Link from "next/link";
+import { ScrollArea } from "@cmt/ui/components/scroll-area";
 
 export default function Page() {
   return (
@@ -161,9 +168,9 @@ export default function Page() {
       </div>
 
       {/* Quick Action Cards*/}
-      <div className="flex gap-2 w-full h-[620px]">
-        <Card className="@container/card w-full">
-          <CardHeader className="relative">
+      <div className="flex gap-2 w-full">
+        <Card className="h-[680px] max-h-h-[680px] min-h-h-[680px] overflow-hidden w-full gap-2">
+          <CardHeader>
             <CardTitle className=" text-lg font-semibold tabular-nums">
               {"This Month's Payments"}
             </CardTitle>
@@ -172,40 +179,89 @@ export default function Page() {
               <Input placeholder="Search..." className="h-10 ps-8" />
             </div>
           </CardHeader>
-          <CardContent className="h-full">
-            <div className="h-full flex items-center justify-center">
-              <EmptyState
-                title="No Payments"
-                description="Any payouts has been done in this month can be seen here"
-              />
-            </div>
+          <CardContent className="h-full max-h-full pb-16">
+            <ScrollArea className="h-full pr-4 ">
+              {Array.from({ length: 20 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2">
+                    <Avatar className="border-3 border-card size-10">
+                      <AvatarImage
+                        src="https://github.com/shadcn.png"
+                        alt="@shadcn"
+                      />
+                      <AvatarFallback>CN</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <b>Jhon Snow</b>
+                      <p className="text-sm text-muted-foreground">#738392J</p>
+                    </div>
+                  </div>
+                  <div>
+                    <Badge variant={"secondary"}>₹ 5,000</Badge>
+                  </div>
+                  <div>
+                    <Button variant={"secondary"}>
+                      <PlusIcon /> Collect
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </ScrollArea>
           </CardContent>
         </Card>
 
-        <Card className="@container/card w-full h-[620px]">
+        <Card className="w-full h-[680px] max-h-h-[680px] min-h-h-[680px] overflow-hidden gap-2">
           <Tabs defaultValue="payouts" className="w-full h-full">
-            <CardHeader className="relative">
+            <CardHeader>
               <TabsList className="w-full">
                 <TabsTrigger value="payouts">Payouts</TabsTrigger>
                 <TabsTrigger value="requests">Requests</TabsTrigger>
               </TabsList>
             </CardHeader>
-            <TabsContent value="payouts" className="h-full">
-              <div className="h-full flex items-center justify-center">
-                <EmptyState
-                  title="No Payouts"
-                  description="Any payouts has been done that can be seen here"
-                />
-              </div>
-            </TabsContent>
-            <TabsContent value="requests" className="h-full">
-              <div className="h-full flex items-center justify-center">
-                <EmptyState
-                  title="No Requests"
-                  description="Any request for payouts can be seen here"
-                />
-              </div>
-            </TabsContent>
+            <CardContent className="h-full max-h-full">
+              <TabsContent value="payouts" className="h-full">
+                <ScrollArea className="h-full pr-4 pb-8">
+                  {Array.from({ length: 20 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between py-2"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Avatar className="border-3 border-card size-10">
+                          <AvatarImage
+                            src="https://github.com/shadcn.png"
+                            alt="@shadcn"
+                          />
+                          <AvatarFallback>CN</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <b>Jhon Snow</b>
+                          <p className="text-sm text-muted-foreground">
+                            #738392J
+                          </p>
+                        </div>
+                      </div>
+                      <div>
+                        <Badge variant={"secondary"}>1. Jan 2024</Badge>
+                      </div>
+                      <div>
+                        <Button variant={"secondary"}>
+                          <ArrowUpRightIcon /> Payout
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </ScrollArea>
+              </TabsContent>
+              <TabsContent value="requests" className="h-full">
+                <div className="h-full flex items-center justify-center">
+                  <EmptyState
+                    title="No Requests"
+                    description="Any request for payouts can be seen here"
+                  />
+                </div>
+              </TabsContent>
+            </CardContent>
           </Tabs>
         </Card>
       </div>
