@@ -1,7 +1,6 @@
 import { DataTable } from "@/components/data-table";
-import { Input } from "@cmt/ui/components/input";
-import { SearchIcon } from "lucide-react";
 import { columns, Payment } from "./columns";
+import SearchInput from "@/components/search-input";
 
 const data: Payment[] = [
   {
@@ -45,10 +44,7 @@ export default function Page() {
         </p>
       </div>
 
-      <div className="relative flex w-[600px] overflow-x-visible  items-center">
-        <SearchIcon className="absolute ml-2.5 mr-2.5 size-4 text-muted-foreground" />
-        <Input placeholder="Search..." className="h-10 ps-8" />
-      </div>
+      <SearchInput placeholder="Search..." className="w-[600px]" />
       <DataTable columns={columns} data={data} />
     </div>
   );

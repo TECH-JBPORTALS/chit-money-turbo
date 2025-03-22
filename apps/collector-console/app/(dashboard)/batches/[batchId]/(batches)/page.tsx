@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@cmt/ui/components/card";
-import { Input } from "@cmt/ui/components/input";
 import { Progress } from "@cmt/ui/components/progress";
 import { Badge } from "@cmt/ui/components/badge";
 import {
@@ -22,7 +21,6 @@ import {
   ArrowUpRightIcon,
   BadgeCheckIcon,
   PlusIcon,
-  SearchIcon,
   SettingsIcon,
 } from "lucide-react";
 import {
@@ -32,6 +30,7 @@ import {
 } from "@cmt/ui/components/tooltip";
 import Link from "next/link";
 import { ScrollArea } from "@cmt/ui/components/scroll-area";
+import SearchInput from "@/components/search-input";
 
 export default function Page() {
   return (
@@ -174,10 +173,7 @@ export default function Page() {
             <CardTitle className=" text-lg font-semibold tabular-nums">
               {"This Month's Payments"}
             </CardTitle>
-            <div className="relative flex w-full items-center">
-              <SearchIcon className="absolute ml-2.5 mr-2.5 size-4 text-muted-foreground" />
-              <Input placeholder="Search..." className="h-10 ps-8" />
-            </div>
+            <SearchInput placeholder="Search..." className="w-full" />
           </CardHeader>
           <CardContent className="h-full max-h-full pb-16">
             <ScrollArea className="h-full pr-4 ">

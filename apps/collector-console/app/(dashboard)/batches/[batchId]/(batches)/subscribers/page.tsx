@@ -1,9 +1,9 @@
 import { DataTable } from "@/components/data-table";
-import { Input } from "@cmt/ui/components/input";
-import { PlusCircleIcon, SearchIcon } from "lucide-react";
+import { PlusCircleIcon } from "lucide-react";
 import { columns, Subscriber } from "./columns";
 import { Button } from "@cmt/ui/components/button";
 import AddSubscribersDialog from "@/components/dialogs/add-subscribers-dialog";
+import SearchInput from "@/components/search-input";
 
 const data: Subscriber[] = [
   {
@@ -52,10 +52,7 @@ export default function Page() {
         </AddSubscribersDialog>
       </div>
 
-      <div className="relative flex w-[600px] items-center">
-        <SearchIcon className="absolute ml-2.5 mr-2.5 size-4 text-muted-foreground" />
-        <Input placeholder="Search..." className="h-10 ps-8" />
-      </div>
+      <SearchInput placeholder="Search..." className="w-[600px]" />
       <DataTable columns={columns} data={data} />
     </div>
   );
