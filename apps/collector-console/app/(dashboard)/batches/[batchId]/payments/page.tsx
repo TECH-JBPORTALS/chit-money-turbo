@@ -44,7 +44,7 @@ export default function Page() {
         </p>
       </div>
 
-      <SearchInput placeholder="Search..." className="w-[600px]" />
+      <SearchInput placeholder="Search..." className="ml-0.5 w-[600px]" />
       <DataTable columns={columns} data={data} />
     </div>
   );
