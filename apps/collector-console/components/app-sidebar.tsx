@@ -1,4 +1,3 @@
-"use client";
 import {
   Sidebar,
   SidebarContent,
@@ -10,16 +9,9 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
-  SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "@cmt/ui/components/sidebar";
 import {
-  ArrowDownLeftIcon,
-  ArrowUpRightIcon,
-  BookIcon,
   ChevronRight,
   ChevronRightIcon,
   HomeIcon,
@@ -27,7 +19,6 @@ import {
   UserCircleIcon,
   UsersIcon,
 } from "lucide-react";
-import Link from "next/link";
 import {
   Collapsible,
   CollapsibleContent,
@@ -40,13 +31,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@cmt/ui/components/tooltip";
-import { usePathname, useRouter } from "next/navigation";
-import { queryClient } from "@/utils/api";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@cmt/api";
-import { cn } from "@cmt/ui/lib/utils";
 import CreateBatchDialog from "./dialogs/create-batch-dialog";
-import { ScrollArea } from "@cmt/ui/components/scroll-area";
+import {
+  AppSidebarMenuButtonWithNextLink,
+  AppSidebarMenuButtonWithSubMenu,
+} from "./app-sidebar-menu-button";
 
 // Menu items.
 const items = [
@@ -91,13 +80,6 @@ const batches = [
 ];
 
 export function AppSidebar() {
-  const pathname = usePathname();
-  const { data, isLoading } = useQuery({
-    queryKey: ["batches"],
-    queryFn: () =>
-      api.getAllBatches({ collecter_id: "bea623d0-f365-11ef-b192-525418b1" }),
-  });
-  const router = useRouter();
   return (
     <Sidebar>
       <SidebarContent className="pt-6">
@@ -113,12 +95,10 @@ export function AppSidebar() {
             <SidebarMenu className="gap-2">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton isActive={pathname === item.url} asChild>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
+                  <AppSidebarMenuButtonWithNextLink href={item.url}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </AppSidebarMenuButtonWithNextLink>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -153,85 +133,11 @@ export function AppSidebar() {
             <CollapsibleContent className="pl-2" asChild>
               <SidebarContent>
                 <SidebarMenu>
-                  {batches.map((batch, index) => (
-                    <SidebarMenuItem key={index}>
-                      <Collapsible className="group/collapsible">
-                        <div className="flex items-center relative overflow-hidden">
-                          {/* Collapsible trigger outside of the navigation area */}
-                          <CollapsibleTrigger asChild>
-                            <Button
-                              size={"icon"}
-                              variant={"ghost"}
-                              className="w-4 data-[state=open]:[&_svg]:rotate-90 absolute left-0 z-10"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <ChevronRightIcon className="size-4" />
-                            </Button>
-                          </CollapsibleTrigger>
-
-                          {/* Navigation element with padding to make room for the trigger */}
-                          <SidebarMenuButton
-                            asChild
-                            isActive={pathname.startsWith(
-                              `/batches/${batch.id}`
-                            )}
-                            className={cn(
-                              "pl-6 w-full", // Add padding for the chevron
-                              pathname !== `/batches/${batch.id}` &&
-                                "data-[active=true]:bg-transparent data-[active=true]:[&_*]:text-primary"
-                            )}
-                          >
-                            <Link href={`/batches/${batch.id}`}>
-                              <BookIcon />
-                              <span>{batch.title}</span>
-                            </Link>
-                          </SidebarMenuButton>
-                        </div>
-                        <CollapsibleContent asChild>
-                          <SidebarMenuSub className="mx-1.5">
-                            <SidebarMenuSubItem>
-                              <SidebarMenuSubButton
-                                isActive={pathname.startsWith(
-                                  `/batches/${batch.id}/subscribers`
-                                )}
-                                asChild
-                              >
-                                <Link href={`/batches/${batch.id}/subscribers`}>
-                                  <UsersIcon />
-                                  <span>Subscribers</span>
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                            <SidebarMenuSubItem>
-                              <SidebarMenuSubButton
-                                isActive={pathname.startsWith(
-                                  `/batches/${batch.id}/payments`
-                                )}
-                                asChild
-                              >
-                                <Link href={`/batches/${batch.id}/payments`}>
-                                  <ArrowDownLeftIcon />
-                                  <span>Payments</span>
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                            <SidebarMenuSubItem>
-                              <SidebarMenuSubButton
-                                isActive={pathname.startsWith(
-                                  `/batches/${batch.id}/payouts`
-                                )}
-                                asChild
-                              >
-                                <Link href={`/batches/${batch.id}/payouts`}>
-                                  <ArrowUpRightIcon />
-                                  <span>Payouts</span>
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          </SidebarMenuSub>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    </SidebarMenuItem>
+                  {batches.map((batch) => (
+                    <AppSidebarMenuButtonWithSubMenu
+                      {...batch}
+                      key={batch.id}
+                    />
                   ))}
                 </SidebarMenu>
               </SidebarContent>
@@ -259,65 +165,10 @@ export function AppSidebar() {
               <SidebarContent>
                 <SidebarMenu>
                   {batches.map((batch, index) => (
-                    <SidebarMenuItem key={index}>
-                      <Collapsible className="group/collapsible">
-                        <SidebarMenuButton
-                          // isActive={pathname === item.url}
-                          asChild
-                        >
-                          <Link href={"#"}>
-                            <CollapsibleTrigger asChild>
-                              <Button
-                                size={"icon"}
-                                variant={"ghost"}
-                                className="w-fit data-[state=open]:[&_svg]:rotate-90"
-                              >
-                                <ChevronRightIcon className="size-4" />
-                              </Button>
-                            </CollapsibleTrigger>
-                            <BookIcon />
-                            <span>{batch.title}</span>
-                          </Link>
-                        </SidebarMenuButton>
-                        <CollapsibleContent asChild>
-                          <SidebarMenuSub>
-                            <SidebarMenuSubItem>
-                              <SidebarMenuSubButton
-                                // isActive={pathname === item.url}
-                                asChild
-                              >
-                                <Link href={"#"}>
-                                  <UsersIcon />
-                                  <span>Subscribers</span>
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                            <SidebarMenuSubItem>
-                              <SidebarMenuSubButton
-                                // isActive={pathname === item.url}
-                                asChild
-                              >
-                                <Link href={"#"}>
-                                  <ArrowDownLeftIcon />
-                                  <span>Payments</span>
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                            <SidebarMenuSubItem>
-                              <SidebarMenuSubButton
-                                // isActive={pathname === item.url}
-                                asChild
-                              >
-                                <Link href={"#"}>
-                                  <ArrowUpRightIcon />
-                                  <span>Payouts</span>
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          </SidebarMenuSub>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    </SidebarMenuItem>
+                    <AppSidebarMenuButtonWithSubMenu
+                      {...batch}
+                      key={batch.id}
+                    />
                   ))}
                 </SidebarMenu>
               </SidebarContent>
