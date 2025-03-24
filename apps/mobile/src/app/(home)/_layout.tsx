@@ -60,7 +60,7 @@ export default function Layout() {
               type={focused ? "bold-duotone" : "line-duotone"}
               size={size}
               color={color}
-              name="RoundTransferDiagonal"
+              name="RoundTransferHorizontal"
             />
           ),
         }}

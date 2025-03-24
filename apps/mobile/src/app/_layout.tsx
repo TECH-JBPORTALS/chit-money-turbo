@@ -26,6 +26,7 @@ import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
 import useIsomorphicLayoutEffect from "use-isomorphic-layout-effect";
 import { StatusBar } from "expo-status-bar";
+import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -56,15 +57,22 @@ function Outlet() {
     Urbanist_800ExtraBold,
     Urbanist_900Black,
   });
-  const { isDarkColorScheme } = useColorScheme();
+  const { isDarkColorScheme, colorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
   const { isSignedIn, isLoaded } = useUser();
   const segments = useSegments();
   const router = useRouter();
+  const hasMounted = React.useRef(false);
 
   useIsomorphicLayoutEffect(() => {
-    if (isLoaded) setIsColorSchemeLoaded(true);
-  }, [isSignedIn, isLoaded]);
+    if (hasMounted.current) {
+      return;
+    }
+
+    setAndroidNavigationBar(colorScheme);
+    setIsColorSchemeLoaded(true);
+    hasMounted.current = true;
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
