@@ -13,7 +13,7 @@ export default function Page() {
 
   return (
     <View className="px-5 py-6 items-center gap-6">
-      <Image
+      {/* <Image
         source={{ uri: user?.imageUrl }}
         style={{ width: 64, height: 64, borderRadius: 9999 }}
       />
@@ -29,7 +29,7 @@ export default function Page() {
         isLoading={isSigningOut}
       >
         <Text>Sign Out</Text>
-      </Button>
+      </Button> */}
     </View>
   );
 }
