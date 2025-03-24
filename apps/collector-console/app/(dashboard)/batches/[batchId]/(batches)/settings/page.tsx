@@ -122,12 +122,12 @@ export default function Page() {
       <Separator />
 
       <section className="p-6 flex flex-col gap-4 bg-linear-30 from-primary/5 to-primary/10 rounded-lg border-primary border ">
-        <div className="font-semibold text-primary text-accent-foreground text-lg">
+        <div className="font-semibold text-primary text-lg">
           Complete the batch
         </div>
         <p className="text-sm text-muted-foreground">
           {`By completing this batch you agree that the batch details will be
-          archived and read only. You can’t mark batch as completed until all
+          archived and read only. You can't mark batch as completed until all
           the transaction are settled.`}
         </p>
         <Button variant={"secondary"} className="w-fit">
