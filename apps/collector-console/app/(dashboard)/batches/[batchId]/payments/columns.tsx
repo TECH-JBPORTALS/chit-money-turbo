@@ -3,6 +3,7 @@
 import { AddPaymentDialog } from "@/components/dialogs/add-payemnt-dialog";
 import EditCommisionsDialog from "@/components/dialogs/edit-commission-dialog";
 import PaymentHistoryDialog from "@/components/dialogs/payment-history-dialog";
+import { ViewPaymentDialog } from "@/components/dialogs/view-payment-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Badge } from "@cmt/ui/components/badge";
 import { Button } from "@cmt/ui/components/button";
@@ -20,6 +21,7 @@ import {
   MoreHorizontal,
   PercentIcon,
   PlusIcon,
+  ScrollTextIcon,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -120,17 +122,11 @@ export const columns: ColumnDef<Payment>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <PaymentHistoryDialog>
+              <ViewPaymentDialog>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  <ArrowUpRightIcon /> Payment History
+                  <ScrollTextIcon /> View Details
                 </DropdownMenuItem>
-              </PaymentHistoryDialog>
-              <EditCommisionsDialog>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  <PercentIcon />
-                  Edit Commision
-                </DropdownMenuItem>
-              </EditCommisionsDialog>
+              </ViewPaymentDialog>
               <DropdownMenuItem variant="destructive">
                 <DeleteIcon />
                 Remove
