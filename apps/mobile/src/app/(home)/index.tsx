@@ -79,7 +79,7 @@ export default function Page() {
                     <CardTitle className="text-lg">January 2024</CardTitle>
                     <CardDescription>Due on 15th Jan</CardDescription>
                   </View>
-                  <View className="gap-2">
+                  <View className="gap-3">
                     <CardTitle className="text-xl text-right">
                       ₹ 5,000
                     </CardTitle>
