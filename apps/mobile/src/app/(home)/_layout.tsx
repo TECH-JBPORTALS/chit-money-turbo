@@ -18,13 +18,13 @@ export default function Layout() {
           fontFamily: "Urbanist_500Medium",
         },
         tabBarPosition: "bottom",
+        headerShown: false,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
-          headerTitle: "Hey, Welcome",
           tabBarIcon: ({ color, focused, size }) => (
             <SolarIcon
               name="HomeSmile"
