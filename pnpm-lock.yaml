@@ -172,6 +172,9 @@ importers:
       '@react-navigation/native':
         specifier: ^7.0.15
         version: 7.0.15(react-native@0.76.7(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)
+      '@rn-primitives/avatar':
+        specifier: ^1.1.0
+        version: 1.1.0(react-native@0.76.7(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)
       '@rn-primitives/label':
         specifier: ^1.1.0
         version: 1.1.0(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react-native@0.76.7(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)
@@ -2358,6 +2361,30 @@ packages:
 
   '@react-navigation/routers@7.2.0':
     resolution: {integrity: sha512-lMyib39H4a//u+eiyt162U6TwCfI8zJbjl9ovjKtDddQ4/Vf7b8/OhyimnJH09N2CBfm4pv0gCV6Q0WnZcfaJg==}
+
+  '@rn-primitives/avatar@1.1.0':
+    resolution: {integrity: sha512-GqhsQHeY7OP9oe3MZkl1Z0IbhIiuQX4+FxafoRK/Aes2m5386nMGK0NBaZBJy06WnFQBN52C8yq+LYv27sA86A==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+      react-native-web: '*'
+    peerDependenciesMeta:
+      react-native:
+        optional: true
+      react-native-web:
+        optional: true
+
+  '@rn-primitives/hooks@1.1.0':
+    resolution: {integrity: sha512-+WP4i395UDXZueL6PE0PiyLgheD4EbZ0ONgVaHjbrWjGKalfXuCyVNeaN79y3Aw9sY+SYQm7P9RckBAgi0C5xQ==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+      react-native-web: '*'
+    peerDependenciesMeta:
+      react-native:
+        optional: true
+      react-native-web:
+        optional: true
 
   '@rn-primitives/label@1.1.0':
     resolution: {integrity: sha512-wNxXu45wzE12M0LYPR6g2DYVZsD4zf9EiXecP46pJfC8XEhUPhcgzAE8oa1xfEUU+P8O29ZIWoK/CPtAodFBfw==}
@@ -9312,6 +9339,22 @@ snapshots:
   '@react-navigation/routers@7.2.0':
     dependencies:
       nanoid: 3.3.8
+
+  '@rn-primitives/avatar@1.1.0(react-native@0.76.7(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@rn-primitives/hooks': 1.1.0(react-native@0.76.7(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)
+      '@rn-primitives/slot': 1.1.0(react-native@0.76.7(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)
+      '@rn-primitives/types': 1.1.0(react-native@0.76.7(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)
+      react: 18.3.1
+    optionalDependencies:
+      react-native: 0.76.7(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(@types/react@18.3.18)(react@18.3.1)
+
+  '@rn-primitives/hooks@1.1.0(react-native@0.76.7(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@rn-primitives/types': 1.1.0(react-native@0.76.7(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)
+      react: 18.3.1
+    optionalDependencies:
+      react-native: 0.76.7(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(@types/react@18.3.18)(react@18.3.1)
 
   '@rn-primitives/label@1.1.0(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react-native@0.76.7(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)':
     dependencies:
