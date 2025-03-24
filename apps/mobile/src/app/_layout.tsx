@@ -56,7 +56,6 @@ function Outlet() {
     Urbanist_800ExtraBold,
     Urbanist_900Black,
   });
-  const hasMounted = React.useRef(false);
   const { isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
   const { isSignedIn, isLoaded } = useUser();
@@ -64,32 +63,8 @@ function Outlet() {
   const router = useRouter();
 
   useIsomorphicLayoutEffect(() => {
-    setIsColorSchemeLoaded(true);
-    hasMounted.current = true;
-  }, []);
-
-  // useEffect(() => {
-  //   (async () => {
-  //     const theme = await AsyncStorage.getItem("theme");
-
-  //     if (!theme) {
-  //       setAndroidNavigationBar(colorScheme);
-  //       AsyncStorage.setItem("theme", colorScheme);
-  //       setIsColorSchemeLoaded(true);
-  //       return;
-  //     }
-  //     const colorTheme = theme === "dark" ? "dark" : "light";
-  //     setAndroidNavigationBar(colorTheme);
-
-  //     if (colorTheme !== colorScheme) {
-  //       setColorScheme(colorTheme);
-  //       setIsColorSchemeLoaded(true);
-  //       return;
-  //     }
-
-  //     setIsColorSchemeLoaded(true);
-  //   })();
-  // }, [isSignedIn, isLoaded, isColorSchemeLoaded]);
+    if (isLoaded) setIsColorSchemeLoaded(true);
+  }, [isSignedIn, isLoaded]);
 
   useFocusEffect(
     useCallback(() => {
