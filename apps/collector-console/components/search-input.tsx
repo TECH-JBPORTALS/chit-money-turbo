@@ -9,7 +9,7 @@ export default function SearchInput({
   return (
     <div className="relative flex w-auto overflow-x-visible  items-center">
       <SearchIcon className="absolute ml-2.5 mr-2.5 size-4 text-muted-foreground" />
-      <Input className={cn("h-10 ps-8", className)} {...props} />
+      <Input className={cn("ps-8", className)} {...props} />
     </div>
   );
 }
