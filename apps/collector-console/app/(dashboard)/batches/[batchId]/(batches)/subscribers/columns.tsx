@@ -53,10 +53,7 @@ export const columns: ColumnDef<Subscriber>[] = [
             <AvatarFallback>S</AvatarFallback>
           </Avatar>
           <div>
-            <Link
-              className="hover:underline"
-              href={`/all-subscribers/s/${row.id}`}
-            >
+            <Link className="hover:underline" href={`/s/${row.id}`}>
               <span>{row.full_name}</span>
             </Link>
             <p className="text-muted-foreground text-sm">{row.email}</p>

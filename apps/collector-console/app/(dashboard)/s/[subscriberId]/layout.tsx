@@ -5,6 +5,7 @@ import { ScrollArea, ScrollBar } from "@cmt/ui/components/scroll-area";
 import Link from "next/link";
 import PaymentCard from "@/components/payment-card";
 import BackButton from "@/components/back-button";
+import { NavTabs } from "./nav-tabs";
 
 export default function Layout({
   children,
@@ -35,22 +36,7 @@ export default function Layout({
           </div>
 
           {/** TODO: Tabs */}
-          <Tabs value="general" className="w-[400px]">
-            <TabsList className="grid grid-cols-2">
-              <TabsTrigger asChild value="general">
-                <Link href={`/all-subscribers/s/${params.subscriberId}`}>
-                  General
-                </Link>
-              </TabsTrigger>
-              <TabsTrigger value="subscribed">
-                <Link
-                  href={`/all-subscribers/s/${params.subscriberId}/subscribed-batches`}
-                >
-                  Subscribed Batches
-                </Link>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <NavTabs />
           {children}
         </div>
         <ScrollBar orientation="vertical" />
