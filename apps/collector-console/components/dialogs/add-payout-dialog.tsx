@@ -5,6 +5,7 @@ import { Badge } from "@cmt/ui/components/badge";
 import { Button } from "@cmt/ui/components/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -15,7 +16,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -34,6 +34,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Steps, useSteps } from "react-step-builder";
 import { z } from "zod";
+import SearchInput from "../search-input";
+import { ScrollArea } from "@cmt/ui/components/scroll-area";
 
 const payoutDetailsForm = z.object({
   amount: z.number().min(1, "Amount must be greater than 0"),
@@ -47,7 +49,7 @@ function PayoutDetailsForm(
     resolver: zodResolver(payoutDetailsForm),
     defaultValues: props.state,
   });
-  const { prev, next } = useSteps();
+  const { next } = useSteps();
 
   async function onSubmit(values: z.infer<typeof payoutDetailsForm>) {
     props.setState(values);
@@ -88,14 +90,11 @@ function PayoutDetailsForm(
           )}
         />
         <DialogFooter>
-          <Button
-            type="button"
-            onClick={() => prev()}
-            size={"lg"}
-            variant={"outline"}
-          >
-            Cancel
-          </Button>
+          <DialogClose asChild>
+            <Button type="button" size={"lg"} variant={"outline"}>
+              Cancel
+            </Button>
+          </DialogClose>
           <Button type="submit" size={"lg"}>
             Create
           </Button>
@@ -261,6 +260,46 @@ export function AddPayoutDialog({ children }: { children: React.ReactNode }) {
             amount={globalState.amount}
           />
         </Steps>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function SelectPayoutPersonDialog({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="gap-3">
+        <DialogHeader>
+          <DialogTitle>Select Subscriber</DialogTitle>
+          <DialogDescription>
+            All subscribers eligible for <b>3. Mar 2024</b> payout
+          </DialogDescription>
+          <SearchInput placeholder="Search..." className="w-full" />
+        </DialogHeader>
+        <ScrollArea className="flex-1 flex flex-col px-4 max-h-[450px] h-[450px]">
+          {Array.from({ length: 9 }).map((_, i) => (
+            <div className="inline-flex py-2  w-full mt-2 items-center justify-between">
+              <div className="inline-flex gap-2">
+                <Avatar className="size-10 border-2">
+                  <AvatarImage src="https://github.com/linear.png" />
+                  <AvatarFallback>N</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-bold text-sm">Ada Shelby</p>
+                  <p className="text-sm text-muted-foreground">#CHIT002</p>
+                </div>
+              </div>
+              <AddPayoutDialog>
+                <Button variant={"secondary"}>Make Payout</Button>
+              </AddPayoutDialog>
+            </div>
+          ))}
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

@@ -4,6 +4,7 @@ import { PlusCircleIcon } from "lucide-react";
 import { columns, Payout } from "./columns";
 import { DataTable } from "@/components/data-table";
 import { PayoutRequestsButton } from "@/components/payout-requests-popover";
+import { SelectPayoutPersonDialog } from "@/components/dialogs/add-payout-dialog";
 
 const data: Payout[] = [
   {
@@ -82,10 +83,12 @@ export default function Page() {
         </div>
 
         <div className="space-x-2">
-          <Button>
-            <PlusCircleIcon />
-            Add Payout
-          </Button>
+          <SelectPayoutPersonDialog>
+            <Button>
+              <PlusCircleIcon />
+              Add Payout
+            </Button>
+          </SelectPayoutPersonDialog>
           <PayoutRequestsButton />
         </div>
       </div>
