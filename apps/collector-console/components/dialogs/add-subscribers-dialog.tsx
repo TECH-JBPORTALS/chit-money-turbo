@@ -2,6 +2,7 @@
 import { Button } from "@cmt/ui/components/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -59,9 +60,8 @@ export default function AddSubscribersDialog({
                 <FormItem>
                   <FormControl>
                     <Textarea
-                      rows={6}
                       placeholder="Search by emails, subscriber ID’s, names to create chits fot that subscriber with default commission rate of (2%)"
-                      className="resize-none"
+                      className="resize-none min-h-32"
                       {...field}
                     />
                   </FormControl>
@@ -74,9 +74,11 @@ export default function AddSubscribersDialog({
               )}
             />
             <DialogFooter>
-              <Button size={"lg"} variant={"outline"}>
-                Cancel
-              </Button>
+              <DialogClose asChild>
+                <Button size={"lg"} variant={"outline"}>
+                  Cancel
+                </Button>
+              </DialogClose>
               <Button size={"lg"}>Create</Button>
             </DialogFooter>
           </form>
