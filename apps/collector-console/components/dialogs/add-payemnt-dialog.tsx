@@ -38,21 +38,22 @@ import SearchInput from "../search-input";
 import { ScrollArea } from "@cmt/ui/components/scroll-area";
 import { Separator } from "@cmt/ui/components/separator";
 
-const payoutDetailsForm = z.object({
-  amount: z.number().min(1, "Amount must be greater than 0"),
-  payout_date: z.string().nonempty("Required"),
+const paymentDetailsForm = z.object({
+  subscription_amount: z.number().min(1, "Amount must be greater than 0"),
+  penalty_charges: z.number().min(0, "No negative value accepted"),
+  payment_date: z.string().nonempty("Required"),
 });
 
-function PayoutDetailsForm(
-  props: StepProps<z.infer<typeof payoutDetailsForm>>
+function PaymentDetailsForm(
+  props: StepProps<z.infer<typeof paymentDetailsForm>>
 ) {
-  const form = useForm<z.infer<typeof payoutDetailsForm>>({
-    resolver: zodResolver(payoutDetailsForm),
+  const form = useForm<z.infer<typeof paymentDetailsForm>>({
+    resolver: zodResolver(paymentDetailsForm),
     defaultValues: props.state,
   });
   const { next } = useSteps();
 
-  async function onSubmit(values: z.infer<typeof payoutDetailsForm>) {
+  async function onSubmit(values: z.infer<typeof paymentDetailsForm>) {
     props.setState(values);
     next();
   }
@@ -62,10 +63,10 @@ function PayoutDetailsForm(
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
-          name="amount"
+          name="subscription_amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Payout Amount</FormLabel>
+              <FormLabel>Subscription Amount</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -79,10 +80,27 @@ function PayoutDetailsForm(
         />
         <FormField
           control={form.control}
-          name="payout_date"
+          name="penalty_charges"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Payout Date</FormLabel>
+              <FormLabel>Penalty Charges</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value))}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="payment_date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Payment Date</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -105,24 +123,26 @@ function PayoutDetailsForm(
   );
 }
 
-const payoutSummaryForm = z.object({
+const paymentSummaryForm = z.object({
   method: z.enum(["Cash", "UPI", "Cheque"]),
   transaction_id: z.string().nonempty("Required"),
 });
 
-function PayoutSummaryForm(
-  props: StepProps<z.infer<typeof payoutSummaryForm>> & { amount: number }
+function PaymentSummaryForm(
+  props: StepProps<z.infer<typeof paymentSummaryForm>> & {
+    subscription_amount: number;
+    penalty_charges: number;
+  }
 ) {
-  const form = useForm<z.infer<typeof payoutSummaryForm>>({
-    resolver: zodResolver(payoutSummaryForm),
+  const form = useForm<z.infer<typeof paymentSummaryForm>>({
+    resolver: zodResolver(paymentSummaryForm),
     defaultValues: props.state,
   });
 
   const { prev } = useSteps();
-  const commisonAmount = Math.floor((2 / 100) * props.amount);
-  const totalAmountPayable = props.amount - commisonAmount;
+  const totalAmountPayable = props.subscription_amount + props.penalty_charges;
 
-  async function onSubmit(values: z.infer<typeof payoutSummaryForm>) {
+  async function onSubmit(values: z.infer<typeof paymentSummaryForm>) {
     console.log(values);
   }
 
@@ -135,11 +155,11 @@ function PayoutSummaryForm(
           <div className="px-3 rounded-lg bg-muted/15 space-y-2 py-5">
             <div className="inline-flex justify-between w-full">
               <small className="text-muted-foreground text-sm">
-                Payout Amount
+                Subscription Amount
               </small>
 
               <p className="text-sm text-right">
-                {props.amount.toLocaleString("en-IN", {
+                {props.subscription_amount.toLocaleString("en-IN", {
                   currencyDisplay: "symbol",
                   style: "currency",
                   currency: "INR",
@@ -148,12 +168,11 @@ function PayoutSummaryForm(
             </div>
             <div className="inline-flex justify-between w-full">
               <small className="text-muted-foreground text-sm">
-                Your Commision (2%)
+                Penalty Charges
               </small>
 
-              <p className="text-sm text-right  text-destructive">
-                -{" "}
-                {commisonAmount.toLocaleString("en-IN", {
+              <p className="text-sm text-right">
+                {props.penalty_charges.toLocaleString("en-IN", {
                   currencyDisplay: "symbol",
                   style: "currency",
                   currency: "INR",
@@ -163,7 +182,7 @@ function PayoutSummaryForm(
             <Separator />
             <div className="inline-flex justify-between w-full">
               <small className="text-muted-foreground text-sm">
-                Total amount to be payout
+                Total amount to be payment
               </small>
 
               <p className="text-sm text-right">
@@ -227,11 +246,17 @@ function PayoutSummaryForm(
   );
 }
 
-export function AddPayoutDialog({ children }: { children: React.ReactNode }) {
+export function AddPaymentDialog({ children }: { children: React.ReactNode }) {
   const { current: currentStep, total } = useSteps();
   const [globalState, setGlobalState] = useState<
-    z.infer<typeof payoutDetailsForm & typeof payoutSummaryForm>
-  >({ amount: 40000, method: "Cash", payout_date: "", transaction_id: "" });
+    z.infer<typeof paymentDetailsForm & typeof paymentSummaryForm>
+  >({
+    subscription_amount: 40000,
+    penalty_charges: 0,
+    method: "Cash",
+    payment_date: "",
+    transaction_id: "",
+  });
 
   return (
     <Dialog>
@@ -248,7 +273,7 @@ export function AddPayoutDialog({ children }: { children: React.ReactNode }) {
             <Badge variant={"secondary"} className="border-primary">
               3. Mar 2004
             </Badge>
-            Payout
+            Payment
           </span>
           <div className="flex gap-2 w-full py-8">
             {Array.from({ length: total })
@@ -265,18 +290,19 @@ export function AddPayoutDialog({ children }: { children: React.ReactNode }) {
           </div>
         </DialogHeader>
         <Steps>
-          <PayoutDetailsForm
+          <PaymentDetailsForm
             state={globalState}
             setState={(state) =>
               setGlobalState((prev) => ({ ...prev, ...state }))
             }
           />
-          <PayoutSummaryForm
+          <PaymentSummaryForm
             state={globalState}
             setState={(state) =>
               setGlobalState((prev) => ({ ...prev, ...state }))
             }
-            amount={globalState.amount}
+            subscription_amount={globalState.subscription_amount}
+            penalty_charges={globalState.penalty_charges}
           />
         </Steps>
       </DialogContent>
@@ -284,7 +310,7 @@ export function AddPayoutDialog({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function SelectPayoutPersonDialog({
+export function SelectPaymentPersonDialog({
   children,
 }: {
   children: React.ReactNode;
@@ -296,7 +322,7 @@ export function SelectPayoutPersonDialog({
         <DialogHeader>
           <DialogTitle>Select Subscriber</DialogTitle>
           <DialogDescription>
-            All subscribers eligible for <b>3. Mar 2024</b> payout
+            All subscribers eligible for <b>3. Mar 2024</b> payment
           </DialogDescription>
           <SearchInput placeholder="Search..." className="w-full" />
         </DialogHeader>
@@ -313,9 +339,9 @@ export function SelectPayoutPersonDialog({
                   <p className="text-sm text-muted-foreground">#CHIT002</p>
                 </div>
               </div>
-              <AddPayoutDialog>
-                <Button variant={"secondary"}>Make Payout</Button>
-              </AddPayoutDialog>
+              <AddPaymentDialog>
+                <Button variant={"secondary"}>Make Payment</Button>
+              </AddPaymentDialog>
             </div>
           ))}
         </ScrollArea>

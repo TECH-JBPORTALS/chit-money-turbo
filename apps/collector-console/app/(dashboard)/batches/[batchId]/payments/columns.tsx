@@ -1,5 +1,6 @@
 "use client";
 
+import { AddPaymentDialog } from "@/components/dialogs/add-payemnt-dialog";
 import EditCommisionsDialog from "@/components/dialogs/edit-commission-dialog";
 import PaymentHistoryDialog from "@/components/dialogs/payment-history-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
@@ -18,6 +19,7 @@ import {
   DeleteIcon,
   MoreHorizontal,
   PercentIcon,
+  PlusIcon,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -30,7 +32,7 @@ export type Payment = {
   subscription_amount: string;
   status: "Paid" | "Not Paid";
   email: string;
-  joined_on: Date;
+  paid_on: Date;
 };
 
 export const columns: ColumnDef<Payment>[] = [
@@ -71,28 +73,40 @@ export const columns: ColumnDef<Payment>[] = [
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: () => <div className="text-center">Status</div>,
     cell(props) {
       const row = props.row.original;
 
-      if (row.status === "Paid") return <Badge>Paid</Badge>;
-      else if (row.status === "Not Paid")
-        return <Badge variant={"outline"}>Not Paid</Badge>;
+      return (
+        <div className="text-center">
+          {row.status == "Paid" ? (
+            <Badge>Paid</Badge>
+          ) : (
+            <Badge variant={"outline"}>Not Paid</Badge>
+          )}
+        </div>
+      );
     },
   },
   {
-    accessorKey: "joined_on",
-    header(props) {
-      return <div className="text-right font-bold">Joined On</div>;
-    },
+    id: "key",
     cell(props) {
+      const original = props.row.original;
       return (
         <div className="text-right">
-          <time className="text-sm text-muted-foreground">
-            {formatDistanceToNowStrict(props.row.original.joined_on, {
-              addSuffix: true,
-            })}
-          </time>
+          {original.status === "Not Paid" ? (
+            <AddPaymentDialog>
+              <Button variant={"secondary"}>
+                <PlusIcon /> Collect
+              </Button>
+            </AddPaymentDialog>
+          ) : (
+            <time className="text-sm text-muted-foreground">
+              {formatDistanceToNowStrict(props.row.original.paid_on, {
+                addSuffix: true,
+              })}
+            </time>
+          )}
         </div>
       );
     },

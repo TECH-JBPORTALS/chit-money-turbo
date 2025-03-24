@@ -10,7 +10,7 @@ const data: Payment[] = [
     full_name: "Jhon Abraham",
     subscription_amount: "3000",
     status: "Paid",
-    joined_on: new Date(2024, 2, 12),
+    paid_on: new Date(2024, 2, 12),
   },
   {
     id: "1",
@@ -19,7 +19,7 @@ const data: Payment[] = [
     full_name: "Jhon Abraham",
     subscription_amount: "2000",
     status: "Not Paid",
-    joined_on: new Date(2024, 2, 12),
+    paid_on: new Date(2024, 2, 12),
   },
   {
     id: "1",
@@ -28,7 +28,7 @@ const data: Payment[] = [
     full_name: "Jhon Abraham",
     subscription_amount: "4000",
     status: "Paid",
-    joined_on: new Date(2024, 2, 12),
+    paid_on: new Date(2024, 2, 12),
   },
 ];
 

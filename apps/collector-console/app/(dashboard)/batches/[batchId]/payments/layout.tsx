@@ -21,14 +21,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               className="rounded-s-none bg-accent border-l-2 border-l-primary w-full justify-start"
               variant={"ghost"}
             >
-              Jan 2024
+              1. Jan 2024
             </Button>
-            <Button
-              className="rounded-s-none justify-start w-full"
-              variant={"ghost"}
-            >
-              Feb 2024
-            </Button>
+            {Array.from({ length: 10 }).map((_, i) => (
+              <Button
+                className="rounded-s-none justify-start w-full"
+                variant={"ghost"}
+              >
+                {i + 1} Feb 2024
+              </Button>
+            ))}
           </div>
         </aside>
       </ScrollArea>
