@@ -200,7 +200,7 @@ function PayoutSummaryForm(
             type="button"
             variant={"outline"}
           >
-            Cancel
+            Back
           </Button>
           <Button size={"lg"}>Complete</Button>
         </DialogFooter>
