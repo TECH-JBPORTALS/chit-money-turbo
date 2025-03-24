@@ -62,37 +62,48 @@ function Outlet() {
   const { isSignedIn, isLoaded } = useUser();
   const segments = useSegments();
   const router = useRouter();
-  const hasMounted = React.useRef(false);
 
-  useIsomorphicLayoutEffect(() => {
-    if (hasMounted.current) {
-      return;
-    }
+  useEffect(() => {
+    (async () => {
+      // const theme = await AsyncStorage.getItem("theme");
 
-    setAndroidNavigationBar(colorScheme);
-    setIsColorSchemeLoaded(true);
-    hasMounted.current = true;
-  }, []);
+      // if (!theme) {
+      //   setAndroidNavigationBar(colorScheme);
+      // AsyncStorage.setItem("theme", colorScheme);
+      //   setIsColorSchemeLoaded(true);
+      //   return;
+      // }
+      // const colorTheme = theme === "dark" ? "dark" : "light";
+      setAndroidNavigationBar(colorScheme);
+
+      if (colorScheme) {
+        // if (colorTheme !== colorScheme) {
+        // setColorScheme(colorTheme);
+        setIsColorSchemeLoaded(true);
+        return;
+      }
+
+      setIsColorSchemeLoaded(true);
+    })();
+  }, [isSignedIn, isLoaded, isColorSchemeLoaded]);
 
   useFocusEffect(
     useCallback(() => {
-      if (isLoaded && fontsLoaded) {
+      if (isLoaded) {
         const isAuthSegment = segments["0"] === "(auth)";
-        const isHomeSegment = segments["0"] === "(home)";
+        // const isHomeSegment = segments["0"] === "(home)";
 
         if (isSignedIn && isAuthSegment) {
           router.replace("/(home)");
-        } else if (!isSignedIn && isHomeSegment) {
+        } else if (!isSignedIn) {
           router.replace("/(auth)");
         }
-        if (isColorSchemeLoaded) {
+        if (isColorSchemeLoaded && fontsLoaded) {
           SplashScreen.hideAsync();
         }
       }
-    }, [isLoaded, fontsLoaded, isSignedIn, isColorSchemeLoaded])
+    }, [isLoaded, isSignedIn, isColorSchemeLoaded, fontsLoaded])
   );
-
-  if (!fontsLoaded || error) return null;
 
   return (
     <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
