@@ -40,7 +40,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@cmt/ui/components/tooltip";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { queryClient } from "@/utils/api";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@cmt/api";
@@ -96,6 +96,7 @@ export function AppSidebar() {
     queryFn: () =>
       api.getAllBatches({ collecter_id: "bea623d0-f365-11ef-b192-525418b1" }),
   });
+  const router = useRouter();
   return (
     <Sidebar>
       <SidebarContent className="pt-6">
@@ -154,30 +155,39 @@ export function AppSidebar() {
                   {batches.map((batch, index) => (
                     <SidebarMenuItem key={index}>
                       <Collapsible className="group/collapsible">
-                        <SidebarMenuButton
-                          isActive={pathname.startsWith(`/batches/${batch.id}`)}
-                          asChild
-                          className={cn(
-                            pathname !== `/batches/${batch.id}` &&
-                              "data-[active=true]:bg-transparent data-[active=true]:[&_*]:text-primary"
-                          )}
-                        >
-                          <Link href={`/batches/${batch.id}`}>
-                            <CollapsibleTrigger asChild>
-                              <Button
-                                size={"icon"}
-                                variant={"ghost"}
-                                className="w-fit data-[state=open]:[&_svg]:rotate-90"
-                              >
-                                <ChevronRightIcon className="size-4" />
-                              </Button>
-                            </CollapsibleTrigger>
-                            <BookIcon />
-                            <span>{batch.title}</span>
-                          </Link>
-                        </SidebarMenuButton>
+                        <div className="flex items-center relative overflow-hidden">
+                          {/* Collapsible trigger outside of the navigation area */}
+                          <CollapsibleTrigger asChild>
+                            <Button
+                              size={"icon"}
+                              variant={"ghost"}
+                              className="w-4 data-[state=open]:[&_svg]:rotate-90 absolute left-0 z-10"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ChevronRightIcon className="size-4" />
+                            </Button>
+                          </CollapsibleTrigger>
+
+                          {/* Navigation element with padding to make room for the trigger */}
+                          <SidebarMenuButton
+                            asChild
+                            isActive={pathname.startsWith(
+                              `/batches/${batch.id}`
+                            )}
+                            className={cn(
+                              "pl-6 w-full", // Add padding for the chevron
+                              pathname !== `/batches/${batch.id}` &&
+                                "data-[active=true]:bg-transparent data-[active=true]:[&_*]:text-primary"
+                            )}
+                          >
+                            <Link href={`/batches/${batch.id}`}>
+                              <BookIcon />
+                              <span>{batch.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </div>
                         <CollapsibleContent asChild>
-                          <SidebarMenuSub>
+                          <SidebarMenuSub className="mx-1.5">
                             <SidebarMenuSubItem>
                               <SidebarMenuSubButton
                                 isActive={pathname.startsWith(
