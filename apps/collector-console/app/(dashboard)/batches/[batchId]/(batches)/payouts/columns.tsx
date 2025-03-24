@@ -1,7 +1,5 @@
 "use client";
-
-import EditCommisionsDialog from "@/components/dialogs/edit-commission-dialog";
-import PaymentHistoryDialog from "@/components/dialogs/payment-history-dialog";
+import { AddPayoutDialog } from "@/components/dialogs/add-payout-dialog";
 import { ViewPayoutDialog } from "@/components/dialogs/view-payout-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Badge } from "@cmt/ui/components/badge";
@@ -13,8 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "@cmt/ui/components/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
-import { format, formatDistanceToNowStrict } from "date-fns";
+import { format } from "date-fns";
 import {
+  ArrowUpRightIcon,
   MoreHorizontal,
   PercentIcon,
   ScrollTextIcon,
@@ -130,12 +129,12 @@ export const columns: ColumnDef<Payout>[] = [
               </ViewPayoutDialog>
 
               {props.row.original.status === "Approved" && (
-                <EditCommisionsDialog>
+                <AddPayoutDialog>
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <PercentIcon />
+                    <ArrowUpRightIcon />
                     Make Payout
                   </DropdownMenuItem>
-                </EditCommisionsDialog>
+                </AddPayoutDialog>
               )}
 
               <DropdownMenuItem variant="destructive">

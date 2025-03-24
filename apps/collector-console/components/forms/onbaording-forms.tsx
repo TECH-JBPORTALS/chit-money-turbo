@@ -22,7 +22,7 @@ import {
   FormMessage,
 } from "@cmt/ui/components/form";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
-import { StepProps, StepWithPrevProps } from "@/types/step-form";
+import { StepProps } from "@/types/step-form";
 import {
   bankInfoSchema,
   contactInfoSchema,
@@ -31,11 +31,11 @@ import {
   personalInfoSchema,
 } from "@/lib/validators";
 import Uploader from "../uploader";
+import { useSteps } from "react-step-builder";
 
 export function PersonalInfoForm({
   setState,
   state,
-  next,
 }: StepProps<z.infer<typeof personalInfoSchema>>) {
   const form = useForm<z.infer<typeof personalInfoSchema>>({
     resolver: zodResolver(personalInfoSchema),
@@ -45,6 +45,7 @@ export function PersonalInfoForm({
       last_name: state?.last_name ?? "",
     },
   });
+  const { next } = useSteps();
 
   const onSubmit = async (values: z.infer<typeof personalInfoSchema>) => {
     await setState(values);
@@ -113,11 +114,9 @@ export function PersonalInfoForm({
 }
 
 export function ContactInfoForm({
-  next,
-  prev,
   setState,
   state,
-}: StepWithPrevProps<z.infer<typeof contactInfoSchema>>) {
+}: StepProps<z.infer<typeof contactInfoSchema>>) {
   const form = useForm<z.infer<typeof contactInfoSchema>>({
     resolver: zodResolver(contactInfoSchema),
     defaultValues: {
@@ -128,6 +127,7 @@ export function ContactInfoForm({
       contact_state: state?.contact_state ?? "",
     },
   });
+  const { next, prev } = useSteps();
 
   const onSubmit = async (values: z.infer<typeof contactInfoSchema>) => {
     await setState(values);
@@ -236,11 +236,9 @@ export function ContactInfoForm({
 }
 
 export function OrgInfoForm({
-  next,
-  prev,
   setState,
   state,
-}: StepWithPrevProps<z.infer<typeof orgInfoSchema>>) {
+}: StepProps<z.infer<typeof orgInfoSchema>>) {
   const form = useForm<z.infer<typeof orgInfoSchema>>({
     resolver: zodResolver(orgInfoSchema),
     defaultValues: {
@@ -251,6 +249,7 @@ export function OrgInfoForm({
       company_state: state?.company_state ?? "",
     },
   });
+  const { next, prev } = useSteps();
 
   const onSubmit = async (values: z.infer<typeof orgInfoSchema>) => {
     await setState(values);
@@ -360,11 +359,9 @@ export function OrgInfoForm({
 }
 
 export function BankInfoForm({
-  next,
-  prev,
   setState,
   state,
-}: StepWithPrevProps<z.infer<typeof bankInfoSchema>>) {
+}: StepProps<z.infer<typeof bankInfoSchema>>) {
   const form = useForm<z.infer<typeof bankInfoSchema>>({
     resolver: zodResolver(bankInfoSchema),
     defaultValues: {
@@ -378,6 +375,7 @@ export function BankInfoForm({
       ifsc_code: state?.ifsc_code ?? "",
     },
   });
+  const { next, prev } = useSteps();
 
   const onSubmit = async (values: z.infer<typeof bankInfoSchema>) => {
     await setState(values);
@@ -528,11 +526,9 @@ export function BankInfoForm({
 }
 
 export function DocumentsForm({
-  next,
-  prev,
   setState,
   state,
-}: StepWithPrevProps<z.infer<typeof documentsSchema>>) {
+}: StepProps<z.infer<typeof documentsSchema>>) {
   const form = useForm<z.infer<typeof documentsSchema>>({
     resolver: zodResolver(documentsSchema),
     defaultValues: {
@@ -541,6 +537,7 @@ export function DocumentsForm({
       registeration_certificate_url: state?.registeration_certificate_url ?? "",
     },
   });
+  const { next, prev } = useSteps();
 
   const onSubmit = async (values: z.infer<typeof documentsSchema>) => {
     await setState(values);
