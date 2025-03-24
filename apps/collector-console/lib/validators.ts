@@ -67,3 +67,10 @@ const documentKeys = Object.keys(documentsSchema.shape) as [
 ];
 
 export const DocumentKeysEnum = z.enum(documentKeys);
+
+export const batchSchema = z.object({
+  name: z.string().nonempty("Required"),
+  number_of_months: z.number().min(1, "Required"),
+  start_month: z.string().nonempty("Required"),
+  due_date: z.string().nonempty("Required"),
+});

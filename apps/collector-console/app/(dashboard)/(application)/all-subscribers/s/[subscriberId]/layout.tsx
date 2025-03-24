@@ -1,17 +1,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
-import { Button } from "@cmt/ui/components/button";
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@cmt/ui/components/card";
-import { ArrowLeftIcon, Circle } from "lucide-react";
+import { Circle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@cmt/ui/components/tabs";
 import { ScrollArea, ScrollBar } from "@cmt/ui/components/scroll-area";
 import Link from "next/link";
 import PaymentCard from "@/components/payment-card";
+import BackButton from "@/components/back-button";
 
 export default function Layout({
   children,
@@ -26,9 +19,7 @@ export default function Layout({
         <div className="flex flex-col  w-full gap-6 py-8 pr-4 pb-20">
           {/* Subscriber Header*/}
           <div className="flex items-center gap-4">
-            <Button className="rounded-full" variant={"outline"} size={"icon"}>
-              <ArrowLeftIcon />
-            </Button>
+            <BackButton />
             <Avatar className="size-12 border border-border">
               <AvatarImage src="https://github.com/shadcn.png" />
               <AvatarFallback>S</AvatarFallback>

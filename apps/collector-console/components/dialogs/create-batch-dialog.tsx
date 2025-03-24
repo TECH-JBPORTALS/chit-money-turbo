@@ -23,21 +23,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@cmt/ui/components/input";
 import { Button } from "@cmt/ui/components/button";
-
-const createBatchSchema = z.object({
-  name: z.string().nonempty("Required"),
-  number_of_months: z.number().min(1, "Required"),
-  start_month: z.string().nonempty("Required"),
-  due_date: z.string().nonempty("Required"),
-});
+import { batchSchema } from "@/lib/validators";
 
 export default function CreateBatchDialog({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const form = useForm<z.infer<typeof createBatchSchema>>({
-    resolver: zodResolver(createBatchSchema),
+  const form = useForm<z.infer<typeof batchSchema>>({
+    resolver: zodResolver(batchSchema),
     defaultValues: {
       name: "",
       number_of_months: 1,
@@ -46,7 +40,7 @@ export default function CreateBatchDialog({
     },
   });
 
-  async function onSubmit(values: z.infer<typeof createBatchSchema>) {
+  async function onSubmit(values: z.infer<typeof batchSchema>) {
     console.log(values);
   }
   return (
