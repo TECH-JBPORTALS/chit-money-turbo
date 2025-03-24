@@ -46,6 +46,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@cmt/api";
 import { cn } from "@cmt/ui/lib/utils";
 import CreateBatchDialog from "./dialogs/create-batch-dialog";
+import { ScrollArea } from "@cmt/ui/components/scroll-area";
 
 // Menu items.
 const items = [
