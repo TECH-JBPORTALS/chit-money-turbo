@@ -182,7 +182,7 @@ export default function Batches() {
           </Button>
         </View>
 
-        {/** Upcoming Payments */}
+        {/** Batches List */}
         <View className="gap-2">
           {data.map((batch, i) => (
             <Card key={i}>
@@ -228,7 +228,7 @@ export default function Batches() {
               </CardContent>
               <CardHeader className="pt-0">
                 <View className="gap-2">
-                  <CardTitle className="text-xl">{batch.name}</CardTitle>
+                  <CardTitle className="text-base">{batch.name}</CardTitle>
                   <View className="flex-row gap-2">
                     <Badge variant={"secondary"}>
                       <Text>
