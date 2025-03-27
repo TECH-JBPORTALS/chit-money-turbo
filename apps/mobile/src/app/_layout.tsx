@@ -24,7 +24,6 @@ import {
 import React, { useCallback, useEffect } from "react";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
-import useIsomorphicLayoutEffect from "use-isomorphic-layout-effect";
 import { StatusBar } from "expo-status-bar";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 
@@ -104,6 +103,8 @@ function Outlet() {
       }
     }, [isLoaded, isSignedIn, isColorSchemeLoaded, fontsLoaded])
   );
+
+  if (error) console.log("font error", error);
 
   return (
     <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
