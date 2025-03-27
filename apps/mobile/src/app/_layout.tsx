@@ -20,13 +20,14 @@ import {
   ThemeProvider,
   DefaultTheme,
   DarkTheme,
+  NavigationContainer,
 } from "@react-navigation/native";
 import React, { useCallback, useEffect } from "react";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
-import useIsomorphicLayoutEffect from "use-isomorphic-layout-effect";
 import { StatusBar } from "expo-status-bar";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
+import { View } from "react-native";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -37,12 +38,39 @@ const DARK_THEME: Theme = {
   colors: NAV_THEME.dark,
 };
 
+export const unstable_settings = {
+  initialRouteName: "(home)",
+};
+
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from "expo-router";
 
 SplashScreen.preventAutoHideAsync();
+
+function ThemeWrapper({ children }: { children: React.ReactNode }) {
+  const { isDarkColorScheme } = useColorScheme();
+
+  return (
+    <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: isDarkColorScheme
+            ? NAV_THEME.dark.background
+            : NAV_THEME.light.background,
+        }}
+      >
+        <StatusBar
+          style={isDarkColorScheme ? "light" : "dark"}
+          backgroundColor="transparent"
+        />
+        {children}
+      </View>
+    </ThemeProvider>
+  );
+}
 
 //Setting things app before loading the app
 function Outlet() {
@@ -105,14 +133,12 @@ function Outlet() {
     }, [isLoaded, isSignedIn, isColorSchemeLoaded, fontsLoaded])
   );
 
+  if (error) console.log("font error", error);
+
   return (
-    <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-      <StatusBar
-        style={isDarkColorScheme ? "light" : "dark"}
-        backgroundColor="transparent"
-      />
+    <ThemeWrapper>
       <Slot />
-    </ThemeProvider>
+    </ThemeWrapper>
   );
 }
 

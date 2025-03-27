@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Image } from "expo-image";
+import { Link } from "expo-router";
 const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
 
 export default function Page() {
@@ -28,10 +29,13 @@ export default function Page() {
               <H1 className="text-6xl">764</H1>
               <P className="text-destructive">-20</P>
             </View>
-            <Button variant={"outline"}>
-              <Text>History</Text>
-              <ArrowRight className="text-foreground size-4" />
-            </Button>
+
+            <Link href={"/credit-score"} asChild>
+              <Button variant={"outline"}>
+                <Text>History</Text>
+                <ArrowRight className="text-foreground size-4" />
+              </Button>
+            </Link>
           </View>
         </View>
 
