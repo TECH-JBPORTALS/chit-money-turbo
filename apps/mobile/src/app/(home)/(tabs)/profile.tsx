@@ -77,7 +77,7 @@ export default function Profile() {
           {items.map((item, index) => (
             <Link href={item.url} asChild>
               <Button
-                key={index}
+                key={index + item.name}
                 className="justify-between native:px-2 native:py-2"
                 variant={"ghost"}
               >
