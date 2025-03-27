@@ -13,27 +13,33 @@ import { Files } from "~/lib/icons/Files";
 import { Contact } from "~/lib/icons/Contact";
 import { LogOut } from "~/lib/icons/LogOut";
 import { useAuth } from "@clerk/clerk-expo";
+import { Link } from "expo-router";
 
 const items = [
   {
     name: "Personal & Nominee Details",
     icon: User,
+    url: "#",
   },
   {
     name: "Credit Score History",
     icon: Radar,
+    url: "/credit-score",
   },
   {
     name: "Documents",
     icon: Files,
+    url: "#",
   },
   {
     name: "Contact Details",
     icon: Contact,
+    url: "#",
   },
   {
     name: "Bank Details",
     icon: Landmark,
+    url: "#",
   },
 ];
 
@@ -69,17 +75,22 @@ export default function Profile() {
         {/** Profile Menu */}
         <View className="gap-1">
           {items.map((item, index) => (
-            <Button
-              key={index}
-              className="justify-between native:px-2 native:py-2"
-              variant={"ghost"}
-            >
-              <View className="gap-2 flex-row items-center">
-                <item.icon strokeWidth={1} className="size-6 text-foreground" />
-                <Text>{item.name}</Text>
-              </View>
-              <ChevronRight className="size-4 text-foreground" />
-            </Button>
+            <Link href={item.url} asChild>
+              <Button
+                key={index}
+                className="justify-between native:px-2 native:py-2"
+                variant={"ghost"}
+              >
+                <View className="gap-2 flex-row items-center">
+                  <item.icon
+                    strokeWidth={1}
+                    className="size-6 text-foreground"
+                  />
+                  <Text>{item.name}</Text>
+                </View>
+                <ChevronRight className="size-4 text-foreground" />
+              </Button>
+            </Link>
           ))}
         </View>
 
