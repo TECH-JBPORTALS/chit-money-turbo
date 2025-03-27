@@ -26,6 +26,7 @@ import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
 import useIsomorphicLayoutEffect from "use-isomorphic-layout-effect";
 import { StatusBar } from "expo-status-bar";
+import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -56,60 +57,53 @@ function Outlet() {
     Urbanist_800ExtraBold,
     Urbanist_900Black,
   });
-  const hasMounted = React.useRef(false);
-  const { isDarkColorScheme } = useColorScheme();
+  const { isDarkColorScheme, colorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
   const { isSignedIn, isLoaded } = useUser();
   const segments = useSegments();
   const router = useRouter();
 
-  useIsomorphicLayoutEffect(() => {
-    setIsColorSchemeLoaded(true);
-    hasMounted.current = true;
-  }, []);
+  useEffect(() => {
+    (async () => {
+      // const theme = await AsyncStorage.getItem("theme");
 
-  // useEffect(() => {
-  //   (async () => {
-  //     const theme = await AsyncStorage.getItem("theme");
+      // if (!theme) {
+      //   setAndroidNavigationBar(colorScheme);
+      // AsyncStorage.setItem("theme", colorScheme);
+      //   setIsColorSchemeLoaded(true);
+      //   return;
+      // }
+      // const colorTheme = theme === "dark" ? "dark" : "light";
+      setAndroidNavigationBar(colorScheme);
 
-  //     if (!theme) {
-  //       setAndroidNavigationBar(colorScheme);
-  //       AsyncStorage.setItem("theme", colorScheme);
-  //       setIsColorSchemeLoaded(true);
-  //       return;
-  //     }
-  //     const colorTheme = theme === "dark" ? "dark" : "light";
-  //     setAndroidNavigationBar(colorTheme);
+      if (colorScheme) {
+        // if (colorTheme !== colorScheme) {
+        // setColorScheme(colorTheme);
+        setIsColorSchemeLoaded(true);
+        return;
+      }
 
-  //     if (colorTheme !== colorScheme) {
-  //       setColorScheme(colorTheme);
-  //       setIsColorSchemeLoaded(true);
-  //       return;
-  //     }
-
-  //     setIsColorSchemeLoaded(true);
-  //   })();
-  // }, [isSignedIn, isLoaded, isColorSchemeLoaded]);
+      setIsColorSchemeLoaded(true);
+    })();
+  }, [isSignedIn, isLoaded, isColorSchemeLoaded]);
 
   useFocusEffect(
     useCallback(() => {
-      if (isLoaded && fontsLoaded) {
+      if (isLoaded) {
         const isAuthSegment = segments["0"] === "(auth)";
-        const isHomeSegment = segments["0"] === "(home)";
+        // const isHomeSegment = segments["0"] === "(home)";
 
         if (isSignedIn && isAuthSegment) {
           router.replace("/(home)");
-        } else if (!isSignedIn && isHomeSegment) {
+        } else if (!isSignedIn) {
           router.replace("/(auth)");
         }
-        if (isColorSchemeLoaded) {
+        if (isColorSchemeLoaded && fontsLoaded) {
           SplashScreen.hideAsync();
         }
       }
-    }, [isLoaded, fontsLoaded, isSignedIn, isColorSchemeLoaded])
+    }, [isLoaded, isSignedIn, isColorSchemeLoaded, fontsLoaded])
   );
-
-  if (!fontsLoaded || error) return null;
 
   return (
     <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
