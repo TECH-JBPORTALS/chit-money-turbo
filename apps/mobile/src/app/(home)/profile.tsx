@@ -1,5 +1,5 @@
 import { View, ScrollView } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { LinearBlurView } from "~/components/linear-blurview";
 import { H2, Large, Muted } from "~/components/ui/typography";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -12,6 +12,7 @@ import { User } from "~/lib/icons/User";
 import { Files } from "~/lib/icons/Files";
 import { Contact } from "~/lib/icons/Contact";
 import { LogOut } from "~/lib/icons/LogOut";
+import { useAuth } from "@clerk/clerk-expo";
 
 const items = [
   {
@@ -37,6 +38,15 @@ const items = [
 ];
 
 export default function Profile() {
+  const { signOut } = useAuth();
+  const [isSigningOut, setIsSingingOut] = useState(false);
+
+  async function onSignout() {
+    setIsSingingOut(true);
+    await signOut();
+    setIsSingingOut(false);
+  }
+
   return (
     <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
       <LinearBlurView>
@@ -73,7 +83,12 @@ export default function Profile() {
           ))}
         </View>
 
-        <Button size={"lg"} variant={"outline"}>
+        <Button
+          isLoading={isSigningOut}
+          onPress={onSignout}
+          size={"lg"}
+          variant={"outline"}
+        >
           <Text className="text-secondary-foreground">Logout</Text>
           <LogOut className="size-4 text-secondary-foreground" />
         </Button>
