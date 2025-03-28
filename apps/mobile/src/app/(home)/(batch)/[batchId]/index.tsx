@@ -1,54 +1,62 @@
 import React, { useMemo } from "react";
-import { View, FlatList } from "react-native";
+import { View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { SolarIcon } from "react-native-solar-icons";
+import { H3 } from "~/components/ui/typography";
+import { FlashList } from "@shopify/flash-list";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { ArrowRight } from "~/lib/icons/ArrowRight";
 
 // Types for better type safety
-type TransactionStatus =
+type PayoutStatus =
   | "completed"
   | "requested"
   | "rejected"
-  | "pending"
+  | "approved"
+  | undefined
   | "request";
 
 interface Transaction {
   id: number;
   date: string;
-  status: TransactionStatus;
+  status: PayoutStatus;
   payoutAmount?: number;
 }
 
-const getStatusColor = (status: TransactionStatus) => {
+const getStatusElement = (status: PayoutStatus) => {
   switch (status) {
     case "completed":
-      return "green";
+      return <SolarIcon size={16} name="CheckCircle" color="green" />;
     case "requested":
-      return "orange";
+      return (
+        <Badge className="bg-orange-500 flex-row gap-1">
+          <Text>Requested</Text>
+          <ArrowRight size={14} className="text-primary-foreground" />
+        </Badge>
+      );
     case "rejected":
-      return "red";
-    case "pending":
-      return "gray";
+      return (
+        <Badge variant={"destructive"} className="flex-row gap-1">
+          <Text>Rejected</Text>
+          <ArrowRight size={14} className="text-primary-foreground" />
+        </Badge>
+      );
+    case "approved":
+      return (
+        <Badge className="bg-indigo-500 flex-row gap-1">
+          <Text>Approved</Text>
+          <ArrowRight size={14} className="text-primary-foreground" />
+        </Badge>
+      );
     case "request":
-      return "lightblue";
+      return (
+        <Button size="sm" className="bg-foreground dark:bg-background">
+          <Text className="text-background dark:text-foreground">Request</Text>
+        </Button>
+      );
     default:
-      return "gray";
-  }
-};
-
-const getStatusIcon = (status: TransactionStatus) => {
-  switch (status) {
-    case "completed":
-      return "CheckCircle";
-    case "requested":
-      return "ArrowRight";
-    case "rejected":
-      return "CloseCircle";
-    case "pending":
-      return "ClockCircle";
-    case "request":
-      return "AddCircle";
-    default:
-      return "QuestionCircle";
+      return null;
   }
 };
 
@@ -60,34 +68,28 @@ export default function BatchRunwayScreen() {
       { id: 2, date: "Feb 10, 2024", status: "completed" },
       { id: 3, date: "Mar 10, 2024", status: "requested" },
       { id: 4, date: "Apr 10, 2024", status: "rejected" },
-      { id: 5, date: "May 10, 2024", status: "pending" },
-      { id: 6, date: "Jun 10, 2024", status: "pending" },
+      { id: 5, date: "May 10, 2024", status: undefined },
+      { id: 6, date: "Jun 10, 2024", status: undefined },
       { id: 7, date: "Jul 10, 2024", status: "request" },
-      { id: 8, date: "Aug 10, 2024", status: "pending" },
-      { id: 9, date: "Sep 10, 2024", status: "pending" },
-      { id: 10, date: "Oct 10, 2024", status: "pending" },
+      { id: 8, date: "Aug 10, 2024", status: undefined },
+      { id: 9, date: "Sep 10, 2024", status: "approved" },
+      { id: 10, date: "Oct 10, 2024", status: undefined },
     ],
     []
   );
 
   const renderTransaction = React.useCallback(
     ({ item }: { item: Transaction }) => {
-      const statusColor = getStatusColor(item.status);
-      const statusIcon = getStatusIcon(item.status);
+      const StatusElement = getStatusElement(item.status);
 
       return (
-        <View className="flex-row items-center justify-between py-3 border-b border-border">
-          <Text className="text-base">{item.date}</Text>
+        <View className="flex-row items-center justify-between py-3">
+          <View className="flex-row items-center gap-3">
+            <H3>{item.id}</H3>
+            <Text className="text-base">{item.date}</Text>
+          </View>
           <View className="flex-row items-center space-x-2">
-            <Text className={`text-${statusColor}-500 capitalize`}>
-              {item.status}
-            </Text>
-            <SolarIcon
-              name={statusIcon}
-              size={20}
-              color={statusColor}
-              type="bold-duotone"
-            />
+            {StatusElement}
           </View>
         </View>
       );
@@ -101,16 +103,16 @@ export default function BatchRunwayScreen() {
   );
 
   return (
-    <FlatList
-      data={transactions}
-      renderItem={renderTransaction}
-      keyExtractor={keyExtractor}
-      showsVerticalScrollIndicator={false}
-      // Performance optimizations
-      removeClippedSubviews={true}
-      maxToRenderPerBatch={10}
-      initialNumToRender={10}
-      windowSize={21}
-    />
+    <View className="flex-1 ">
+      <FlashList
+        contentContainerStyle={{}}
+        data={transactions}
+        renderItem={renderTransaction}
+        keyExtractor={keyExtractor}
+        showsVerticalScrollIndicator={false}
+        removeClippedSubviews={true}
+        scrollEnabled={false}
+      />
+    </View>
   );
 }

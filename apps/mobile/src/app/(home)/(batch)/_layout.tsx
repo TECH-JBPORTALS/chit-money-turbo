@@ -5,7 +5,7 @@ import {
   useRouter,
   usePathname,
 } from "expo-router";
-import { ScrollView, View } from "react-native";
+import { ScrollView, useWindowDimensions, View } from "react-native";
 import { SolarIcon } from "react-native-solar-icons";
 
 import {
@@ -56,6 +56,7 @@ export default function BatchDetailsLayout() {
   const { batchId } = useLocalSearchParams<{ batchId: string }>();
   const router = useRouter();
   const pathname = usePathname();
+  const { height } = useWindowDimensions();
 
   // Memoized active tab calculation
   const activeTab = React.useMemo(() => {
@@ -108,20 +109,20 @@ export default function BatchDetailsLayout() {
   };
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          title: "",
-          headerRight: () => (
-            <Lead>
-              {batchDetails.completedMonths}/{batchDetails.numberOfMonths}{" "}
-              Months
-            </Lead>
-          ),
-        }}
-      />
+    <ScrollView showsVerticalScrollIndicator={false} className="flex-1 ">
+      <View className="gap-6 flex-1 px-4 py-6" style={{ height }}>
+        <Stack.Screen
+          options={{
+            title: "",
+            headerRight: () => (
+              <Lead>
+                {batchDetails.completedMonths}/{batchDetails.numberOfMonths}{" "}
+                Months
+              </Lead>
+            ),
+          }}
+        />
 
-      <View className="gap-6 flex-1 px-4 py-6">
         <BatchCard className="border-0">
           <BatchCardHeader className="px-0 pt-0 pb-3 justify-between">
             <Muted className="text-xs">
@@ -204,9 +205,13 @@ export default function BatchDetailsLayout() {
 
         <Stack
           initialRouteName={"[batchId]/index"}
-          screenOptions={{ headerShown: false, animation: "fade_from_bottom" }}
+          screenOptions={{
+            headerShown: false,
+            animation: "fade_from_bottom",
+            contentStyle: { flex: 1, height: 900 },
+          }}
         />
       </View>
-    </>
+    </ScrollView>
   );
 }

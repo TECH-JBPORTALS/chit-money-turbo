@@ -79,7 +79,7 @@ const data = [
 
 export default function CreditScore() {
   return (
-    <ScrollView showsVerticalScrollIndicator={false} className="flex-1  ">
+    <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
       <View className="gap-6 flex-1 px-4 py-6">
         <View className="flex-row justify-center items-center gap-3 ">
           <H1 className="text-6xl">764</H1>
