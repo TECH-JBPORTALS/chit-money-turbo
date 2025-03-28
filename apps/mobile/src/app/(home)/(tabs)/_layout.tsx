@@ -1,10 +1,6 @@
 import { Stack, Tabs } from "expo-router";
 import { SolarIcon } from "react-native-solar-icons";
 
-export const unstable_settings = {
-  initialRouteName: "index",
-};
-
 export default function TabsLayout() {
   return (
     <>

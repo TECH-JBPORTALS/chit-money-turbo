@@ -28,6 +28,7 @@ import { useColorScheme } from "~/lib/useColorScheme";
 import { StatusBar } from "expo-status-bar";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -39,7 +40,13 @@ const DARK_THEME: Theme = {
 };
 
 export const unstable_settings = {
-  initialRouteName: "(home)/(tabs)",
+  initialRouteName: "(home)",
+  home: {
+    initialRouteName: "(tabs)",
+    batch: {
+      initialRouteName: "[batchId]/index",
+    },
+  },
 };
 
 export {
@@ -152,7 +159,9 @@ export default function RootLayout() {
 
   return (
     <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-      <Outlet />
+      <GestureHandlerRootView>
+        <Outlet />
+      </GestureHandlerRootView>
     </ClerkProvider>
   );
 }

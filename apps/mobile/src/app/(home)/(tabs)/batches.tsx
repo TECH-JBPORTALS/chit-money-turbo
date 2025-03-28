@@ -1,4 +1,9 @@
-import { ScrollView, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import { ScrollView, View, RefreshControl } from "react-native";
+import { useRouter } from "expo-router";
+import { TouchableOpacity } from "react-native-gesture-handler";
+
+// Components
 import { LinearBlurView } from "~/components/linear-blurview";
 import { H2, Muted, Small } from "~/components/ui/typography";
 import { Input } from "~/components/ui/input";
@@ -8,7 +13,6 @@ import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
 import { SolarIcon } from "react-native-solar-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Link, useRouter, useNavigation } from "expo-router";
 import {
   BatchCard,
   BatchCardBadge,
@@ -18,6 +22,202 @@ import {
   BatchCardHeader,
   BatchCardTitle,
 } from "~/components/batch-card";
+
+// Types
+interface Batch {
+  id: string;
+  name: string;
+  target_amount: number;
+  type: string;
+  subscription_amount: number;
+  chit_fund_name: string;
+  chit_fund_image: string;
+  is_completed: boolean;
+  number_of_months: number;
+  completed_months: number;
+  is_upcoming: boolean;
+}
+
+export default function Batches() {
+  const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
+  const [filter, setFilter] = useState<
+    "all" | "ongoing" | "upcoming" | "completed"
+  >("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Memoized and filtered data
+  const filteredBatches = useMemo(() => {
+    return data.filter((batch) => {
+      // Filter logic
+      const matchesFilter =
+        filter === "all" ||
+        (filter === "ongoing" && !batch.is_completed && !batch.is_upcoming) ||
+        (filter === "upcoming" && batch.is_upcoming) ||
+        (filter === "completed" && batch.is_completed);
+
+      // Search logic
+      const matchesSearch = batch.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+
+      return matchesFilter && matchesSearch;
+    });
+  }, [filter, searchQuery]);
+
+  // Optimized navigation handler
+  const navigateToBatch = useCallback((batchId: string) => {}, [router]);
+
+  // Refresh handler
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    // Simulate data refresh
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  }, []);
+
+  // Render batch status
+  const renderBatchStatus = useCallback((batch: Batch) => {
+    if (batch.is_completed) {
+      return (
+        <View className="flex-row items-center">
+          <Small className="text-xs inline-flex flex-row items-center">
+            Completed{" "}
+          </Small>
+          <SolarIcon
+            name="CheckCircle"
+            size={14}
+            color="green"
+            type="bold-duotone"
+          />
+        </View>
+      );
+    }
+
+    if (batch.is_upcoming) {
+      return (
+        <View className="flex-row items-center">
+          <Small className="text-xs inline-flex flex-row items-center">
+            Upcoming{" "}
+          </Small>
+          <SolarIcon name="Record" size={14} color="gray" type="bold-duotone" />
+        </View>
+      );
+    }
+
+    return (
+      <View className="flex-row justify-end gap-1 flex-1 items-center">
+        <Muted className="text-sm">
+          {batch.completed_months}/{batch.number_of_months} Months
+        </Muted>
+      </View>
+    );
+  }, []);
+
+  return (
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      className="flex-1"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <LinearBlurView>
+        <H2>All Batches</H2>
+
+        {/** Search Bar */}
+        <View className="relative flex-row items-center">
+          <Search className="absolute z-30 ml-2.5 mr-2.5 size-4 text-muted-foreground" />
+          <Input
+            placeholder="Search..."
+            placeholderClassName="text-sm"
+            className="ps-8 w-full h-11"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+
+        {/** Filters */}
+        <View className="flex-row gap-2">
+          {(["all", "ongoing", "upcoming", "completed"] as const).map(
+            (filterType) => (
+              <Button
+                key={filterType}
+                className={`${filter === filterType ? "border-border" : "border-dashed"}`}
+                variant={filter === filterType ? "default" : "outline"}
+                size={"sm"}
+                onPress={() => setFilter(filterType)}
+              >
+                <Text>
+                  {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
+                </Text>
+              </Button>
+            )
+          )}
+        </View>
+
+        {/** Batches List */}
+        <View className="gap-2">
+          {filteredBatches.map((batch) => (
+            <TouchableOpacity
+              key={batch.id}
+              onPress={() => router.push(`/(batch)/${batch.id}`)}
+              style={{ opacity: batch.is_completed ? 0.6 : 1 }}
+            >
+              <BatchCard>
+                <BatchCardHeader className="justify-between">
+                  <Muted className="text-xs">Started on 2 Jan, 2024</Muted>
+                  {renderBatchStatus(batch)}
+                </BatchCardHeader>
+                <BatchCardContent>
+                  <BatchCardTitle>{batch.name}</BatchCardTitle>
+                  <BatchCardBadgeRow>
+                    <BatchCardBadge>
+                      <Text>
+                        {batch.target_amount.toLocaleString("en-IN", {
+                          style: "currency",
+                          currency: "INR",
+                          maximumFractionDigits: 0,
+                        })}
+                      </Text>
+                    </BatchCardBadge>
+                    <BatchCardBadge>
+                      <Text>{batch.type}</Text>
+                    </BatchCardBadge>
+                    <BatchCardBadge>
+                      <Text>
+                        {batch.subscription_amount.toLocaleString("en-IN", {
+                          style: "currency",
+                          currency: "INR",
+                          maximumFractionDigits: 0,
+                        })}
+                        /m
+                      </Text>
+                    </BatchCardBadge>
+                  </BatchCardBadgeRow>
+                </BatchCardContent>
+                <BatchCardFooter>
+                  <View className="flex-row items-center gap-2">
+                    <Avatar className="size-5" alt={batch.chit_fund_name}>
+                      <AvatarImage source={{ uri: batch.chit_fund_image }} />
+                      <AvatarFallback>
+                        <Text className="text-[8px]">
+                          {batch.chit_fund_name.charAt(0).toUpperCase()}
+                        </Text>
+                      </AvatarFallback>
+                    </Avatar>
+                    <Small className="text-xs">{batch.chit_fund_name}</Small>
+                  </View>
+                </BatchCardFooter>
+              </BatchCard>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </LinearBlurView>
+    </ScrollView>
+  );
+}
 
 const data = [
   {
@@ -152,136 +352,3 @@ const data = [
     is_upcoming: true,
   },
 ];
-
-export default function Batches() {
-  const router = useRouter();
-  const navigation = useNavigation();
-  return (
-    <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-      <LinearBlurView>
-        <H2>All Batches</H2>
-
-        {/** Search Bar */}
-        <View className="relative flex-row items-center">
-          <Search className="absolute z-30 ml-2.5 mr-2.5 size-4 text-muted-foreground" />
-          <Input
-            placeholder="Search..."
-            placeholderClassName="text-sm"
-            className="ps-8 w-full h-11"
-          />
-        </View>
-
-        {/** Filters */}
-        <View className="flex-row gap-2">
-          <Button className="border-dashed" variant={"outline"} size={"sm"}>
-            <Text>Ongoing</Text>
-          </Button>
-          <Button className="border-dashed" variant={"outline"} size={"sm"}>
-            <Text>Upcoming</Text>
-          </Button>
-          <Button className="border-dashed" variant={"outline"} size={"sm"}>
-            <Text>Completed</Text>
-          </Button>
-        </View>
-
-        {/** Batches List */}
-        <View className="gap-2">
-          {data.map((batch, i) => (
-            <TouchableOpacity
-              key={i}
-              onPress={() => {
-                router.push(`/${batch.id}`);
-              }}
-            >
-              <BatchCard>
-                <BatchCardHeader className="justify-between">
-                  <Muted className="text-xs">Started on 2 Jan, 2024</Muted>
-                  {batch.is_completed ? (
-                    <View className="flex-row items-center">
-                      <Small className="text-xs inline-flex flex-row items-center">
-                        Completed{" "}
-                      </Small>
-                      <SolarIcon
-                        name="CheckCircle"
-                        size={14}
-                        color="green"
-                        type="bold-duotone"
-                      />
-                    </View>
-                  ) : batch.is_upcoming ? (
-                    <View className="flex-row items-center">
-                      <Small className="text-xs inline-flex flex-row items-center">
-                        Upcoming{" "}
-                      </Small>
-                      <SolarIcon
-                        name="Record"
-                        size={14}
-                        color="gray"
-                        type="bold-duotone"
-                      />
-                    </View>
-                  ) : (
-                    <View className="flex-row gap-1 flex-1 items-center">
-                      <Progress
-                        className="h-1 flex-1"
-                        value={
-                          (batch.completed_months / batch.number_of_months) *
-                          100
-                        }
-                      />
-                      <Muted className="text-sm">
-                        {batch.completed_months}/{batch.number_of_months} Months
-                      </Muted>
-                    </View>
-                  )}
-                </BatchCardHeader>
-                <BatchCardContent>
-                  <BatchCardTitle>{batch.name}</BatchCardTitle>
-                  <BatchCardBadgeRow>
-                    <BatchCardBadge>
-                      <Text>
-                        {batch.target_amount.toLocaleString("en-IN", {
-                          currencyDisplay: "symbol",
-                          style: "currency",
-                          currency: "INR",
-                          maximumFractionDigits: 0,
-                        })}
-                      </Text>
-                    </BatchCardBadge>
-                    <BatchCardBadge>
-                      <Text>{batch.type}</Text>
-                    </BatchCardBadge>
-                    <BatchCardBadge>
-                      <Text>
-                        {batch.subscription_amount.toLocaleString("en-IN", {
-                          currencyDisplay: "symbol",
-                          style: "currency",
-                          currency: "INR",
-                          maximumFractionDigits: 0,
-                        })}
-                        /m
-                      </Text>
-                    </BatchCardBadge>
-                  </BatchCardBadgeRow>
-                </BatchCardContent>
-                <BatchCardFooter>
-                  <View className="flex-row items-center gap-2">
-                    <Avatar className="size-5" alt={batch.chit_fund_name}>
-                      <AvatarImage source={{ uri: batch.chit_fund_image }} />
-                      <AvatarFallback>
-                        <Text className="text-[8px]">
-                          {batch.chit_fund_name.charAt(0).toUpperCase()}
-                        </Text>
-                      </AvatarFallback>
-                    </Avatar>
-                    <Small className="text-xs">{batch.chit_fund_name}</Small>
-                  </View>
-                </BatchCardFooter>
-              </BatchCard>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </LinearBlurView>
-    </ScrollView>
-  );
-}
