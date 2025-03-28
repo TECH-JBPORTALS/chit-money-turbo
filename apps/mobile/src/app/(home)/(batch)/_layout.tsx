@@ -5,7 +5,7 @@ import {
   useRouter,
   usePathname,
 } from "expo-router";
-import { ScrollView, useWindowDimensions, View } from "react-native";
+import { useWindowDimensions, View } from "react-native";
 import { SolarIcon } from "react-native-solar-icons";
 
 import {
@@ -109,79 +109,77 @@ export default function BatchDetailsLayout() {
   };
 
   return (
-    <ScrollView showsVerticalScrollIndicator={false} className="flex-1 ">
-      <View className="gap-6 flex-1 px-4 py-6" style={{ height }}>
-        <Stack.Screen
-          options={{
-            title: "",
-            headerRight: () => (
-              <Lead>
-                {batchDetails.completedMonths}/{batchDetails.numberOfMonths}{" "}
-                Months
-              </Lead>
-            ),
-          }}
-        />
+    <View className="pt-6 px-4 gap-6 flex-1">
+      <Stack.Screen
+        options={{
+          title: "",
+          headerRight: () => (
+            <Lead>
+              {batchDetails.completedMonths}/{batchDetails.numberOfMonths}{" "}
+              Months
+            </Lead>
+          ),
+        }}
+      />
 
-        <BatchCard className="border-0">
-          <BatchCardHeader className="px-0 pt-0 pb-3 justify-between">
-            <Muted className="text-xs">
-              Started on {new Date(batchDetails.startDate).toLocaleDateString()}
-            </Muted>
-            {renderStatusComponent()}
-          </BatchCardHeader>
+      <BatchCard className="border-0">
+        <BatchCardHeader className="px-0 pt-0 pb-3 justify-between">
+          <Muted className="text-xs">
+            Started on {new Date(batchDetails.startDate).toLocaleDateString()}
+          </Muted>
+          {renderStatusComponent()}
+        </BatchCardHeader>
 
-          <BatchCardContent className="px-0 gap-3">
-            <BatchCardTitle className="text-xl">
-              {batchDetails.name}
-            </BatchCardTitle>
+        <BatchCardContent className="px-0 gap-3">
+          <BatchCardTitle className="text-xl">
+            {batchDetails.name}
+          </BatchCardTitle>
 
-            <BatchCardBadgeRow>
-              <BatchCardBadge>
-                <Text className="font-semibold text-sm">
-                  {batchDetails.targetAmount.toLocaleString("en-IN", {
-                    style: "currency",
-                    currency: "INR",
-                    maximumFractionDigits: 0,
-                  })}
+          <BatchCardBadgeRow>
+            <BatchCardBadge>
+              <Text className="font-semibold text-sm">
+                {batchDetails.targetAmount.toLocaleString("en-IN", {
+                  style: "currency",
+                  currency: "INR",
+                  maximumFractionDigits: 0,
+                })}
+              </Text>
+            </BatchCardBadge>
+            <BatchCardBadge>
+              <Text className="font-semibold text-sm">{batchDetails.type}</Text>
+            </BatchCardBadge>
+            <BatchCardBadge>
+              <Text className="font-semibold text-sm">
+                {batchDetails.subscriptionAmount.toLocaleString("en-IN", {
+                  style: "currency",
+                  currency: "INR",
+                  maximumFractionDigits: 0,
+                })}
+                /m
+              </Text>
+            </BatchCardBadge>
+          </BatchCardBadgeRow>
+        </BatchCardContent>
+
+        <BatchCardFooter className="px-0 pb-0">
+          <View className="flex-row items-center gap-2">
+            <Avatar
+              alt="ChitFund Image"
+              className="size-5 border border-border"
+            >
+              <AvatarImage source={{ uri: batchDetails.chit_fund_image }} />
+              <AvatarFallback>
+                <Text className="text-[8px]">
+                  {batchDetails.chit_fund_name.charAt(0).toUpperCase()}
                 </Text>
-              </BatchCardBadge>
-              <BatchCardBadge>
-                <Text className="font-semibold text-sm">
-                  {batchDetails.type}
-                </Text>
-              </BatchCardBadge>
-              <BatchCardBadge>
-                <Text className="font-semibold text-sm">
-                  {batchDetails.subscriptionAmount.toLocaleString("en-IN", {
-                    style: "currency",
-                    currency: "INR",
-                    maximumFractionDigits: 0,
-                  })}
-                  /m
-                </Text>
-              </BatchCardBadge>
-            </BatchCardBadgeRow>
-          </BatchCardContent>
+              </AvatarFallback>
+            </Avatar>
+            <Small className="text-xs">{batchDetails.chit_fund_name}</Small>
+          </View>
+        </BatchCardFooter>
+      </BatchCard>
 
-          <BatchCardFooter className="px-0 pb-0">
-            <View className="flex-row items-center gap-2">
-              <Avatar
-                alt="ChitFund Image"
-                className="size-5 border border-border"
-              >
-                <AvatarImage source={{ uri: batchDetails.chit_fund_image }} />
-                <AvatarFallback>
-                  <Text className="text-[8px]">
-                    {batchDetails.chit_fund_name.charAt(0).toUpperCase()}
-                  </Text>
-                </AvatarFallback>
-              </Avatar>
-              <Small className="text-xs">{batchDetails.chit_fund_name}</Small>
-            </View>
-          </BatchCardFooter>
-        </BatchCard>
-
+      <View className="flex-1">
         <Tabs value={activeTab} onValueChange={() => {}}>
           <TabsList className="flex-row gap-1 w-full">
             <TabsTrigger
@@ -204,14 +202,9 @@ export default function BatchDetailsLayout() {
         </Tabs>
 
         <Stack
-          initialRouteName={"[batchId]/index"}
-          screenOptions={{
-            headerShown: false,
-            animation: "fade_from_bottom",
-            contentStyle: { flex: 1, height: 900 },
-          }}
+          screenOptions={{ headerShown: false, animation: "fade_from_bottom" }}
         />
       </View>
-    </ScrollView>
+    </View>
   );
 }

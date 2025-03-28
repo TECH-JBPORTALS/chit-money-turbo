@@ -51,8 +51,8 @@ const getStatusElement = (status: PayoutStatus) => {
       );
     case "request":
       return (
-        <Button size="sm" className="bg-foreground dark:bg-background">
-          <Text className="text-background dark:text-foreground">Request</Text>
+        <Button size="sm" className="bg-foreground dark:bg-foreground">
+          <Text className="text-background dark:text-background">Request</Text>
         </Button>
       );
     default:
@@ -74,6 +74,16 @@ export default function BatchRunwayScreen() {
       { id: 8, date: "Aug 10, 2024", status: undefined },
       { id: 9, date: "Sep 10, 2024", status: "approved" },
       { id: 10, date: "Oct 10, 2024", status: undefined },
+      { id: 11, date: "Oct 10, 2024", status: undefined },
+      { id: 12, date: "Oct 10, 2024", status: undefined },
+      { id: 13, date: "Oct 10, 2024", status: undefined },
+      { id: 14, date: "Oct 10, 2024", status: undefined },
+      { id: 15, date: "Oct 10, 2024", status: undefined },
+      { id: 16, date: "Oct 10, 2024", status: undefined },
+      { id: 17, date: "Oct 10, 2024", status: undefined },
+      { id: 18, date: "Oct 10, 2024", status: undefined },
+      { id: 19, date: "Oct 10, 2024", status: undefined },
+      { id: 20, date: "Oct 10, 2024", status: undefined },
     ],
     []
   );
@@ -85,7 +95,7 @@ export default function BatchRunwayScreen() {
       return (
         <View className="flex-row items-center justify-between py-3">
           <View className="flex-row items-center gap-3">
-            <H3>{item.id}</H3>
+            <H3>{item.id}.</H3>
             <Text className="text-base">{item.date}</Text>
           </View>
           <View className="flex-row items-center space-x-2">
@@ -103,15 +113,14 @@ export default function BatchRunwayScreen() {
   );
 
   return (
-    <View className="flex-1 ">
+    <View className="flex-1">
       <FlashList
-        contentContainerStyle={{}}
         data={transactions}
         renderItem={renderTransaction}
         keyExtractor={keyExtractor}
         showsVerticalScrollIndicator={false}
-        removeClippedSubviews={true}
-        scrollEnabled={false}
+        estimatedItemSize={50}
+        contentContainerStyle={{}}
       />
     </View>
   );
