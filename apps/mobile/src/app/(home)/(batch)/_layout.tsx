@@ -137,7 +137,7 @@ export default function BatchDetailsLayout() {
 
             <BatchCardBadgeRow>
               <BatchCardBadge>
-                <Text>
+                <Text className="font-semibold text-sm">
                   {batchDetails.targetAmount.toLocaleString("en-IN", {
                     style: "currency",
                     currency: "INR",
@@ -146,10 +146,12 @@ export default function BatchDetailsLayout() {
                 </Text>
               </BatchCardBadge>
               <BatchCardBadge>
-                <Text>{batchDetails.type}</Text>
+                <Text className="font-semibold text-sm">
+                  {batchDetails.type}
+                </Text>
               </BatchCardBadge>
               <BatchCardBadge>
-                <Text>
+                <Text className="font-semibold text-sm">
                   {batchDetails.subscriptionAmount.toLocaleString("en-IN", {
                     style: "currency",
                     currency: "INR",
