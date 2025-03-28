@@ -46,7 +46,7 @@ export default function BatchDetailsLayout() {
     type: "Interest Chit",
     subscriptionAmount: 5000,
     chit_fund_name: "Surya Chit Fund",
-    chit_fund_image: "https://example.com/chit-fund-logo.png",
+    chit_fund_image: "https://github.com/x-sss-x.png",
     startDate: "2024-01-02",
     numberOfMonths: 20,
     completedMonths: 2,
