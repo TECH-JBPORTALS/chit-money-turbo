@@ -8,7 +8,7 @@ import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
 import { SolarIcon } from "react-native-solar-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Link } from "expo-router";
+import { Link, useRouter, useNavigation } from "expo-router";
 import {
   BatchCard,
   BatchCardBadge,
@@ -154,6 +154,8 @@ const data = [
 ];
 
 export default function Batches() {
+  const router = useRouter();
+  const navigation = useNavigation();
   return (
     <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
       <LinearBlurView>
@@ -185,96 +187,98 @@ export default function Batches() {
         {/** Batches List */}
         <View className="gap-2">
           {data.map((batch, i) => (
-            <Link key={i} asChild href={`/batches/${batch.id}`}>
-              <TouchableOpacity>
-                <BatchCard>
-                  <BatchCardHeader className="justify-between">
-                    <Muted className="text-xs">Started on 2 Jan, 2024</Muted>
-                    {batch.is_completed ? (
-                      <View className="flex-row items-center">
-                        <Small className="text-xs inline-flex flex-row items-center">
-                          Completed{" "}
-                        </Small>
-                        <SolarIcon
-                          name="CheckCircle"
-                          size={14}
-                          color="green"
-                          type="bold-duotone"
-                        />
-                      </View>
-                    ) : batch.is_upcoming ? (
-                      <View className="flex-row items-center">
-                        <Small className="text-xs inline-flex flex-row items-center">
-                          Upcoming{" "}
-                        </Small>
-                        <SolarIcon
-                          name="Record"
-                          size={14}
-                          color="gray"
-                          type="bold-duotone"
-                        />
-                      </View>
-                    ) : (
-                      <View className="flex-row gap-1 flex-1 items-center">
-                        <Progress
-                          className="h-1 flex-1"
-                          value={
-                            (batch.completed_months / batch.number_of_months) *
-                            100
-                          }
-                        />
-                        <Muted className="text-sm">
-                          {batch.completed_months}/{batch.number_of_months}{" "}
-                          Months
-                        </Muted>
-                      </View>
-                    )}
-                  </BatchCardHeader>
-                  <BatchCardContent>
-                    <BatchCardTitle>{batch.name}</BatchCardTitle>
-                    <BatchCardBadgeRow>
-                      <BatchCardBadge>
-                        <Text>
-                          {batch.target_amount.toLocaleString("en-IN", {
-                            currencyDisplay: "symbol",
-                            style: "currency",
-                            currency: "INR",
-                            maximumFractionDigits: 0,
-                          })}
-                        </Text>
-                      </BatchCardBadge>
-                      <BatchCardBadge>
-                        <Text>{batch.type}</Text>
-                      </BatchCardBadge>
-                      <BatchCardBadge>
-                        <Text>
-                          {batch.subscription_amount.toLocaleString("en-IN", {
-                            currencyDisplay: "symbol",
-                            style: "currency",
-                            currency: "INR",
-                            maximumFractionDigits: 0,
-                          })}
-                          /m
-                        </Text>
-                      </BatchCardBadge>
-                    </BatchCardBadgeRow>
-                  </BatchCardContent>
-                  <BatchCardFooter>
-                    <View className="flex-row items-center gap-2">
-                      <Avatar className="size-5" alt={batch.chit_fund_name}>
-                        <AvatarImage source={{ uri: batch.chit_fund_image }} />
-                        <AvatarFallback>
-                          <Text className="text-[8px]">
-                            {batch.chit_fund_name.charAt(0).toUpperCase()}
-                          </Text>
-                        </AvatarFallback>
-                      </Avatar>
-                      <Small className="text-xs">{batch.chit_fund_name}</Small>
+            <TouchableOpacity
+              key={i}
+              onPress={() => {
+                router.push(`/${batch.id}`);
+              }}
+            >
+              <BatchCard>
+                <BatchCardHeader className="justify-between">
+                  <Muted className="text-xs">Started on 2 Jan, 2024</Muted>
+                  {batch.is_completed ? (
+                    <View className="flex-row items-center">
+                      <Small className="text-xs inline-flex flex-row items-center">
+                        Completed{" "}
+                      </Small>
+                      <SolarIcon
+                        name="CheckCircle"
+                        size={14}
+                        color="green"
+                        type="bold-duotone"
+                      />
                     </View>
-                  </BatchCardFooter>
-                </BatchCard>
-              </TouchableOpacity>
-            </Link>
+                  ) : batch.is_upcoming ? (
+                    <View className="flex-row items-center">
+                      <Small className="text-xs inline-flex flex-row items-center">
+                        Upcoming{" "}
+                      </Small>
+                      <SolarIcon
+                        name="Record"
+                        size={14}
+                        color="gray"
+                        type="bold-duotone"
+                      />
+                    </View>
+                  ) : (
+                    <View className="flex-row gap-1 flex-1 items-center">
+                      <Progress
+                        className="h-1 flex-1"
+                        value={
+                          (batch.completed_months / batch.number_of_months) *
+                          100
+                        }
+                      />
+                      <Muted className="text-sm">
+                        {batch.completed_months}/{batch.number_of_months} Months
+                      </Muted>
+                    </View>
+                  )}
+                </BatchCardHeader>
+                <BatchCardContent>
+                  <BatchCardTitle>{batch.name}</BatchCardTitle>
+                  <BatchCardBadgeRow>
+                    <BatchCardBadge>
+                      <Text>
+                        {batch.target_amount.toLocaleString("en-IN", {
+                          currencyDisplay: "symbol",
+                          style: "currency",
+                          currency: "INR",
+                          maximumFractionDigits: 0,
+                        })}
+                      </Text>
+                    </BatchCardBadge>
+                    <BatchCardBadge>
+                      <Text>{batch.type}</Text>
+                    </BatchCardBadge>
+                    <BatchCardBadge>
+                      <Text>
+                        {batch.subscription_amount.toLocaleString("en-IN", {
+                          currencyDisplay: "symbol",
+                          style: "currency",
+                          currency: "INR",
+                          maximumFractionDigits: 0,
+                        })}
+                        /m
+                      </Text>
+                    </BatchCardBadge>
+                  </BatchCardBadgeRow>
+                </BatchCardContent>
+                <BatchCardFooter>
+                  <View className="flex-row items-center gap-2">
+                    <Avatar className="size-5" alt={batch.chit_fund_name}>
+                      <AvatarImage source={{ uri: batch.chit_fund_image }} />
+                      <AvatarFallback>
+                        <Text className="text-[8px]">
+                          {batch.chit_fund_name.charAt(0).toUpperCase()}
+                        </Text>
+                      </AvatarFallback>
+                    </Avatar>
+                    <Small className="text-xs">{batch.chit_fund_name}</Small>
+                  </View>
+                </BatchCardFooter>
+              </BatchCard>
+            </TouchableOpacity>
           ))}
         </View>
       </LinearBlurView>

@@ -1,20 +1,18 @@
 import { Stack } from "expo-router";
 
+export const unstable_settings = {
+  initialRouteName: "(tabs)",
+};
+
 export default function HomeLayout() {
   return (
     <Stack
-      initialRouteName="(tabs)"
       screenOptions={{
         headerTitleStyle: {
           fontFamily: "Urbanist_400Regular",
         },
         headerShadowVisible: false,
       }}
-    >
-      <Stack.Screen
-        name="credit-score"
-        options={{ title: "Credit Score History" }}
-      />
-    </Stack>
+    />
   );
 }

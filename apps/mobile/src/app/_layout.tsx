@@ -39,7 +39,7 @@ const DARK_THEME: Theme = {
 };
 
 export const unstable_settings = {
-  initialRouteName: "(home)",
+  initialRouteName: "(home)/(tabs)",
 };
 
 export {
@@ -122,7 +122,7 @@ function Outlet() {
         // const isHomeSegment = segments["0"] === "(home)";
 
         if (isSignedIn && isAuthSegment) {
-          router.replace("/(home)");
+          router.replace("/(home)/(tabs)");
         } else if (!isSignedIn) {
           router.replace("/(auth)");
         }
