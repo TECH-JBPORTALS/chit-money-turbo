@@ -4,8 +4,9 @@ import {
   useLocalSearchParams,
   useRouter,
   usePathname,
+  Link,
 } from "expo-router";
-import { useWindowDimensions, View } from "react-native";
+import { View } from "react-native";
 import { SolarIcon } from "react-native-solar-icons";
 
 import {
@@ -21,6 +22,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "~/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Text } from "~/components/ui/text";
 import { Lead, Muted, Small } from "~/components/ui/typography";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 // Types
 interface BatchDetails {
@@ -56,7 +58,6 @@ export default function BatchDetailsLayout() {
   const { batchId } = useLocalSearchParams<{ batchId: string }>();
   const router = useRouter();
   const pathname = usePathname();
-  const { height } = useWindowDimensions();
 
   // Memoized active tab calculation
   const activeTab = React.useMemo(() => {
@@ -162,20 +163,24 @@ export default function BatchDetailsLayout() {
         </BatchCardContent>
 
         <BatchCardFooter className="px-0 pb-0">
-          <View className="flex-row items-center gap-2">
-            <Avatar
-              alt="ChitFund Image"
-              className="size-5 border border-border"
-            >
-              <AvatarImage source={{ uri: batchDetails.chit_fund_image }} />
-              <AvatarFallback>
-                <Text className="text-[8px]">
-                  {batchDetails.chit_fund_name.charAt(0).toUpperCase()}
-                </Text>
-              </AvatarFallback>
-            </Avatar>
-            <Small className="text-xs">{batchDetails.chit_fund_name}</Small>
-          </View>
+          <Link asChild href={`/cfh/2`}>
+            <TouchableOpacity>
+              <View className="flex-row items-center gap-2">
+                <Avatar
+                  alt="ChitFund Image"
+                  className="size-5 border border-border"
+                >
+                  <AvatarImage source={{ uri: batchDetails.chit_fund_image }} />
+                  <AvatarFallback>
+                    <Text className="text-[8px]">
+                      {batchDetails.chit_fund_name.charAt(0).toUpperCase()}
+                    </Text>
+                  </AvatarFallback>
+                </Avatar>
+                <Small className="text-xs">{batchDetails.chit_fund_name}</Small>
+              </View>
+            </TouchableOpacity>
+          </Link>
         </BatchCardFooter>
       </BatchCard>
 
@@ -192,9 +197,7 @@ export default function BatchDetailsLayout() {
             <TabsTrigger
               value="transactions"
               className="flex-1"
-              onPress={() => {
-                router.replace(`/${batchId}/tranx`);
-              }}
+              onPress={handleTransactionsPress}
             >
               <Text>Transactions</Text>
             </TabsTrigger>

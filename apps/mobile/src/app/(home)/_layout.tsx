@@ -9,6 +9,8 @@ export default function HomeLayout() {
         },
         headerShadowVisible: false,
       }}
-    />
+    >
+      <Stack.Screen name="cfh/[id]" options={{ title: "" }} />
+    </Stack>
   );
 }
