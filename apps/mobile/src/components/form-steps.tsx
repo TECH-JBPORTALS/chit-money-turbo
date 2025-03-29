@@ -18,9 +18,11 @@ export function FormStepsProvider({ children }: { children: React.ReactNode }) {
   const [currentStep, setCurrentStep] = React.useState(1);
   const [totalSteps, setTotalSteps] = React.useState(0);
 
+  console.log(currentStep);
+
   const next = () =>
-    setCurrentStep(currentStep < totalSteps ? currentStep + 1 : totalSteps);
-  const prev = () => setCurrentStep(currentStep > 1 ? currentStep - 1 : 1);
+    setCurrentStep((prev) => (prev < totalSteps ? prev + 1 : totalSteps));
+  const prev = () => setCurrentStep((prev) => (prev > 1 ? prev - 1 : 1));
   const jumpTo = (index: number) =>
     setCurrentStep(index > totalSteps ? totalSteps : index < 1 ? 1 : index);
 
@@ -71,8 +73,11 @@ export const FormSteps = ({
 
   React.useEffect(() => {
     setTotalSteps(steps.length);
+  }, [steps]);
+
+  React.useEffect(() => {
     setCurrentStep(defaultStep);
-  }, [steps, defaultStep]);
+  }, []);
 
   return <View className="flex-1">{steps[currentStep - 1]}</View>;
 };

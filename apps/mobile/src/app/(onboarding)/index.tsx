@@ -25,6 +25,7 @@ const personalInfoSchema = z.object({
   full_name: z.string().trim().min(2, "Enter valid name"),
   date_of_birth: z.string().trim().min(2, "Enter valid date of birth"),
 });
+
 function PersonalInfoForm() {
   const form = useForm<z.infer<typeof personalInfoSchema>>({
     resolver: zodResolver(personalInfoSchema),
@@ -33,8 +34,11 @@ function PersonalInfoForm() {
       date_of_birth: "",
     },
   });
+  const { next } = useFormSteps();
 
-  async function onSubmit(values: z.infer<typeof personalInfoSchema>) {}
+  async function onSubmit(values: z.infer<typeof personalInfoSchema>) {
+    next();
+  }
 
   return (
     <View className="flex-1 gap-6">
@@ -95,8 +99,11 @@ function ContactInfoForm() {
       date_of_birth: "",
     },
   });
+  const { next, prev } = useFormSteps();
 
-  async function onSubmit(values: z.infer<typeof contactInfoSchema>) {}
+  async function onSubmit(values: z.infer<typeof contactInfoSchema>) {
+    next();
+  }
 
   return (
     <View className="flex-1 gap-6">
@@ -135,7 +142,12 @@ function ContactInfoForm() {
       </Form>
 
       <View className="flex-row gap-4 mt-auto">
-        <Button size={"lg"} variant={"secondary"} className="flex-1">
+        <Button
+          onPress={() => prev()}
+          size={"lg"}
+          variant={"secondary"}
+          className="flex-1"
+        >
           <ArrowLeft className="size-4 text-secondary-foreground" />
           <Text>Back</Text>
         </Button>
@@ -176,6 +188,10 @@ export default function Index() {
       />
       <FormSteps defaultStep={1}>
         <PersonalInfoForm />
+        <ContactInfoForm />
+        <ContactInfoForm />
+        <ContactInfoForm />
+        <ContactInfoForm />
         <ContactInfoForm />
       </FormSteps>
     </LinearBlurView>
