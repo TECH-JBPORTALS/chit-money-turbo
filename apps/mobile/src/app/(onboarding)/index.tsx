@@ -167,11 +167,20 @@ function ContactInfoForm() {
 
 export default function Index() {
   const { currentStep, totalSteps } = useFormSteps();
+  const labels = [
+    "Personal Information",
+    "Contact Information",
+    "Documents",
+    "Nominee Details",
+    "Address Details",
+    "Bank Account Details",
+  ];
+
   return (
     <LinearBlurView className="pt-20">
       <Stack.Screen
         options={{
-          title: "Personal Information",
+          title: labels[currentStep - 1],
           headerShown: true,
           headerTitleStyle: {
             fontFamily: "Urbanist_400Regular",
