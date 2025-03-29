@@ -71,7 +71,6 @@ export default function BatchDetailsLayout() {
   }, [batchId]);
 
   const handleTransactionsPress = React.useCallback(() => {
-    console.log("Pressed");
     router.replace(`/${batchId}/tranx`);
   }, [batchId]);
 

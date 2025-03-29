@@ -29,6 +29,7 @@ import { StatusBar } from "expo-status-bar";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { PortalHost } from "@rn-primitives/portal";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -161,6 +162,7 @@ export default function RootLayout() {
     <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
       <GestureHandlerRootView>
         <Outlet />
+        <PortalHost />
       </GestureHandlerRootView>
     </ClerkProvider>
   );
