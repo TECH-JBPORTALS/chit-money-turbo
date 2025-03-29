@@ -15,6 +15,7 @@ import { Text } from "~/components/ui/text";
 import { PayoutStatusBadge } from "~/lib/payout-badge";
 import { Separator } from "~/components/ui/separator";
 import { Button } from "~/components/ui/button";
+import { ScrollView } from "react-native-gesture-handler";
 
 const t = {
   id: "s987t654-u321v098-w765x432",
@@ -25,7 +26,7 @@ const t = {
   credit_score_affected: -10,
   chit_fund_name: "Surya Chit fund",
   chit_fund_image: "https://github.com/x-sss-x.png",
-  status: "disbursed",
+  status: "cancelled",
   created_at: new Date(2024, 4, 20),
 };
 
@@ -266,61 +267,63 @@ function PayoutDetails({ status }: { status: string }) {
 
 export default function TransactionDetails() {
   return (
-    <View className="flex-1 items-center py-6 px-4 justify-between">
-      <View className="flex-1 w-full gap-6">
-        {/** Transaction Top Card */}
-        <View className="gap-3">
-          <View className="flex-row justify-between items-center">
-            <Lead className="text-foreground">JNANA 2024</Lead>
-            <View className="flex-row items-center gap-1">
-              <Large className="font-bold">
-                {t.amount.toLocaleString("en-IN", {
-                  currency: "INR",
-                  currencyDisplay: "narrowSymbol",
-                  currencySign: "standard",
-                  style: "currency",
-                  maximumFractionDigits: 0,
-                })}
-              </Large>
-              {t.type === "payout" ? (
-                <ArrowDownLeft
-                  strokeWidth={1}
-                  className="text-foreground size-6"
-                />
-              ) : (
-                <ArrowUpRight
-                  strokeWidth={1}
-                  className="text-foreground size-6"
-                />
+    <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <View className="flex-1 items-center py-6 px-4 justify-between">
+        <View className="flex-1 w-full gap-6">
+          {/** Transaction Top Card */}
+          <View className="gap-3">
+            <View className="flex-row justify-between items-center">
+              <Lead className="text-foreground">JNANA 2024</Lead>
+              <View className="flex-row items-center gap-1">
+                <Large className="font-bold">
+                  {t.amount.toLocaleString("en-IN", {
+                    currency: "INR",
+                    currencyDisplay: "narrowSymbol",
+                    currencySign: "standard",
+                    style: "currency",
+                    maximumFractionDigits: 0,
+                  })}
+                </Large>
+                {t.type === "payout" ? (
+                  <ArrowDownLeft
+                    strokeWidth={1}
+                    className="text-foreground size-6"
+                  />
+                ) : (
+                  <ArrowUpRight
+                    strokeWidth={1}
+                    className="text-foreground size-6"
+                  />
+                )}
+              </View>
+            </View>
+            <View className="flex-row justify-between items-center">
+              <View className="flex-row items-center gap-2">
+                <Avatar className="size-5" alt={t.chit_fund_name}>
+                  <AvatarImage source={{ uri: t.chit_fund_image }} />
+                  <AvatarFallback>
+                    <Text className="text-[8px]">
+                      {t.chit_fund_name.charAt(0).toUpperCase()}
+                    </Text>
+                  </AvatarFallback>
+                </Avatar>
+                <Small className="text-xs">{t.chit_fund_name}</Small>
+              </View>
+              {t.type === "payout" && (
+                <PayoutStatusBadge status={t.status ?? ""} />
               )}
             </View>
           </View>
-          <View className="flex-row justify-between items-center">
-            <View className="flex-row items-center gap-2">
-              <Avatar className="size-5" alt={t.chit_fund_name}>
-                <AvatarImage source={{ uri: t.chit_fund_image }} />
-                <AvatarFallback>
-                  <Text className="text-[8px]">
-                    {t.chit_fund_name.charAt(0).toUpperCase()}
-                  </Text>
-                </AvatarFallback>
-              </Avatar>
-              <Small className="text-xs">{t.chit_fund_name}</Small>
-            </View>
-            {t.type === "payout" && (
-              <PayoutStatusBadge status={t.status ?? ""} />
-            )}
-          </View>
-        </View>
 
-        {/** Content */}
-        {t.type === "payment" ? (
-          <PaymentDetails />
-        ) : (
-          <PayoutDetails status={t.status ?? ""} />
-        )}
+          {/** Content */}
+          {t.type === "payment" ? (
+            <PaymentDetails />
+          ) : (
+            <PayoutDetails status={t.status ?? ""} />
+          )}
+        </View>
+        <H3 className="text-muted-foreground">Chit.Money</H3>
       </View>
-      <H3 className="text-muted-foreground">Chit.Money</H3>
-    </View>
+    </ScrollView>
   );
 }
