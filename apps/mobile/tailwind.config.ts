@@ -64,6 +64,14 @@ export default {
           fontWeight: "unset",
         },
         ".font-black": { fontFamily: "Urbanist_900Black", fontWeight: "unset" },
+        ".font-fira": {
+          fontFamily: "FiraCode_400Regular",
+          fontWeight: "unset",
+        },
+        ".font-fira-bold": {
+          fontFamily: "FiraCode_700Bold",
+          fontWeight: "unset",
+        },
       };
       addUtilities(newUtilities);
     }),
