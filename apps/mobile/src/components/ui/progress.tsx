@@ -7,6 +7,7 @@ import Animated, {
   useAnimatedStyle,
   useDerivedValue,
   withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { cn } from "~/lib/utils";
 
@@ -40,13 +41,15 @@ function Indicator({
   value: number | undefined | null;
   className?: string;
 }) {
-  const progress = useDerivedValue(() => value ?? 0);
+  const progress = useDerivedValue(() => {
+    return value ? value : 0;
+  });
 
   const indicator = useAnimatedStyle(() => {
     return {
-      width: withSpring(
+      width: withTiming(
         `${interpolate(progress.value, [0, 100], [1, 100], Extrapolation.CLAMP)}%`,
-        { overshootClamping: true }
+        { duration: 300 } // Adjust duration as needed
       ),
     };
   });
@@ -58,7 +61,7 @@ function Indicator({
           "h-full w-full flex-1 bg-primary web:transition-all",
           className
         )}
-        style={{ transform: `translateX(-${100 - (value ?? 0)}%)` }}
+        style={{ width: `${value ?? 0}%` }}
       >
         <ProgressPrimitive.Indicator
           className={cn("h-full w-full", className)}

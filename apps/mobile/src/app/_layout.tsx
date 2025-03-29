@@ -28,6 +28,8 @@ import { useColorScheme } from "~/lib/useColorScheme";
 import { StatusBar } from "expo-status-bar";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { PortalHost } from "@rn-primitives/portal";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -40,6 +42,12 @@ const DARK_THEME: Theme = {
 
 export const unstable_settings = {
   initialRouteName: "(home)",
+  home: {
+    initialRouteName: "(tabs)",
+    batch: {
+      initialRouteName: "[batchId]/index",
+    },
+  },
 };
 
 export {
@@ -122,7 +130,7 @@ function Outlet() {
         // const isHomeSegment = segments["0"] === "(home)";
 
         if (isSignedIn && isAuthSegment) {
-          router.replace("/(home)");
+          router.replace("/(home)/(tabs)");
         } else if (!isSignedIn) {
           router.replace("/(auth)");
         }
@@ -152,7 +160,10 @@ export default function RootLayout() {
 
   return (
     <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-      <Outlet />
+      <GestureHandlerRootView>
+        <Outlet />
+        <PortalHost />
+      </GestureHandlerRootView>
     </ClerkProvider>
   );
 }

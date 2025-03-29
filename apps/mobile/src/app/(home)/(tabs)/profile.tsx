@@ -75,9 +75,8 @@ export default function Profile() {
         {/** Profile Menu */}
         <View className="gap-1">
           {items.map((item, index) => (
-            <Link href={item.url} asChild>
+            <Link href={item.url} key={index + item.name} asChild>
               <Button
-                key={index + item.name}
                 className="justify-between native:px-2 native:py-2"
                 variant={"ghost"}
               >

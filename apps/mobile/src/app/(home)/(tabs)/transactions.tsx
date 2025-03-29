@@ -2,21 +2,15 @@ import { Search } from "lucide-react-native";
 import { ScrollView, View } from "react-native";
 import { LinearBlurView } from "~/components/linear-blurview";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card, CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import { H2, Large, Muted, Small } from "~/components/ui/typography";
 import { cn } from "~/lib/utils";
 import { ArrowDownLeft } from "~/lib/icons/ArrowDownLeft";
 import { ArrowUpRight } from "~/lib/icons/ArrowUpRight";
+import { PayoutStatusBadge } from "~/lib/payout-badge";
 
 const data = [
   {
@@ -104,44 +98,6 @@ const data = [
     created_at: new Date(2024, 3, 8),
   },
 ];
-
-function PayoutStatusBadge({ status }: { status: string }) {
-  switch (status) {
-    case "requested":
-      return (
-        <Badge className="bg-orange-600">
-          <Text>Requested</Text>
-        </Badge>
-      );
-
-    case "approved":
-      return (
-        <Badge className="bg-indigo-600">
-          <Text>Approved</Text>
-        </Badge>
-      );
-
-    case "disbursed":
-      return (
-        <Badge>
-          <Text>Disbursed</Text>
-        </Badge>
-      );
-    case "rejected":
-      return (
-        <Badge variant={"destructive"}>
-          <Text>Rejected</Text>
-        </Badge>
-      );
-
-    case "cancelled":
-      return (
-        <Badge variant={"outline"} className="border-destructive">
-          <Text className="text-destructive">Cancelled</Text>
-        </Badge>
-      );
-  }
-}
 
 export default function Transactions() {
   return (
