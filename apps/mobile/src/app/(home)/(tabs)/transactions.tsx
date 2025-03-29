@@ -11,6 +11,8 @@ import { cn } from "~/lib/utils";
 import { ArrowDownLeft } from "~/lib/icons/ArrowDownLeft";
 import { ArrowUpRight } from "~/lib/icons/ArrowUpRight";
 import { PayoutStatusBadge } from "~/lib/payout-badge";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { Link } from "expo-router";
 
 const data = [
   {
@@ -125,67 +127,71 @@ export default function Transactions() {
         {/** Transaction List */}
         <View className="gap-2">
           {data.map((t, i) => (
-            <Card key={i}>
-              <CardHeader className="gap-3">
-                <View className="gap-2 flex-row justify-between items-center">
-                  <CardTitle className="text-base">{t.name}</CardTitle>
+            <Link key={i} asChild href={`/transaction/${t.id}`}>
+              <TouchableOpacity>
+                <Card>
+                  <CardHeader className="gap-3">
+                    <View className="gap-2 flex-row justify-between items-center">
+                      <CardTitle className="text-base">{t.name}</CardTitle>
 
-                  <View className="flex-row items-center gap-1">
-                    <Large>
-                      {t.amount.toLocaleString("en-IN", {
-                        currency: "INR",
-                        currencyDisplay: "narrowSymbol",
-                        currencySign: "standard",
-                        style: "currency",
-                        maximumFractionDigits: 0,
-                      })}
-                    </Large>
-                    {t.type === "payout" ? (
-                      <ArrowDownLeft
-                        strokeWidth={1}
-                        className="text-foreground size-6"
-                      />
-                    ) : (
-                      <ArrowUpRight
-                        strokeWidth={1}
-                        className="text-foreground size-6"
-                      />
-                    )}
-                  </View>
-                </View>
+                      <View className="flex-row items-center gap-1">
+                        <Large>
+                          {t.amount.toLocaleString("en-IN", {
+                            currency: "INR",
+                            currencyDisplay: "narrowSymbol",
+                            currencySign: "standard",
+                            style: "currency",
+                            maximumFractionDigits: 0,
+                          })}
+                        </Large>
+                        {t.type === "payout" ? (
+                          <ArrowDownLeft
+                            strokeWidth={1}
+                            className="text-foreground size-6"
+                          />
+                        ) : (
+                          <ArrowUpRight
+                            strokeWidth={1}
+                            className="text-foreground size-6"
+                          />
+                        )}
+                      </View>
+                    </View>
 
-                <View className="flex-row justify-between items-center">
-                  <View className="flex-row items-center gap-2">
-                    <Avatar className="size-5" alt={t.chit_fund_name}>
-                      <AvatarImage source={{ uri: t.chit_fund_image }} />
-                      <AvatarFallback>
-                        <Text className="text-[8px]">
-                          {t.chit_fund_name.charAt(0).toUpperCase()}
+                    <View className="flex-row justify-between items-center">
+                      <View className="flex-row items-center gap-2">
+                        <Avatar className="size-5" alt={t.chit_fund_name}>
+                          <AvatarImage source={{ uri: t.chit_fund_image }} />
+                          <AvatarFallback>
+                            <Text className="text-[8px]">
+                              {t.chit_fund_name.charAt(0).toUpperCase()}
+                            </Text>
+                          </AvatarFallback>
+                        </Avatar>
+                        <Small className="text-xs">{t.chit_fund_name}</Small>
+                      </View>
+
+                      {t.type === "payment" ? (
+                        <Text
+                          className={cn(
+                            t.credit_score_affected > 0
+                              ? "text-primary"
+                              : "text-destructive"
+                          )}
+                        >
+                          {t.credit_score_affected}
                         </Text>
-                      </AvatarFallback>
-                    </Avatar>
-                    <Small className="text-xs">{t.chit_fund_name}</Small>
-                  </View>
-
-                  {t.type === "payment" ? (
-                    <Text
-                      className={cn(
-                        t.credit_score_affected > 0
-                          ? "text-primary"
-                          : "text-destructive"
+                      ) : (
+                        <PayoutStatusBadge status={t.status ?? ""} />
                       )}
-                    >
-                      {t.credit_score_affected}
-                    </Text>
-                  ) : (
-                    <PayoutStatusBadge status={t.status ?? ""} />
-                  )}
-                </View>
-              </CardHeader>
-              <CardFooter>
-                <Muted className="text-xs">2 hours ago</Muted>
-              </CardFooter>
-            </Card>
+                    </View>
+                  </CardHeader>
+                  <CardFooter>
+                    <Muted className="text-xs">2 hours ago</Muted>
+                  </CardFooter>
+                </Card>
+              </TouchableOpacity>
+            </Link>
           ))}
         </View>
       </LinearBlurView>

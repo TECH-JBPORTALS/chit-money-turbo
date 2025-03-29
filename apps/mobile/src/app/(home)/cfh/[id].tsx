@@ -31,9 +31,9 @@ export default function ChitFundHouse() {
 
         {/** QR code button */}
         <Button variant={"outline"}>
-          <QrCode className="size-4 text-secondary-foreground" />
-          <Text className="text-secondary-foreground">Get QR Code to Pay</Text>
-          <ArrowRight className="size-4 text-secondary-foreground" />
+          <QrCode className="size-4 " />
+          <Text>Get QR Code to Pay</Text>
+          <ArrowRight className="size-4 " />
         </Button>
 
         {/** Owner */}
@@ -125,14 +125,12 @@ export default function ChitFundHouse() {
             <P>Documents</P>
           </View>
           <Button variant={"outline"} className="justify-between">
-            <Text className="text-secondary-foreground">Owner Aadhar Card</Text>
-            <ArrowRight className="text-secondary-foreground size-4" />
+            <Text>Owner Aadhar Card</Text>
+            <ArrowRight className=" size-4" />
           </Button>
           <Button variant={"outline"} className="justify-between">
-            <Text className="text-secondary-foreground">
-              Chit Fund Registration Certificate
-            </Text>
-            <ArrowRight className="text-secondary-foreground size-4" />
+            <Text>Chit Fund Registration Certificate</Text>
+            <ArrowRight className=" size-4" />
           </Button>
         </View>
       </View>

@@ -13,6 +13,10 @@ import {
   Urbanist_700Bold,
   Urbanist_900Black,
 } from "@expo-google-fonts/urbanist";
+import {
+  FiraCode_400Regular,
+  FiraCode_700Bold,
+} from "@expo-google-fonts/fira-code";
 import * as SplashScreen from "expo-splash-screen";
 import { ClerkProvider, useUser } from "@clerk/clerk-expo";
 import {
@@ -20,7 +24,6 @@ import {
   ThemeProvider,
   DefaultTheme,
   DarkTheme,
-  NavigationContainer,
 } from "@react-navigation/native";
 import React, { useCallback, useEffect } from "react";
 import { NAV_THEME } from "~/lib/constants";
@@ -92,6 +95,8 @@ function Outlet() {
     Urbanist_700Bold,
     Urbanist_800ExtraBold,
     Urbanist_900Black,
+    FiraCode_400Regular,
+    FiraCode_700Bold,
   });
   const { isDarkColorScheme, colorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);

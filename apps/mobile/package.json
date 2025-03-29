@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@clerk/clerk-expo": "^2.8.5",
+    "@expo-google-fonts/fira-code": "^0.2.3",
     "@expo-google-fonts/urbanist": "^0.2.3",
     "@hookform/resolvers": "catalog:rfh752",
     "@react-native-community/blur": "^4.4.1",
@@ -20,6 +21,7 @@
     "@rn-primitives/dialog": "^1.1.0",
     "@rn-primitives/label": "^1.1.0",
     "@rn-primitives/progress": "^1.1.0",
+    "@rn-primitives/separator": "^1.1.0",
     "@rn-primitives/slot": "^1.1.0",
     "@rn-primitives/tabs": "^1.1.0",
     "@rn-primitives/types": "^1.1.0",
