@@ -98,11 +98,12 @@ function Outlet() {
     FiraCode_400Regular,
     FiraCode_700Bold,
   });
-  const { isDarkColorScheme, colorScheme } = useColorScheme();
+  const { colorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
   const segments = useSegments();
   const router = useRouter();
+  const onboardingComplete = user?.publicMetadata.onboardingComplete;
 
   useEffect(() => {
     (async () => {
@@ -132,10 +133,16 @@ function Outlet() {
     useCallback(() => {
       if (isLoaded) {
         const isAuthSegment = segments["0"] === "(auth)";
-        // const isHomeSegment = segments["0"] === "(home)";
+        const isHomeSegment = segments["0"] === "(home)";
 
-        if (isSignedIn && isAuthSegment) {
+        if (isSignedIn && isAuthSegment && onboardingComplete) {
           router.replace("/(home)/(tabs)");
+        } else if (
+          !onboardingComplete &&
+          isSignedIn &&
+          (isHomeSegment || isAuthSegment)
+        ) {
+          router.replace("/(onboarding)");
         } else if (!isSignedIn) {
           router.replace("/(auth)");
         }
@@ -143,7 +150,13 @@ function Outlet() {
           SplashScreen.hideAsync();
         }
       }
-    }, [isLoaded, isSignedIn, isColorSchemeLoaded, fontsLoaded])
+    }, [
+      isLoaded,
+      isSignedIn,
+      onboardingComplete,
+      isColorSchemeLoaded,
+      fontsLoaded,
+    ])
   );
 
   if (error) console.log("font error", error);
