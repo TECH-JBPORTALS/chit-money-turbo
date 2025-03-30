@@ -33,6 +33,7 @@ import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { PortalHost } from "@rn-primitives/portal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -98,7 +99,7 @@ function Outlet() {
     FiraCode_400Regular,
     FiraCode_700Bold,
   });
-  const { colorScheme } = useColorScheme();
+  const { colorScheme, setColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
   const { isSignedIn, isLoaded, user } = useUser();
   const segments = useSegments();
@@ -107,20 +108,19 @@ function Outlet() {
 
   useEffect(() => {
     (async () => {
-      // const theme = await AsyncStorage.getItem("theme");
+      const theme = await AsyncStorage.getItem("theme");
 
-      // if (!theme) {
-      //   setAndroidNavigationBar(colorScheme);
-      // AsyncStorage.setItem("theme", colorScheme);
-      //   setIsColorSchemeLoaded(true);
-      //   return;
-      // }
-      // const colorTheme = theme === "dark" ? "dark" : "light";
+      if (!theme) {
+        setAndroidNavigationBar(colorScheme);
+        AsyncStorage.setItem("theme", colorScheme);
+        setIsColorSchemeLoaded(true);
+        return;
+      }
+      const colorTheme = theme === "dark" ? "dark" : "light";
       setAndroidNavigationBar(colorScheme);
 
-      if (colorScheme) {
-        // if (colorTheme !== colorScheme) {
-        // setColorScheme(colorTheme);
+      if (colorTheme !== colorScheme) {
+        setColorScheme(colorTheme);
         setIsColorSchemeLoaded(true);
         return;
       }

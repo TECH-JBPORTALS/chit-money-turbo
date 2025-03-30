@@ -15,6 +15,7 @@
     "@expo-google-fonts/fira-code": "^0.2.3",
     "@expo-google-fonts/urbanist": "^0.2.3",
     "@hookform/resolvers": "catalog:rfh752",
+    "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/blur": "^4.4.1",
     "@react-navigation/native": "^7.0.15",
     "@rn-primitives/avatar": "^1.1.0",
@@ -58,7 +59,8 @@
     "tailwindcss": "catalog:tailwind3",
     "tailwindcss-animate": "^1.0.7",
     "use-isomorphic-layout-effect": "^1.2.0",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

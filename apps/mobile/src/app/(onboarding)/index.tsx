@@ -20,11 +20,13 @@ import { Button } from "~/components/ui/button";
 import { View } from "react-native";
 import { FormSteps, useFormSteps } from "~/components/form-steps";
 import { Small } from "~/components/ui/typography";
-
-const personalInfoSchema = z.object({
-  full_name: z.string().trim().min(2, "Enter valid name"),
-  date_of_birth: z.string().trim().min(2, "Enter valid date of birth"),
-});
+import {
+  personalInfoSchema,
+  contactInfoSchema,
+  nomineeInfoSchema,
+  documentsSchema,
+} from "~/lib/validators";
+import { useUser } from "@clerk/clerk-expo";
 
 function PersonalInfoForm() {
   const form = useForm<z.infer<typeof personalInfoSchema>>({
@@ -34,9 +36,13 @@ function PersonalInfoForm() {
       date_of_birth: "",
     },
   });
+
   const { next } = useFormSteps();
+  const { user, isLoaded } = useUser();
 
   async function onSubmit(values: z.infer<typeof personalInfoSchema>) {
+    if (!isLoaded) return;
+
     next();
   }
 
@@ -87,16 +93,12 @@ function PersonalInfoForm() {
   );
 }
 
-const contactInfoSchema = z.object({
-  full_name: z.string().trim().min(2, "Enter valid name"),
-  date_of_birth: z.string().trim().min(2, "Enter valid date of birth"),
-});
 function ContactInfoForm() {
   const form = useForm<z.infer<typeof contactInfoSchema>>({
     resolver: zodResolver(contactInfoSchema),
     defaultValues: {
-      full_name: "",
-      date_of_birth: "",
+      primary_phone_number: "",
+      alternative_phone_number: "",
     },
   });
   const { next, prev } = useFormSteps();
@@ -110,16 +112,17 @@ function ContactInfoForm() {
       <Form {...form}>
         <FormField
           control={form.control}
-          name="full_name"
+          name="primary_phone_number"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Full Name</FormLabel>
+              <FormLabel>Primary Phone Number</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   autoFocus
                   onChangeText={field.onChange}
-                  placeholder="Gean Gun Hi"
+                  keyboardType="phone-pad"
+                  maxLength={10}
                 />
               </FormControl>
               <FormMessage />
@@ -128,10 +131,83 @@ function ContactInfoForm() {
         />
         <FormField
           control={form.control}
-          name="date_of_birth"
+          name="alternative_phone_number"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Date Of Birth</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  onChangeText={field.onChange}
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </Form>
+
+      <View className="flex-row gap-4 mt-auto">
+        <Button
+          onPress={() => prev()}
+          size={"lg"}
+          variant={"secondary"}
+          className="flex-1"
+        >
+          <ArrowLeft className="size-4 text-secondary-foreground" />
+          <Text>Back</Text>
+        </Button>
+        <Button
+          onPress={form.handleSubmit(onSubmit)}
+          size={"lg"}
+          className="flex-1"
+        >
+          <Text>Next</Text>
+          <ArrowRight className="size-4 text-primary-foreground" />
+        </Button>
+      </View>
+    </View>
+  );
+}
+
+function NomineeInfoForm() {
+  const form = useForm<z.infer<typeof nomineeInfoSchema>>({
+    resolver: zodResolver(nomineeInfoSchema),
+    defaultValues: {
+      full_name: "",
+      relationship: "",
+    },
+  });
+  const { next, prev } = useFormSteps();
+
+  async function onSubmit(values: z.infer<typeof nomineeInfoSchema>) {
+    next();
+  }
+
+  return (
+    <View className="flex-1 gap-6">
+      <Form {...form}>
+        <FormField
+          control={form.control}
+          name="full_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name</FormLabel>
+              <FormControl>
+                <Input {...field} autoFocus onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="relationship"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Relationship</FormLabel>
               <FormControl>
                 <Input {...field} onChangeText={field.onChange} />
               </FormControl>
@@ -155,7 +231,76 @@ function ContactInfoForm() {
           onPress={form.handleSubmit(onSubmit)}
           size={"lg"}
           className="flex-1"
-          disabled={!form.formState.isValid}
+        >
+          <Text>Next</Text>
+          <ArrowRight className="size-4 text-primary-foreground" />
+        </Button>
+      </View>
+    </View>
+  );
+}
+
+function DocumentsForm() {
+  const form = useForm<z.infer<typeof documentsSchema>>({
+    resolver: zodResolver(documentsSchema),
+    defaultValues: {
+      pan_number: "",
+      aadhar_uri: "",
+    },
+  });
+  const { next, prev } = useFormSteps();
+
+  async function onSubmit(values: z.infer<typeof documentsSchema>) {
+    next();
+  }
+
+  return (
+    <View className="flex-1 gap-6">
+      <Form {...form}>
+        <FormField
+          control={form.control}
+          name="pan_number"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>PAN Number</FormLabel>
+              <FormControl>
+                <Input {...field} autoFocus onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="aadhar_uri"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Aadhar Card</FormLabel>
+              <FormControl>
+                <Button variant={"outline"}>
+                  <Text>Upload or Capture</Text>
+                </Button>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </Form>
+
+      <View className="flex-row gap-4 mt-auto">
+        <Button
+          onPress={() => prev()}
+          size={"lg"}
+          variant={"secondary"}
+          className="flex-1"
+        >
+          <ArrowLeft className="size-4 text-secondary-foreground" />
+          <Text>Back</Text>
+        </Button>
+        <Button
+          onPress={form.handleSubmit(onSubmit)}
+          size={"lg"}
+          className="flex-1"
         >
           <Text>Next</Text>
           <ArrowRight className="size-4 text-primary-foreground" />
@@ -198,8 +343,8 @@ export default function Index() {
       <FormSteps defaultStep={1}>
         <PersonalInfoForm />
         <ContactInfoForm />
-        <ContactInfoForm />
-        <ContactInfoForm />
+        <DocumentsForm />
+        <NomineeInfoForm />
         <ContactInfoForm />
         <ContactInfoForm />
       </FormSteps>
