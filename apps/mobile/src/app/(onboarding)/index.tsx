@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Text } from "~/components/ui/text";
 import { Stack } from "expo-router";
 import { LinearBlurView } from "~/components/linear-blurview";
@@ -25,6 +25,8 @@ import {
   contactInfoSchema,
   nomineeInfoSchema,
   documentsSchema,
+  bankInfoSchema,
+  addressInfoSchema,
 } from "~/lib/validators";
 import { useOnboardingStore } from "~/lib/hooks/useOnboardingStore";
 
@@ -135,7 +137,7 @@ function ContactInfoForm() {
           name="alternative_phone_number"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Date Of Birth</FormLabel>
+              <FormLabel>Alternative Phone Number</FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -315,6 +317,227 @@ function DocumentsForm() {
   );
 }
 
+function AddressInfoForm() {
+  const {
+    setState,
+    state: { addressInfo, ...state },
+  } = useOnboardingStore();
+
+  const form = useForm<z.infer<typeof addressInfoSchema>>({
+    resolver: zodResolver(addressInfoSchema),
+    defaultValues: addressInfo,
+  });
+
+  const { next, prev } = useFormSteps();
+
+  async function onSubmit(values: z.infer<typeof addressInfoSchema>) {
+    setState({ ...state, addressInfo: values });
+    next();
+  }
+
+  return (
+    <View className="flex-1 gap-6">
+      <Form {...form}>
+        <FormField
+          control={form.control}
+          name="complete_address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Complete Address</FormLabel>
+              <FormControl>
+                <Input {...field} autoFocus onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="pincode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Pincode</FormLabel>
+              <FormControl>
+                <Input {...field} autoFocus onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>City</FormLabel>
+              <FormControl>
+                <Input {...field} autoFocus onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="state"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>State</FormLabel>
+              <FormControl>
+                <Input {...field} autoFocus onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </Form>
+
+      <View className="flex-row gap-4 mt-auto">
+        <Button
+          onPress={() => prev()}
+          size={"lg"}
+          variant={"secondary"}
+          className="flex-1"
+        >
+          <ArrowLeft className="size-4 text-secondary-foreground" />
+          <Text>Back</Text>
+        </Button>
+        <Button
+          onPress={form.handleSubmit(onSubmit)}
+          size={"lg"}
+          className="flex-1"
+        >
+          <Text>Next</Text>
+          <ArrowRight className="size-4 text-primary-foreground" />
+        </Button>
+      </View>
+    </View>
+  );
+}
+
+function BankInfoForm() {
+  const {
+    setState,
+    state: { bankInfo, ...state },
+  } = useOnboardingStore();
+  const form = useForm<z.infer<typeof bankInfoSchema>>({
+    resolver: zodResolver(bankInfoSchema),
+    defaultValues: bankInfo,
+  });
+  const { next, prev } = useFormSteps();
+
+  async function onSubmit(values: z.infer<typeof bankInfoSchema>) {
+    setState({ ...state, bankInfo: values });
+    next();
+  }
+
+  return (
+    <View className="flex-1 gap-6">
+      <Form {...form}>
+        <FormField
+          control={form.control}
+          name="account_number"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Account Number</FormLabel>
+              <FormControl>
+                <Input {...field} autoFocus onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="confirm_account_number"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm Account Number</FormLabel>
+              <FormControl>
+                <Input {...field} autoFocus onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="ifsc_code"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>IFSC Code</FormLabel>
+              <FormControl>
+                <Input {...field} autoFocus onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="branch_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Branch Name</FormLabel>
+              <FormControl>
+                <Input {...field} autoFocus onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="upi_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>UPI Id</FormLabel>
+              <FormControl>
+                <Input {...field} autoFocus onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="account_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Account Type</FormLabel>
+              <FormControl>
+                <Input {...field} autoFocus onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </Form>
+
+      <View className="flex-row gap-4 mt-auto">
+        <Button
+          onPress={() => prev()}
+          size={"lg"}
+          variant={"secondary"}
+          className="flex-1"
+        >
+          <ArrowLeft className="size-4 text-secondary-foreground" />
+          <Text>Back</Text>
+        </Button>
+        <Button
+          onPress={form.handleSubmit(onSubmit)}
+          size={"lg"}
+          className="flex-1"
+        >
+          <Text>Next</Text>
+          <ArrowRight className="size-4 text-primary-foreground" />
+        </Button>
+      </View>
+    </View>
+  );
+}
+
 export default function Index() {
   const { currentStep, totalSteps } = useFormSteps();
   const { currentStep: defaultStep, setCurrentStep } = useOnboardingStore();
@@ -356,8 +579,8 @@ export default function Index() {
         <ContactInfoForm />
         <DocumentsForm />
         <NomineeInfoForm />
-        <ContactInfoForm />
-        <ContactInfoForm />
+        <AddressInfoForm />
+        <BankInfoForm />
       </FormSteps>
     </LinearBlurView>
   );

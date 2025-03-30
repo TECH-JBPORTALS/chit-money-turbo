@@ -38,6 +38,21 @@ export const useOnboardingStore = create<OnboardingStoreProps>()(
           full_name: "",
           relationship: "",
         },
+        addressInfo: {
+          complete_address: "",
+          pincode: "",
+          state: "",
+          city: "",
+        },
+        bankInfo: {
+          account_number: "",
+          confirm_account_number: "",
+          account_holder_name: "",
+          ifsc_code: "",
+          account_type: "",
+          branch_name: "",
+          upi_id: "",
+        },
       },
     }),
     {
