@@ -22,7 +22,7 @@ export const useOnboardingStore = create<OnboardingStoreProps>()(
         set({ currentStep: step });
       },
       state: {
-        perosnalInfo: {
+        personalInfo: {
           full_name: "",
           date_of_birth: "",
         },

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Text } from "~/components/ui/text";
 import { Stack } from "expo-router";
 import { LinearBlurView } from "~/components/linear-blurview";
@@ -26,23 +26,22 @@ import {
   nomineeInfoSchema,
   documentsSchema,
 } from "~/lib/validators";
-import { useUser } from "@clerk/clerk-expo";
+import { useOnboardingStore } from "~/lib/hooks/useOnboardingStore";
 
 function PersonalInfoForm() {
+  const {
+    setState,
+    state: { personalInfo, ...state },
+  } = useOnboardingStore();
   const form = useForm<z.infer<typeof personalInfoSchema>>({
     resolver: zodResolver(personalInfoSchema),
-    defaultValues: {
-      full_name: "",
-      date_of_birth: "",
-    },
+    defaultValues: personalInfo,
   });
 
   const { next } = useFormSteps();
-  const { user, isLoaded } = useUser();
 
   async function onSubmit(values: z.infer<typeof personalInfoSchema>) {
-    if (!isLoaded) return;
-
+    setState({ ...state, personalInfo: values });
     next();
   }
 
@@ -94,16 +93,18 @@ function PersonalInfoForm() {
 }
 
 function ContactInfoForm() {
+  const {
+    setState,
+    state: { contactInfo, ...state },
+  } = useOnboardingStore();
   const form = useForm<z.infer<typeof contactInfoSchema>>({
     resolver: zodResolver(contactInfoSchema),
-    defaultValues: {
-      primary_phone_number: "",
-      alternative_phone_number: "",
-    },
+    defaultValues: contactInfo,
   });
   const { next, prev } = useFormSteps();
 
   async function onSubmit(values: z.infer<typeof contactInfoSchema>) {
+    setState({ ...state, contactInfo: values });
     next();
   }
 
@@ -173,16 +174,18 @@ function ContactInfoForm() {
 }
 
 function NomineeInfoForm() {
+  const {
+    setState,
+    state: { nomineeInfo, ...state },
+  } = useOnboardingStore();
   const form = useForm<z.infer<typeof nomineeInfoSchema>>({
     resolver: zodResolver(nomineeInfoSchema),
-    defaultValues: {
-      full_name: "",
-      relationship: "",
-    },
+    defaultValues: nomineeInfo,
   });
   const { next, prev } = useFormSteps();
 
   async function onSubmit(values: z.infer<typeof nomineeInfoSchema>) {
+    setState({ ...state, nomineeInfo: values });
     next();
   }
 
@@ -241,16 +244,18 @@ function NomineeInfoForm() {
 }
 
 function DocumentsForm() {
+  const {
+    setState,
+    state: { documents, ...state },
+  } = useOnboardingStore();
   const form = useForm<z.infer<typeof documentsSchema>>({
     resolver: zodResolver(documentsSchema),
-    defaultValues: {
-      pan_number: "",
-      aadhar_uri: "",
-    },
+    defaultValues: documents,
   });
   const { next, prev } = useFormSteps();
 
   async function onSubmit(values: z.infer<typeof documentsSchema>) {
+    setState({ ...state, documents: values });
     next();
   }
 
@@ -312,6 +317,7 @@ function DocumentsForm() {
 
 export default function Index() {
   const { currentStep, totalSteps } = useFormSteps();
+  const { currentStep: defaultStep, setCurrentStep } = useOnboardingStore();
   const labels = [
     "Personal Information",
     "Contact Information",
@@ -340,7 +346,12 @@ export default function Index() {
           ),
         }}
       />
-      <FormSteps defaultStep={1}>
+      <FormSteps
+        onStepChange={(step) => {
+          setCurrentStep(step);
+        }}
+        defaultStep={defaultStep}
+      >
         <PersonalInfoForm />
         <ContactInfoForm />
         <DocumentsForm />

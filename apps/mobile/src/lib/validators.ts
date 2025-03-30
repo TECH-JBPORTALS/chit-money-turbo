@@ -27,7 +27,7 @@ export const documentsSchema = z.object({
 });
 
 export const onboardingSchema = z.object({
-  perosnalInfo: personalInfoSchema,
+  personalInfo: personalInfoSchema,
   contactInfo: contactInfoSchema,
   nomineeInfo: nomineeInfoSchema,
   documents: documentsSchema,

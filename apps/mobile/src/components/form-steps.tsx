@@ -5,10 +5,10 @@ interface FormStepsContextProps {
   currentStep: number;
   next: () => void;
   prev: () => void;
-  jumpTo: (index: number) => void;
+  jumpTo: (step: number) => void;
   totalSteps: number;
   setTotalSteps: (totalSteps: number) => void;
-  setCurrentStep: (index: number) => void;
+  setCurrentStep: (step: number) => void;
 }
 const FormStepsContext = React.createContext<FormStepsContextProps | null>(
   null
@@ -18,13 +18,11 @@ export function FormStepsProvider({ children }: { children: React.ReactNode }) {
   const [currentStep, setCurrentStep] = React.useState(1);
   const [totalSteps, setTotalSteps] = React.useState(0);
 
-  console.log(currentStep);
-
   const next = () =>
     setCurrentStep((prev) => (prev < totalSteps ? prev + 1 : totalSteps));
   const prev = () => setCurrentStep((prev) => (prev > 1 ? prev - 1 : 1));
-  const jumpTo = (index: number) =>
-    setCurrentStep(index > totalSteps ? totalSteps : index < 1 ? 1 : index);
+  const jumpTo = (step: number) =>
+    setCurrentStep(step > totalSteps ? totalSteps : step < 1 ? 1 : step);
 
   return (
     <FormStepsContext.Provider
@@ -56,9 +54,11 @@ export function useFormSteps() {
 export const FormSteps = ({
   children,
   defaultStep = 1,
+  onStepChange,
 }: {
   children: React.ReactNode;
   defaultStep?: number;
+  onStepChange?: (step: number) => void;
 }) => {
   const steps = React.Children.toArray(children);
 
@@ -74,6 +74,11 @@ export const FormSteps = ({
   React.useEffect(() => {
     setTotalSteps(steps.length);
   }, [steps]);
+
+  //Track changing of current step
+  React.useEffect(() => {
+    onStepChange?.(currentStep);
+  }, [currentStep]);
 
   React.useEffect(() => {
     setCurrentStep(defaultStep);
