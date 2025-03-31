@@ -1,5 +1,6 @@
 import React from "react";
 import { View } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 interface FormStepsContextProps {
   currentStep: number;
@@ -84,5 +85,9 @@ export const FormSteps = ({
     setCurrentStep(defaultStep);
   }, []);
 
-  return <View className="flex-1">{steps[currentStep - 1]}</View>;
+  return (
+    <Animated.View entering={FadeIn.duration(800)} className="flex-1">
+      {steps[currentStep - 1]}
+    </Animated.View>
+  );
 };

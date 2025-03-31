@@ -20,6 +20,7 @@ import { Button } from "~/components/ui/button";
 import { View } from "react-native";
 import { FormSteps, useFormSteps } from "~/components/form-steps";
 import { Small } from "~/components/ui/typography";
+import { Camera } from "~/lib/icons/Camera";
 import {
   personalInfoSchema,
   contactInfoSchema,
@@ -284,7 +285,8 @@ function DocumentsForm() {
             <FormItem>
               <FormLabel>Aadhar Card</FormLabel>
               <FormControl>
-                <Button variant={"outline"}>
+                <Button size={"lg"} variant={"outline"}>
+                  <Camera className="size-5 text-secondary-foreground" />
                   <Text>Upload or Capture</Text>
                 </Button>
               </FormControl>
