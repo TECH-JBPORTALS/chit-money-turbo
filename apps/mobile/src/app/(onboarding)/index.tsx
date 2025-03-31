@@ -2,6 +2,7 @@ import React from "react";
 import { Text } from "~/components/ui/text";
 import { Stack } from "expo-router";
 import { LinearBlurView } from "~/components/linear-blurview";
+import { openSettings } from "expo-linking";
 import {
   Form,
   FormControl,
@@ -17,7 +18,7 @@ import { Input } from "~/components/ui/input";
 import { ArrowRight } from "~/lib/icons/ArrowRight";
 import { ArrowLeft } from "~/lib/icons/ArrowLeft";
 import { Button } from "~/components/ui/button";
-import { View } from "react-native";
+import { Alert, View } from "react-native";
 import { FormSteps, useFormSteps } from "~/components/form-steps";
 import { Small } from "~/components/ui/typography";
 import { Camera } from "~/lib/icons/Camera";
@@ -30,6 +31,7 @@ import {
   addressInfoSchema,
 } from "~/lib/validators";
 import { useOnboardingStore } from "~/lib/hooks/useOnboardingStore";
+import { useUploadHelpers } from "~/utils/uploadthing";
 
 function PersonalInfoForm() {
   const {
@@ -256,6 +258,11 @@ function DocumentsForm() {
     defaultValues: documents,
   });
   const { next, prev } = useFormSteps();
+  const { useImageUploader } = useUploadHelpers();
+  const { openImagePicker, isUploading } = useImageUploader("imageUploader", {
+    onClientUploadComplete: () => Alert.alert("Upload Completed"),
+    onUploadError: (error) => Alert.alert("Upload Error", error.message),
+  });
 
   async function onSubmit(values: z.infer<typeof documentsSchema>) {
     setState({ ...state, documents: values });
@@ -285,7 +292,27 @@ function DocumentsForm() {
             <FormItem>
               <FormLabel>Aadhar Card</FormLabel>
               <FormControl>
-                <Button size={"lg"} variant={"outline"}>
+                <Button
+                  isLoading={isUploading}
+                  onPress={() => {
+                    openImagePicker({
+                      allowsEditing: true,
+                      source: "library", // or "camera"
+                      onInsufficientPermissions: () => {
+                        Alert.alert(
+                          "No Permissions",
+                          "You need to grant permission to your Photos to use this",
+                          [
+                            { text: "Dismiss" },
+                            { text: "Open Settings", onPress: openSettings },
+                          ]
+                        );
+                      },
+                    });
+                  }}
+                  size={"lg"}
+                  variant={"outline"}
+                >
                   <Camera className="size-5 text-secondary-foreground" />
                   <Text>Upload or Capture</Text>
                 </Button>

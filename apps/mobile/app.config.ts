@@ -28,6 +28,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   web: {
     favicon: "./assets/favicon.png",
+    output: "server",
   },
   plugins: ["expo-router", "expo-font"],
 });
