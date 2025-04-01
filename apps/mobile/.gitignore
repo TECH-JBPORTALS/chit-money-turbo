@@ -38,3 +38,4 @@ android/
 
 # typescript
 *.tsbuildinfo
+.vercel
