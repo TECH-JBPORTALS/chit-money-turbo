@@ -15,7 +15,8 @@
     "*.ts",
     "*.js",
     "nativewind-env.d.ts",
-    "types/globals.d.ts"
+    "types/globals.d.ts",
+    "api/index.ts"
   ],
   "exclude": ["node_modules"]
 }
