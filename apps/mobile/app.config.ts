@@ -28,6 +28,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   web: {
     favicon: "./assets/favicon.png",
+    output: "server",
   },
-  plugins: ["expo-router", "expo-font"],
+  plugins: [
+    [
+      "expo-router",
+      {
+        origin: "https://example.com",
+      },
+    ],
+    "expo-font",
+  ],
 });

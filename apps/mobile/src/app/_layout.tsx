@@ -33,6 +33,7 @@ import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { PortalHost } from "@rn-primitives/portal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -98,28 +99,28 @@ function Outlet() {
     FiraCode_400Regular,
     FiraCode_700Bold,
   });
-  const { isDarkColorScheme, colorScheme } = useColorScheme();
+  const { colorScheme, setColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
   const segments = useSegments();
   const router = useRouter();
+  const onboardingComplete = user?.publicMetadata.onboardingComplete;
 
   useEffect(() => {
     (async () => {
-      // const theme = await AsyncStorage.getItem("theme");
+      const theme = await AsyncStorage.getItem("theme");
 
-      // if (!theme) {
-      //   setAndroidNavigationBar(colorScheme);
-      // AsyncStorage.setItem("theme", colorScheme);
-      //   setIsColorSchemeLoaded(true);
-      //   return;
-      // }
-      // const colorTheme = theme === "dark" ? "dark" : "light";
+      if (!theme) {
+        setAndroidNavigationBar(colorScheme);
+        AsyncStorage.setItem("theme", colorScheme);
+        setIsColorSchemeLoaded(true);
+        return;
+      }
+      const colorTheme = theme === "dark" ? "dark" : "light";
       setAndroidNavigationBar(colorScheme);
 
-      if (colorScheme) {
-        // if (colorTheme !== colorScheme) {
-        // setColorScheme(colorTheme);
+      if (colorTheme !== colorScheme) {
+        setColorScheme(colorTheme);
         setIsColorSchemeLoaded(true);
         return;
       }
@@ -132,10 +133,16 @@ function Outlet() {
     useCallback(() => {
       if (isLoaded) {
         const isAuthSegment = segments["0"] === "(auth)";
-        // const isHomeSegment = segments["0"] === "(home)";
+        const isHomeSegment = segments["0"] === "(home)";
 
-        if (isSignedIn && isAuthSegment) {
+        if (isSignedIn && isAuthSegment && onboardingComplete) {
           router.replace("/(home)/(tabs)");
+        } else if (
+          !onboardingComplete &&
+          isSignedIn &&
+          (isHomeSegment || isAuthSegment)
+        ) {
+          router.replace("/(onboarding)");
         } else if (!isSignedIn) {
           router.replace("/(auth)");
         }
@@ -143,7 +150,13 @@ function Outlet() {
           SplashScreen.hideAsync();
         }
       }
-    }, [isLoaded, isSignedIn, isColorSchemeLoaded, fontsLoaded])
+    }, [
+      isLoaded,
+      isSignedIn,
+      onboardingComplete,
+      isColorSchemeLoaded,
+      fontsLoaded,
+    ])
   );
 
   if (error) console.log("font error", error);
