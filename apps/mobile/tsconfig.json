@@ -5,18 +5,24 @@
     "paths": {
       "~/*": ["./src/*"]
     },
-    "jsx": "react-native",
+    "jsx": "preserve",
     "types": ["nativewind/types"],
     "checkJs": false,
-    "moduleSuffixes": [".ios", ".android", ".native", ""]
+    "moduleSuffixes": [".ios", ".android", ".native", ""],
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
-    "src",
-    "*.ts",
     "*.js",
+    "*.ts",
+    "api/index.ts",
     "nativewind-env.d.ts",
+    "src",
     "types/globals.d.ts",
-    "api/index.ts"
+    ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

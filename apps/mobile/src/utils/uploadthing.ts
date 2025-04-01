@@ -1,8 +1,7 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { generateReactNativeHelpers } from "@uploadthing/expo";
 import React, { useState } from "react";
-
-import type { UploadRouter } from "~/utils/__core";
+import { UploadRouter } from "~/app/api/uploadthing+api";
 
 export const createUploadHelpers = (token: string | null) => {
   return generateReactNativeHelpers<UploadRouter>({

@@ -1,4 +1,4 @@
-import { auth, clerk } from "~/utils/__auth";
+import { auth, clerk } from "~/utils/auth";
 
 export async function POST(req: Request) {
   const session = await auth(req);
@@ -18,7 +18,8 @@ export async function POST(req: Request) {
     });
 
     return Response.json({ message: "Ok, Successful" }, { status: 200 });
-  } catch (error: any) {
+  } catch (e) {
+    const error = e as Record<string, string>;
     return Response.json(
       {
         message: "Can't update the user meta data",
@@ -29,6 +30,6 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET() {
   return Response.json("Hello World");
 }

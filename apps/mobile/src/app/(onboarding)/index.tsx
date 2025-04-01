@@ -33,7 +33,7 @@ import {
 import { useOnboardingStore } from "~/lib/hooks/useOnboardingStore";
 import { getUTPublicUrl, useUploadHelpers } from "~/utils/uploadthing";
 import { Image } from "expo-image";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-expo";
 
 function PersonalInfoForm() {
   const {

@@ -10,8 +10,8 @@ const config = withTurborepoManagedCache(
     withNativeWind(getDefaultConfig(__dirname), {
       input: "./src/globals.css",
       configPath: "./tailwind.config.ts",
-    }),
-  ),
+    })
+  )
 );
 
 // XXX: Resolve our exports in workspace packages

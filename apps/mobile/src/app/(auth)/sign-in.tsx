@@ -9,7 +9,6 @@ import { Input } from "~/components/ui/input";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ClerkAPIError } from "@clerk/types";
 import {
   Form,
   FormControl,
@@ -18,7 +17,6 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import Spinner from "~/components/ui/spinner";
 
 const signInSchema = z.object({
   email: z.string().trim().min(1, {

@@ -7,14 +7,18 @@
     "dev:android": "expo start --android -c",
     "android": "expo run android --no-build-cache",
     "clean": "git clean -xdf .cache .expo .turbo android ios node_modules",
-    "clean:native": "git clean -xdf android ios .cache .expo",
-    "ios": "expo run:ios"
+    "clean:native": "git clean -xdf android ios .cache .expo dist .next",
+    "ios": "expo run:ios",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@clerk/backend": "^1.25.8",
     "@clerk/clerk-expo": "^2.8.5",
     "@expo-google-fonts/fira-code": "^0.2.3",
     "@expo-google-fonts/urbanist": "^0.2.3",
+    "@expo/metro-runtime": "~4.0.1",
     "@hookform/resolvers": "catalog:rfh752",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/blur": "^4.4.1",
@@ -61,6 +65,7 @@
     "react-native-screens": "~4.4.0",
     "react-native-solar-icons": "^1.0.2",
     "react-native-svg": "15.8.0",
+    "react-native-web": "~0.19.13",
     "tailwind-merge": "^3.0.1",
     "tailwindcss": "catalog:tailwind3",
     "tailwindcss-animate": "^1.0.7",
@@ -73,6 +78,7 @@
     "@babel/core": "^7.25.2",
     "@babel/runtime": "^7.26.10",
     "@clerk/types": "^4.48.0",
+    "@cmt/eslint-config": "workspace:^",
     "@cmt/typescript-config": "workspace:*",
     "@types/react": "catalog:react18",
     "typescript": "catalog:"
