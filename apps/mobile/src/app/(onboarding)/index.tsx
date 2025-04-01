@@ -1,6 +1,5 @@
-import React from "react";
 import { Text } from "~/components/ui/text";
-import { router, Stack, useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { LinearBlurView } from "~/components/linear-blurview";
 import { openSettings } from "expo-linking";
 import {
@@ -34,8 +33,7 @@ import {
 import { useOnboardingStore } from "~/lib/hooks/useOnboardingStore";
 import { getUTPublicUrl, useUploadHelpers } from "~/utils/uploadthing";
 import { Image } from "expo-image";
-import { useUser } from "@clerk/clerk-expo";
-import { useAuth, useSession } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-react";
 
 function PersonalInfoForm() {
   const {
