@@ -39,3 +39,6 @@ export const useUploadHelpers = () => {
 
   return createUploadHelpers(token);
 };
+
+export const getUTPublicUrl = (fileKey: string) =>
+  `https://qlqyyestnd.ufs.sh/f/${fileKey}`;

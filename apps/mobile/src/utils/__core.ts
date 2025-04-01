@@ -1,27 +1,8 @@
 import { createUploadthing, UploadThingError } from "uploadthing/server";
 import type { FileRouter } from "uploadthing/server";
-import { createClerkClient } from "@clerk/backend";
-import { jwtDecode } from "jwt-decode";
+import { auth } from "./__auth";
 
 const f = createUploadthing();
-
-const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
-
-const auth = async (req: Request) => {
-  // Get the session token from the request
-  const sessionToken = req.headers.get("authorization")?.split(" ")[1];
-
-  if (!sessionToken) {
-    return null;
-  }
-
-  const decodedToken = jwtDecode<{ sid: string }>(sessionToken);
-
-  // Verify the session and get the user ID
-  const session = await clerk.sessions.getSession(decodedToken.sid);
-
-  return session;
-};
 
 export const uploadRouter = {
   imageUploader: f({

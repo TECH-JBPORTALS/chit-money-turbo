@@ -1,6 +1,6 @@
 import React from "react";
 import { Text } from "~/components/ui/text";
-import { Stack } from "expo-router";
+import { router, Stack, useRouter } from "expo-router";
 import { LinearBlurView } from "~/components/linear-blurview";
 import { openSettings } from "expo-linking";
 import {
@@ -22,6 +22,7 @@ import { Alert, View } from "react-native";
 import { FormSteps, useFormSteps } from "~/components/form-steps";
 import { Small } from "~/components/ui/typography";
 import { Camera } from "~/lib/icons/Camera";
+import { RotateCcw } from "~/lib/icons/RotateCcw";
 import {
   personalInfoSchema,
   contactInfoSchema,
@@ -31,7 +32,10 @@ import {
   addressInfoSchema,
 } from "~/lib/validators";
 import { useOnboardingStore } from "~/lib/hooks/useOnboardingStore";
-import { useUploadHelpers } from "~/utils/uploadthing";
+import { getUTPublicUrl, useUploadHelpers } from "~/utils/uploadthing";
+import { Image } from "expo-image";
+import { useUser } from "@clerk/clerk-expo";
+import { useAuth, useSession } from "@clerk/clerk-react";
 
 function PersonalInfoForm() {
   const {
@@ -260,8 +264,17 @@ function DocumentsForm() {
   const { next, prev } = useFormSteps();
   const { useImageUploader } = useUploadHelpers();
   const { openImagePicker, isUploading } = useImageUploader("imageUploader", {
-    onClientUploadComplete: () => Alert.alert("Upload Completed"),
-    onUploadError: (error) => Alert.alert("Upload Error", error.message),
+    onClientUploadComplete: (res) => {
+      setState({
+        ...state,
+        documents: { ...form.getValues(), aadhar_uri: res.at(0)?.key ?? "" },
+      });
+      form.setValue("aadhar_uri", res.at(0)?.key ?? "");
+    },
+    onUploadError: (error) =>
+      Alert.alert("Upload Error", error.message, undefined, {
+        userInterfaceStyle: "dark",
+      }),
   });
 
   async function onSubmit(values: z.infer<typeof documentsSchema>) {
@@ -292,30 +305,68 @@ function DocumentsForm() {
             <FormItem>
               <FormLabel>Aadhar Card</FormLabel>
               <FormControl>
-                <Button
-                  isLoading={isUploading}
-                  onPress={() => {
-                    openImagePicker({
-                      allowsEditing: true,
-                      source: "library", // or "camera"
-                      onInsufficientPermissions: () => {
-                        Alert.alert(
-                          "No Permissions",
-                          "You need to grant permission to your Photos to use this",
-                          [
-                            { text: "Dismiss" },
-                            { text: "Open Settings", onPress: openSettings },
-                          ]
-                        );
-                      },
-                    });
-                  }}
-                  size={"lg"}
-                  variant={"outline"}
-                >
-                  <Camera className="size-5 text-secondary-foreground" />
-                  <Text>Upload or Capture</Text>
-                </Button>
+                {field.value ? (
+                  <>
+                    <Image
+                      source={{ uri: getUTPublicUrl(field.value) }}
+                      style={{ width: "auto", height: 200, borderRadius: 6 }}
+                    />
+                    <Button
+                      isLoading={isUploading}
+                      onPress={() => {
+                        openImagePicker({
+                          allowsEditing: true,
+                          source: "camera", // or "camera"
+                          onInsufficientPermissions: () => {
+                            Alert.alert(
+                              "No Permissions",
+                              "You need to grant permission to your Photos to use this",
+                              [
+                                { text: "Dismiss" },
+                                {
+                                  text: "Open Settings",
+                                  onPress: openSettings,
+                                },
+                              ],
+                              { userInterfaceStyle: "dark" }
+                            );
+                          },
+                        });
+                      }}
+                      size={"lg"}
+                      variant={"outline"}
+                    >
+                      <RotateCcw className="size-5 text-secondary-foreground" />
+                      <Text>Re-Capture Image</Text>
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    isLoading={isUploading}
+                    onPress={() => {
+                      openImagePicker({
+                        allowsEditing: true,
+                        source: "camera", // or "camera"
+                        onInsufficientPermissions: () => {
+                          Alert.alert(
+                            "No Permissions",
+                            "You need to grant permission to your Photos to use this",
+                            [
+                              { text: "Dismiss" },
+                              { text: "Open Settings", onPress: openSettings },
+                            ],
+                            { userInterfaceStyle: "dark" }
+                          );
+                        },
+                      });
+                    }}
+                    size={"lg"}
+                    variant={"outline"}
+                  >
+                    <Camera className="size-5 text-secondary-foreground" />
+                    <Text>Capture Image</Text>
+                  </Button>
+                )}
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -454,10 +505,27 @@ function BankInfoForm() {
     defaultValues: bankInfo,
   });
   const { next, prev } = useFormSteps();
+  const { getToken } = useAuth();
+  const router = useRouter();
 
   async function onSubmit(values: z.infer<typeof bankInfoSchema>) {
     setState({ ...state, bankInfo: values });
-    next();
+    const token = await getToken();
+    try {
+      await fetch("/api/onboarding", {
+        method: "POST",
+        body: JSON.stringify({ onboardingComplete: true }),
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      });
+
+      router.replace("/(home)");
+
+      next();
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   return (
@@ -476,6 +544,7 @@ function BankInfoForm() {
             </FormItem>
           )}
         />
+        {/* <Text>{JSON.stringify(form.formState.errors, undefined, 2)}</Text> */}
         <FormField
           control={form.control}
           name="confirm_account_number"
@@ -483,12 +552,27 @@ function BankInfoForm() {
             <FormItem>
               <FormLabel>Confirm Account Number</FormLabel>
               <FormControl>
-                <Input {...field} autoFocus onChangeText={field.onChange} />
+                <Input {...field} onChangeText={field.onChange} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="account_holder_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Account Holder Name</FormLabel>
+              <FormControl>
+                <Input {...field} onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="ifsc_code"
@@ -496,7 +580,7 @@ function BankInfoForm() {
             <FormItem>
               <FormLabel>IFSC Code</FormLabel>
               <FormControl>
-                <Input {...field} autoFocus onChangeText={field.onChange} />
+                <Input {...field} onChangeText={field.onChange} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -509,7 +593,7 @@ function BankInfoForm() {
             <FormItem>
               <FormLabel>Branch Name</FormLabel>
               <FormControl>
-                <Input {...field} autoFocus onChangeText={field.onChange} />
+                <Input {...field} onChangeText={field.onChange} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -522,7 +606,7 @@ function BankInfoForm() {
             <FormItem>
               <FormLabel>UPI Id</FormLabel>
               <FormControl>
-                <Input {...field} autoFocus onChangeText={field.onChange} />
+                <Input {...field} onChangeText={field.onChange} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -536,7 +620,7 @@ function BankInfoForm() {
             <FormItem>
               <FormLabel>Account Type</FormLabel>
               <FormControl>
-                <Input {...field} autoFocus onChangeText={field.onChange} />
+                <Input {...field} onChangeText={field.onChange} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -555,6 +639,7 @@ function BankInfoForm() {
           <Text>Back</Text>
         </Button>
         <Button
+          isLoading={form.formState.isSubmitting}
           onPress={form.handleSubmit(onSubmit)}
           size={"lg"}
           className="flex-1"

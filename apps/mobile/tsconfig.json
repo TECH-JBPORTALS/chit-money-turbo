@@ -10,6 +10,12 @@
     "checkJs": false,
     "moduleSuffixes": [".ios", ".android", ".native", ""]
   },
-  "include": ["src", "*.ts", "*.js", "nativewind-env.d.ts"],
+  "include": [
+    "src",
+    "*.ts",
+    "*.js",
+    "nativewind-env.d.ts",
+    "types/globals.d.ts"
+  ],
   "exclude": ["node_modules"]
 }
