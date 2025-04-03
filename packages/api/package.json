@@ -7,10 +7,12 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./routers/*": "./src/routers/*"
+    "./routers/*": "./src/routers/*.ts"
   },
   "dependencies": {
+    "@clerk/nextjs": "catalog:",
     "@zodios/core": "^10.9.6",
+    "uploadthing": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

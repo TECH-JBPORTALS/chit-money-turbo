@@ -14,7 +14,7 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.12.5",
+    "@clerk/nextjs": "catalog:",
     "@hookform/resolvers": "catalog:rfh752",
     "@t3-oss/env-nextjs": "^0.12.0",
     "@tanstack/react-query": "^5.69.0",
@@ -32,7 +32,7 @@
     "react-dom": "catalog:react18",
     "react-hook-form": "catalog:rfh752",
     "react-step-builder": "^3.0.6",
-    "uploadthing": "^7.5.2",
+    "uploadthing": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

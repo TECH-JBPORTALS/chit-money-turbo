@@ -7,6 +7,8 @@ catalog:
   typescript: ^5.7.3
   zod: ^3.24.2
   dotenv-cli: ^8.0.0
+  uploadthing: ^7.6.0
+  "@clerk/nextjs": ^6.12.5
 
 catalogs:
   react18:

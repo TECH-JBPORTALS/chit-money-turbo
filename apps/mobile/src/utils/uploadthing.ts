@@ -1,25 +1,17 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { generateReactNativeHelpers } from "@uploadthing/expo";
 import React, { useState } from "react";
-import { UploadRouter } from "~/app/api/uploadthing+api";
+import { OurFileRouter } from "@cmt/api/routers/uploadthing";
+import { fetch } from "expo/fetch";
 
 export const createUploadHelpers = (token: string | null) => {
-  return generateReactNativeHelpers<UploadRouter>({
+  return generateReactNativeHelpers<OurFileRouter>({
     /**
      * Your server url.
      * @default process.env.EXPO_PUBLIC_SERVER_URL
      * @remarks In dev we will also try to use Expo.debuggerHost
      */
-    url: "/api/uploadthing",
-    fetch: (input, init) => {
-      return fetch(input, {
-        ...init,
-        headers: {
-          ...init?.headers,
-          Authorization: `Bearer ${token}`,
-        },
-      });
-    },
+    url: "http://localhost:3000/api/uploadthing",
   });
 };
 
