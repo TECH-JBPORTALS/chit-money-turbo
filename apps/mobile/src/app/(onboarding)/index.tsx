@@ -261,22 +261,21 @@ function DocumentsForm() {
   });
   const { next, prev } = useFormSteps();
   const { useImageUploader } = useUploadHelpers();
-  const { openImagePicker, isUploading } = useImageUploader(
-    "documentsUploader",
-    {
-      onClientUploadComplete: (res) => {
-        setState({
-          ...state,
-          documents: { ...form.getValues(), aadhar_uri: res.at(0)?.key ?? "" },
-        });
-        form.setValue("aadhar_uri", res.at(0)?.key ?? "");
-      },
-      onUploadError: (error) =>
-        Alert.alert("Upload Error", error.message, undefined, {
-          userInterfaceStyle: "dark",
-        }),
-    }
-  );
+  const { openImagePicker, isUploading } = useImageUploader("imageUploader", {
+    onClientUploadComplete: (res) => {
+      setState({
+        ...state,
+        documents: { ...form.getValues(), aadhar_uri: res.at(0)?.key ?? "" },
+      });
+      form.setValue("aadhar_uri", res.at(0)?.key ?? "");
+    },
+    onUploadError: (error) => {
+      console.log(error);
+      Alert.alert("Upload Error", error.message, undefined, {
+        userInterfaceStyle: "dark",
+      });
+    },
+  });
 
   async function onSubmit(values: z.infer<typeof documentsSchema>) {
     setState({ ...state, documents: values });
@@ -316,7 +315,6 @@ function DocumentsForm() {
                       isLoading={isUploading}
                       onPress={() => {
                         openImagePicker({
-                          input: "aadhar_card_front_url",
                           allowsEditing: true,
                           source: "camera", // or "camera"
                           onInsufficientPermissions: () => {
@@ -348,7 +346,6 @@ function DocumentsForm() {
                     onPress={() => {
                       openImagePicker({
                         allowsEditing: true,
-                        input: "aadhar_card_front_url",
                         source: "camera", // or "camera"
                         onInsufficientPermissions: () => {
                           Alert.alert(

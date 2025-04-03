@@ -2,7 +2,7 @@ import { useAuth } from "@clerk/clerk-expo";
 import { generateReactNativeHelpers } from "@uploadthing/expo";
 import React, { useState } from "react";
 import { OurFileRouter } from "@cmt/api/routers/uploadthing";
-import { fetch } from "expo/fetch";
+import { getBaseUrl } from "./base-url";
 
 export const createUploadHelpers = (token: string | null) => {
   return generateReactNativeHelpers<OurFileRouter>({
@@ -11,7 +11,15 @@ export const createUploadHelpers = (token: string | null) => {
      * @default process.env.EXPO_PUBLIC_SERVER_URL
      * @remarks In dev we will also try to use Expo.debuggerHost
      */
-    url: "http://localhost:3000/api/uploadthing",
+    url: `${getBaseUrl()}/api/uploadthing`,
+    fetch: (input, init) => {
+      return fetch(input, {
+        ...init,
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      });
+    },
   });
 };
 
