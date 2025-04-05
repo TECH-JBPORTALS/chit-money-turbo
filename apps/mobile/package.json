@@ -58,7 +58,7 @@
     "react": "catalog:react18",
     "react-dom": "catalog:react18",
     "react-hook-form": "catalog:rfh752",
-    "react-native": "0.76.8",
+    "react-native": "0.76.9",
     "react-native-css-interop": "^0.1.22",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-reanimated": "3.16.2",
