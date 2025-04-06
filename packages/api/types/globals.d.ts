@@ -9,6 +9,6 @@ declare global {
 
   //Not include onboarding meta data in publicMetadata so that we can get clean profile
   interface UserPrivateMetadata {
-    documents: object;
+    documents: Record<string, string>;
   }
 }

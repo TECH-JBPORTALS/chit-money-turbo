@@ -55,7 +55,7 @@ export const ourFileRouter = {
           privateMetadata: {
             ...privateData,
             documents: {
-              ...privateData.documents,
+              ...(privateData.documents as Record<string, string>),
               [metadata.input]: file.key, //update the url to respective selected document slot
             },
           },

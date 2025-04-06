@@ -4,13 +4,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Chit.Money",
   slug: "chit-money",
+  owner: "jb-portals",
   version: "1.0.0",
-  scheme: "'com.jb_portals.chit.money",
+  scheme: "com.jb_portals.chit.money",
   orientation: "portrait",
   icon: "./assets/icon.png",
   assetBundlePatterns: ["**/*"],
   userInterfaceStyle: "automatic",
-  newArchEnabled: true,
+  // newArchEnabled: false,
   splash: {
     image: "./assets/splash-icon.png",
     resizeMode: "contain",
@@ -35,13 +36,25 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     favicon: "./assets/favicon.png",
     output: "server",
   },
+  updates: {
+    url: "https://u.expo.dev/af73ccee-6f1b-4a7e-a1f7-4daeb769609f",
+  },
+  runtimeVersion: {
+    policy: "appVersion",
+  },
   plugins: [
+    "expo-font",
     [
       "expo-router",
       {
-        origin: "https://example.com",
+        origin: "https://chit-money-sub-nerd--api-only.expo.app",
       },
     ],
-    "expo-font",
+    [
+      "expo-dev-client",
+      {
+        launchMode: "most-recent",
+      },
+    ],
   ],
 });
