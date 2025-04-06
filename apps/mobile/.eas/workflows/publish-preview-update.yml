@@ -2,13 +2,13 @@ name: Publish preview update
 
 on:
   push:
-    branches: ["feat-mobile/*", "fix-mobile/*", "main"]
+    branches: ["feat-mobile/*", "fix-mobile/*"]
 
 jobs:
   publish_preview_update:
     name: Publish preview update
+    if: github.event.label.name == 'expo-preview'
     type: update
     params:
-      branch: ${{ github.ref_name || 'main' }}
-      message: "Update from ${{ github.ref_name }}"
-      channel: ${{ github.ref_name }}
+      branch: ${{ github.head_ref || 'main' }}
+      message: "Preview update for PR #${{ github.event.pull_request.number }}"
