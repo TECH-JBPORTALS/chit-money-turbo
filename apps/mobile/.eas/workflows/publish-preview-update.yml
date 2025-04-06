@@ -2,11 +2,13 @@ name: Publish preview update
 
 on:
   push:
-    branches: ["feat-mobile/*", "fix-mobile/*"]
+    branches: ["feat-mobile/*", "fix-mobile/*", "main"]
 
 jobs:
   publish_preview_update:
     name: Publish preview update
     type: update
     params:
-      branch: ${{ github.ref_name || 'test' }}
+      branch: ${{ github.ref_name || 'main' }}
+      message: "Update from ${{ github.ref_name }}"
+      channel: ${{ github.ref_name }}
