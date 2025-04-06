@@ -6,8 +6,13 @@ on:
 
 jobs:
   publish_preview_update:
-    name: Publish preview update
+    name: Publish android preview update
     type: update
     params:
-      branch: ${{ github.head_ref || 'main' }}
-      message: "Preview update for PR #${{ github.event.pull_request.number }}"
+      branch: ${{ github.ref_name || 'main' }}
+      message: "Update from ${{ github.ref_name }}"
+      platform: android
+
+    # Add this section to specify Node.js version
+    env:
+      NODE_VERSION: "20.11.0"
