@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
+    "eas-build-pre-install": "echo node-linker=hoisted >> ../../.npmrc",
     "start": "expo start -c",
     "dev:android": "expo start --android -c",
     "android": "expo run:android --no-build-cache",
