@@ -16,13 +16,15 @@ export default ({ config }: ConfigContext) => {
     userInterfaceStyle: "automatic",
     platforms: ["ios", "android"],
     newArchEnabled: true,
-    splash: {
-      image: "./assets/splash-icon.png",
-      resizeMode: "contain",
-      backgroundColor: "#ffffff",
-    },
     ios: {
       supportsTablet: true,
+      bundleIdentifier: scheme,
+      icon: {
+        light: "./assets/icons/ios-light-icon.png",
+        dark: "./assets/icons/ios-dark-icon.png",
+        tinted: "./assets/icons/ios-tinted-icon.png",
+      },
+    
     },
     extra: {
       eas: {
@@ -31,7 +33,9 @@ export default ({ config }: ConfigContext) => {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/adaptive-icon.png",
+        foregroundImage: "./assets/icons/android-adaptive-icon.png",
+        backgroundImage: "./assets/icons/android-adaptive-icon.png",
+        monochromeImage: "./assets/icons/android-adaptive-icon.png",
         backgroundColor: "#ffffff",
       },
       package: scheme,
@@ -55,6 +59,16 @@ export default ({ config }: ConfigContext) => {
       ],
       "expo-font",
       ["expo-dev-client", { launchMode: "most-recent" }],
+      ["expo-splash-screen", {
+        image: "./assets/icons/splash-icon-light.png",
+        resizeMode: "contain",
+        imageWidth:200,
+        backgroundColor: "#ffffff",
+        dark: {
+          image: "./assets/icons/splash-icon-dark.png",
+          backgroundColor: "#020806",
+        }
+      }],
     ],
   } satisfies ExpoConfig;
 };
@@ -66,17 +80,22 @@ function getConfig() {
     case "development":
       return {
         name: "Chit.Money (Development)",
-        scheme: "com.jb_portals.chit.money.development",
+        scheme: "com.jb_portals.chit_money_development",
       };
     case "preview":
       return {
         name: "Chit.Money (Preview)",
-        scheme: "com.jb_portals.chit.money.preview",
+        scheme: "com.jb_portals.chit_money_preview",
+      };
+    case "production":
+      return {
+        name: "Chit.Money",
+        scheme: "com.jb_portals.chit_money",
       };
     default:
       return {
         name: "Chit.Money",
-        scheme: "com.jb_portals.chit.money",
+        scheme: "com.jb_portals.chit_money",
       };
   }
 }
