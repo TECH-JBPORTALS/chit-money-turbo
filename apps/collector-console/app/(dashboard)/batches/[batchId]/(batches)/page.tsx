@@ -32,7 +32,8 @@ import Link from "next/link";
 import { ScrollArea } from "@cmt/ui/components/scroll-area";
 import SearchInput from "@/components/search-input";
 
-export default function Page({ params }: { params: { batchId: string } }) {
+export default async function Page({ params }: { params: Promise<{ batchId: string }> }) {
+  const { batchId } = await params; 
   return (
     <div className="flex flex-col gap-8">
       {/* Batch Title */}
@@ -67,7 +68,7 @@ export default function Page({ params }: { params: { batchId: string } }) {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button size={"icon"} asChild variant={"outline"}>
-              <Link href={`/batches/${params.batchId}/settings`}>
+              <Link href={`/batches/${batchId}/settings`}>
                 <SettingsIcon />
               </Link>
             </Button>
