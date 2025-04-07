@@ -7,7 +7,7 @@ import Image from "next/image";
 interface UploaderProps
   extends Pick<
     React.ComponentProps<typeof UploadDropzone>,
-    "onClientUploadComplete" | "onUploadError" | "input" | "endpoint"
+    "onClientUploadComplete" | "onUploadError" | "endpoint"
   > {
   uploadDropzoneProps?: Omit<
     React.ComponentProps<typeof UploadDropzone>,
