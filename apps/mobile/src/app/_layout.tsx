@@ -127,7 +127,7 @@ function Outlet() {
 
       setIsColorSchemeLoaded(true);
     })();
-  }, [isSignedIn, isLoaded, isColorSchemeLoaded]);
+  }, [isColorSchemeLoaded]);
 
   useFocusEffect(
     useCallback(() => {
@@ -135,17 +135,18 @@ function Outlet() {
         const isAuthSegment = segments["0"] === "(auth)";
         const isHomeSegment = segments["0"] === "(home)";
 
-        if (isSignedIn && isAuthSegment && onboardingComplete) {
-          router.replace("/(home)/(tabs)");
+        if (!isSignedIn && isHomeSegment) {
+          router.replace("/(auth)");
         } else if (
           !onboardingComplete &&
           isSignedIn &&
           (isHomeSegment || isAuthSegment)
         ) {
           router.replace("/(onboarding)");
-        } else if (!isSignedIn) {
-          router.replace("/(auth)");
+        } else if (isSignedIn && ( isAuthSegment || onboardingComplete)) {
+          router.replace("/(home)/(tabs)");
         }
+
         if (isColorSchemeLoaded && fontsLoaded) {
           SplashScreen.hideAsync();
         }
@@ -156,6 +157,8 @@ function Outlet() {
       onboardingComplete,
       isColorSchemeLoaded,
       fontsLoaded,
+      segments,
+      router
     ])
   );
 
