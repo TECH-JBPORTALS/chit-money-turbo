@@ -36,6 +36,12 @@ export default ({ config }: ConfigContext) => {
       },
       package: scheme,
     },
+    updates: {
+      url: "https://u.expo.dev/af73ccee-6f1b-4a7e-a1f7-4daeb769609f",
+    },
+    runtimeVersion: {
+      policy: "appVersion",
+    },
     web: {
       favicon: "./assets/favicon.png",
       output: "server",
