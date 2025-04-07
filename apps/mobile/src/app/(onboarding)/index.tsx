@@ -34,6 +34,7 @@ import { useOnboardingStore } from "~/lib/hooks/useOnboardingStore";
 import { getUTPublicUrl, useUploadHelpers } from "~/utils/uploadthing";
 import { Image } from "expo-image";
 import { useAuth } from "@clerk/clerk-expo";
+import { ScrollView } from "react-native-gesture-handler";
 
 function PersonalInfoForm() {
   const {
@@ -665,6 +666,13 @@ export default function Index() {
   ];
 
   return (
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      automaticallyAdjustKeyboardInsets
+      keyboardDismissMode="interactive"
+      keyboardShouldPersistTaps="handled"
+    >
+
     <LinearBlurView className="pt-20">
       <Stack.Screen
         options={{
@@ -682,13 +690,13 @@ export default function Index() {
             </Small>
           ),
         }}
-      />
+        />
       <FormSteps
         onStepChange={(step) => {
           setCurrentStep(step);
         }}
         defaultStep={defaultStep}
-      >
+        >
         <PersonalInfoForm />
         <ContactInfoForm />
         <DocumentsForm />
@@ -697,5 +705,6 @@ export default function Index() {
         <BankInfoForm />
       </FormSteps>
     </LinearBlurView>
+  </ScrollView>
   );
 }
