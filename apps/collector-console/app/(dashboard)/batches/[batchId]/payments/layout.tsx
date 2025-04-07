@@ -25,6 +25,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </Button>
             {Array.from({ length: 10 }).map((_, i) => (
               <Button
+                key={i}
                 className="rounded-s-none justify-start w-full"
                 variant={"ghost"}
               >
