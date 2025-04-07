@@ -43,6 +43,7 @@ const items = [
     title: "Home",
     url: "/",
     icon: HomeIcon,
+    exact: true,
   },
   {
     title: "All Subscribers",
@@ -95,7 +96,10 @@ export function AppSidebar() {
             <SidebarMenu className="gap-2">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <AppSidebarMenuButtonWithNextLink href={item.url}>
+                  <AppSidebarMenuButtonWithNextLink
+                    exact={item.exact}
+                    href={item.url}
+                  >
                     <item.icon />
                     <span>{item.title}</span>
                   </AppSidebarMenuButtonWithNextLink>

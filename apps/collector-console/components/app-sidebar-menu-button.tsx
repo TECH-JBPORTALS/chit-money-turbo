@@ -111,13 +111,22 @@ export function AppSidebarMenuButtonWithSubMenu(batch: {
 export function AppSidebarMenuButtonWithNextLink({
   children,
   href,
+  exact = false,
 }: {
   children: React.ReactNode;
   href: string;
+  /**
+   * If true, the button will be active if the pathname is exactly equal to the `href`
+   * Otherwise, the button will be active if the pathname starts with the `href`
+   */
+  exact?: boolean;
 }) {
   const pathname = usePathname();
   return (
-    <SidebarMenuButton isActive={pathname === href} asChild>
+    <SidebarMenuButton
+      isActive={exact ? pathname === href : pathname.startsWith(href)}
+      asChild
+    >
       <Link href={href}>{children}</Link>
     </SidebarMenuButton>
   );
