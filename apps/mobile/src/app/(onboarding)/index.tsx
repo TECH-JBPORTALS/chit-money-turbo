@@ -1,6 +1,5 @@
 import { Text } from "~/components/ui/text";
 import { Stack, useRouter } from "expo-router";
-import { LinearBlurView } from "~/components/linear-blurview";
 import { openSettings } from "expo-linking";
 import {
   Form,
@@ -35,6 +34,8 @@ import { getUTPublicUrl, useUploadHelpers } from "~/utils/uploadthing";
 import { Image } from "expo-image";
 import { useAuth } from "@clerk/clerk-expo";
 import { ScrollView } from "react-native-gesture-handler";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import { BlurView } from "expo-blur";
 
 function PersonalInfoForm() {
   const {
@@ -673,7 +674,20 @@ export default function Index() {
       keyboardShouldPersistTaps="handled"
     >
 
-    <LinearBlurView className="pt-20">
+      <View className="px-6 py-8 pt-32 gap-6">
+        
+        <View className="flex-row gap-2">
+
+        {
+            Array.from({ length: totalSteps }).map((_, index) => (<Animated.View key={index} className={"h-1 rounded-ful flex-1 bg-primary opacity-20"}>
+              {
+                currentStep >= index + 1 && (
+                  <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(200)} className="h-full bg-primary rounded-full" style={{width: `${100}%`}}></Animated.View>
+                )
+              }
+            </Animated.View>))
+        }
+        </View>
       <Stack.Screen
         options={{
           title: labels[currentStep - 1],
@@ -688,7 +702,10 @@ export default function Index() {
             <Small>
               {currentStep}/{totalSteps}
             </Small>
-          ),
+            ),
+          headerBackground() {
+            return <BlurView intensity={100} tint="systemChromeMaterialDark" className="bg-background/10 h-full w-full flex-1" />
+          },
         }}
         />
       <FormSteps
@@ -704,7 +721,7 @@ export default function Index() {
         <AddressInfoForm />
         <BankInfoForm />
       </FormSteps>
-    </LinearBlurView>
+    </View>
   </ScrollView>
   );
 }
