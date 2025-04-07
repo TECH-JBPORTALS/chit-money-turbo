@@ -36,6 +36,7 @@ import { useAuth } from "@clerk/clerk-expo";
 import { ScrollView } from "react-native-gesture-handler";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
+import { useColorScheme } from "~/lib/useColorScheme";
 
 function PersonalInfoForm() {
   const {
@@ -665,6 +666,7 @@ export default function Index() {
     "Address Details",
     "Bank Account Details",
   ];
+  const {isDarkColorScheme} = useColorScheme()
 
   return (
     <ScrollView
@@ -704,7 +706,7 @@ export default function Index() {
             </Small>
             ),
           headerBackground() {
-            return <BlurView intensity={100} tint="systemChromeMaterialDark" className="bg-background/10 h-full w-full flex-1" />
+            return <BlurView intensity={100} tint={isDarkColorScheme?"systemChromeMaterialDark":"systemChromeMaterialLight"} className="bg-background/10 h-full w-full flex-1" />
           },
         }}
         />
