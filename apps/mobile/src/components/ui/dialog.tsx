@@ -4,7 +4,6 @@ import { Platform, StyleSheet, View, type ViewProps } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { X } from "~/lib/icons/X";
 import { cn } from "~/lib/utils";
-import { BlurView } from "@react-native-community/blur";
 
 const Dialog = DialogPrimitive.Root;
 
@@ -36,8 +35,6 @@ const DialogOverlayWeb = React.forwardRef<
 
 DialogOverlayWeb.displayName = "DialogOverlayWeb";
 
-const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
-
 const DialogOverlayNative = React.forwardRef<
   DialogPrimitive.OverlayRef,
   DialogPrimitive.OverlayProps
@@ -52,18 +49,13 @@ const DialogOverlayNative = React.forwardRef<
       {...props}
       ref={ref}
     >
-      <AnimatedBlurView
-        entering={FadeIn.duration(150)}
-        exiting={FadeOut.duration(150)}
-        blurAmount={50}
-        blurType={"dark"}
-        style={StyleSheet.absoluteFill}
-      />
       <Animated.View
         entering={FadeIn.duration(150)}
         exiting={FadeOut.duration(150)}
       >
-        <>{children}</>
+        {typeof children === "function"
+          ? children({ pressed: false, hovered: false })
+          : children}
       </Animated.View>
     </DialogPrimitive.Overlay>
   );
