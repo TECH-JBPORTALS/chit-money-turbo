@@ -566,8 +566,8 @@ export function DocumentsForm({
                     <FormControl>
                       <Uploader
                         fileKey={field.value}
-                        input="registeration_certificate_url"
                         endpoint={"documentsUploader"}
+                        input="registeration_certificate_url"
                         onUploadError={(e) => {
                           form.setError("registeration_certificate_url", {
                             message: e.message,

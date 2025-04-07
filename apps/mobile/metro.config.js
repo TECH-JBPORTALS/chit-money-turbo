@@ -2,15 +2,20 @@
 const { getDefaultConfig } = require("expo/metro-config");
 const { FileStore } = require("metro-cache");
 const { withNativeWind } = require("nativewind/metro");
+const {
+  wrapWithReanimatedMetroConfig,
+} = require("react-native-reanimated/metro-config");
 
 const path = require("path");
 
 const config = withTurborepoManagedCache(
   withMonorepoPaths(
-    withNativeWind(getDefaultConfig(__dirname), {
-      input: "./src/globals.css",
-      configPath: "./tailwind.config.ts",
-    })
+    wrapWithReanimatedMetroConfig(
+      withNativeWind(getDefaultConfig(__dirname), {
+        input: "./src/globals.css",
+        configPath: "./tailwind.config.ts",
+      })
+    )
   )
 );
 

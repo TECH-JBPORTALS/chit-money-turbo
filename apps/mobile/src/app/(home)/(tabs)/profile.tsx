@@ -19,7 +19,7 @@ const items = [
   {
     name: "Personal & Nominee Details",
     icon: User,
-    url: "#",
+    url: "/profile/pn-details",
   },
   {
     name: "Credit Score History",
@@ -29,17 +29,17 @@ const items = [
   {
     name: "Documents",
     icon: Files,
-    url: "#",
+    url: "/profile/documents",
   },
   {
     name: "Contact Details",
     icon: Contact,
-    url: "#",
+    url: "/profile/contact-details",
   },
   {
     name: "Bank Details",
     icon: Landmark,
-    url: "#",
+    url: "/profile/bank-details",
   },
 ];
 

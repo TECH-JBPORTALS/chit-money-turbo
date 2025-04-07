@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
+    "eas-build-pre-install": "cd ../../ && echo 'node-linker=hoisted\nlegacy-peer-deps=true' > .npmrc",
     "start": "expo start -c",
     "dev:android": "expo start --android -c",
-    "android": "expo run android --no-build-cache",
+    "android": "expo run:android --no-build-cache",
     "clean": "git clean -xdf .cache .expo .turbo android ios node_modules",
     "clean:native": "git clean -xdf android ios .cache .expo dist .next",
     "ios": "expo run:ios",
@@ -22,7 +23,7 @@
     "@expo/metro-runtime": "~4.0.1",
     "@hookform/resolvers": "catalog:rfh752",
     "@react-native-async-storage/async-storage": "1.23.1",
-    "@react-native-community/blur": "^4.4.1",
+    "@react-native/gradle-plugin": "^0.78.2",
     "@react-navigation/native": "^7.0.14",
     "@rn-primitives/avatar": "^1.1.0",
     "@rn-primitives/dialog": "^1.1.0",
@@ -37,28 +38,33 @@
     "@uploadthing/expo": "^7.2.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "expo": "~52.0.42",
+    "expo": "~52.0.44",
     "expo-blur": "~14.0.3",
     "expo-constants": "~17.0.8",
+    "expo-crypto": "~14.0.2",
+    "expo-dev-client": "~5.0.19",
     "expo-document-picker": "^13.0.3",
     "expo-font": "~13.0.4",
     "expo-image": "~2.0.7",
     "expo-image-picker": "^16.0.6",
     "expo-linear-gradient": "~14.0.2",
     "expo-linking": "~7.0.5",
+    "expo-modules-autolinking": "~2.0.0",
     "expo-navigation-bar": "~4.0.9  ",
     "expo-router": "~4.0.20",
     "expo-secure-store": "^14.0.1",
     "expo-splash-screen": "~0.29.22",
     "expo-status-bar": "~2.0.1",
     "expo-system-ui": "~4.0.9",
+    "expo-updates": "~0.27.4",
+    "expo-web-browser": "~14.0.2",
     "jwt-decode": "^4.0.0",
     "lucide-react-native": "^0.479.0",
     "nativewind": "^4.1.23",
     "react": "catalog:react18",
     "react-dom": "catalog:react18",
     "react-hook-form": "catalog:rfh752",
-    "react-native": "0.76.8",
+    "react-native": "0.76.9",
     "react-native-css-interop": "^0.1.22",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-reanimated": "3.16.2",
@@ -84,6 +90,17 @@
     "@cmt/typescript-config": "workspace:*",
     "@types/react": "catalog:react18",
     "typescript": "catalog:"
+  },
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "jwt-decode",
+          "lucide-react-native"
+        ],
+        "listUnknownPackages": false
+      }
+    }
   },
   "private": true
 }

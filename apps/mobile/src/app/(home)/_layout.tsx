@@ -19,6 +19,19 @@ export default function HomeLayout() {
         name="credit-score"
         options={{ title: "Credit Score History" }}
       />
+      <Stack.Screen
+        name="profile/pn-details"
+        options={{ title: "Profile & Nominee Details" }}
+      />
+      <Stack.Screen
+        name="profile/contact-details"
+        options={{ title: "Contact Details" }}
+      />
+      <Stack.Screen name="profile/documents" options={{ title: "Documents" }} />
+      <Stack.Screen
+        name="profile/bank-details"
+        options={{ title: "Bank Details" }}
+      />
     </Stack>
   );
 }
