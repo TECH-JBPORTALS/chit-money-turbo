@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
+    "eas-build-pre-install": "cd ../../ && echo 'node-linker=hoisted\nlegacy-peer-deps=true' > .npmrc",
     "start": "expo start -c",
     "dev:android": "expo start --android -c",
     "android": "expo run:android --no-build-cache",
@@ -48,6 +49,7 @@
     "expo-image-picker": "^16.0.6",
     "expo-linear-gradient": "~14.0.2",
     "expo-linking": "~7.0.5",
+    "expo-modules-autolinking": "~2.0.0",
     "expo-navigation-bar": "~4.0.9  ",
     "expo-router": "~4.0.20",
     "expo-secure-store": "^14.0.1",
