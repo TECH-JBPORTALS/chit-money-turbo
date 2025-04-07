@@ -1,7 +1,7 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
 export default ({ config }: ConfigContext) => {   
-  const { name, scheme } = getConfig();
+  const { name, scheme, adaptiveIcon } = getConfig();
 
   return {
     ...config,
@@ -32,8 +32,8 @@ export default ({ config }: ConfigContext) => {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/icons/android-adaptive-icon.png",
-        monochromeImage: "./assets/icons/android-adaptive-icon.png",
+        foregroundImage: adaptiveIcon,
+        monochromeImage: adaptiveIcon,
         backgroundColor: "#ffffff"
       },
       package: scheme,
@@ -79,21 +79,25 @@ function getConfig() {
       return {
         name: "Chit.Money (Development)",
         scheme: "money.chit.development",
+        adaptiveIcon: "./assets/icons/android-adaptive-dev-icon.png",
       };
     case "preview":
       return {
         name: "Chit.Money (Preview)",
         scheme: "money.chit.preview",
+        adaptiveIcon: "./assets/icons/android-adaptive-preview-icon.png",
       };
     case "production":
       return {
         name: "Chit.Money",
         scheme: "money.chit.app",
+        adaptiveIcon: "./assets/icons/android-adaptive-icon.png",
       };
     default:
       return {
         name: "Chit.Money",
         scheme: "money.chit.app",
+        adaptiveIcon: "./assets/icons/android-adaptive-icon.png",
       };
   }
 }
