@@ -2,21 +2,26 @@
 const { getDefaultConfig } = require("expo/metro-config");
 const { FileStore } = require("metro-cache");
 const { withNativeWind } = require("nativewind/metro");
+const {
+  wrapWithReanimatedMetroConfig,
+} = require("react-native-reanimated/metro-config");
 
 const path = require("path");
 
 const config = withTurborepoManagedCache(
   withMonorepoPaths(
-    withNativeWind(getDefaultConfig(__dirname), {
-      input: "./src/globals.css",
-      configPath: "./tailwind.config.ts",
-    })
+    wrapWithReanimatedMetroConfig(
+      withNativeWind(getDefaultConfig(__dirname), {
+        input: "./src/globals.css",
+        configPath: "./tailwind.config.ts",
+      })
+    )
   )
 );
 
 // XXX: Resolve our exports in workspace packages
 // https://github.com/expo/expo/issues/26926
-config.resolver.unstable_enablePackageExports = true;
+// config.resolver.unstable_enablePackageExports = true;
 
 module.exports = config;
 
