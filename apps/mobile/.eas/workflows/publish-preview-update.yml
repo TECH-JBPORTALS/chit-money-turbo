@@ -5,8 +5,9 @@ on:
     branches: ["*"]
 
 jobs:
-  publish_preview_update:
-    name: Publish preview update
+  publish_android_preview_update:
+    name: Publish android preview update
     type: update
     params:
-      branch: ${{ github.ref_name || 'test' }}
+      channel: preview
+      platform: android

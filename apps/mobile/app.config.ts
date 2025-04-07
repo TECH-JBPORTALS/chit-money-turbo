@@ -18,7 +18,6 @@ export default ({ config }: ConfigContext) => {
     newArchEnabled: true,
     ios: {
       supportsTablet: true,
-      bundleIdentifier: scheme,
       icon: {
         light: "./assets/icons/ios-light-icon.png",
         dark: "./assets/icons/ios-dark-icon.png",
@@ -34,9 +33,8 @@ export default ({ config }: ConfigContext) => {
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/icons/android-adaptive-icon.png",
-        backgroundImage: "./assets/icons/android-adaptive-icon.png",
         monochromeImage: "./assets/icons/android-adaptive-icon.png",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#ffffff"
       },
       package: scheme,
     },
@@ -80,22 +78,22 @@ function getConfig() {
     case "development":
       return {
         name: "Chit.Money (Development)",
-        scheme: "com.jb_portals.chit_money_development",
+        scheme: "money.chit.development",
       };
     case "preview":
       return {
         name: "Chit.Money (Preview)",
-        scheme: "com.jb_portals.chit_money_preview",
+        scheme: "money.chit.preview",
       };
     case "production":
       return {
         name: "Chit.Money",
-        scheme: "com.jb_portals.chit_money",
+        scheme: "money.chit.app",
       };
     default:
       return {
         name: "Chit.Money",
-        scheme: "com.jb_portals.chit_money",
+        scheme: "money.chit.app",
       };
   }
 }
