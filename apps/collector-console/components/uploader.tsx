@@ -1,14 +1,17 @@
 "use client";
 import { getUTFile, UploadButton, UploadDropzone } from "@/utils/uploadthing";
-import {  OurFileRouter } from "@cmt/api/routers/uploadthing";
+import { OurFileRouter } from "@cmt/api/routers/uploadthing";
 import { cn } from "@cmt/ui/lib/utils";
 import { RotateCwIcon } from "lucide-react";
 import Image from "next/image";
-import {  UploadthingComponentProps } from "@uploadthing/react";
+import { UploadthingComponentProps } from "@uploadthing/react";
 
-
-
-export default function Uploader({ fileKey, ...props }: UploadthingComponentProps<OurFileRouter,"documentsUploader"> & {fileKey:string}) {
+export default function Uploader({
+  fileKey,
+  ...props
+}: UploadthingComponentProps<OurFileRouter, "documentsUploader"> & {
+  fileKey: string;
+}) {
   if (fileKey)
     return (
       <div className="w-full group overflow-hidden rounded-md border bg-card object-contain relative h-60">
@@ -81,7 +84,7 @@ export default function Uploader({ fileKey, ...props }: UploadthingComponentProp
           color: "var(--foreground)",
         },
       }}
-      className="ut-button:bg-accent ut-button:text-accent-foreground ut-button:ut-uploading:bg-primary/40 ut-button:ut-uploading:after:bg-primary ut-allowed-content:text-muted-foreground"
+      className="ut-button:bg-accent h-60 ut-button:text-accent-foreground ut-button:ut-uploading:bg-primary/40 ut-button:px-6 ut-button:ut-uploading:after:bg-primary ut-allowed-content:text-muted-foreground"
       config={{ appendOnPaste: true, mode: "auto" }}
     />
   );

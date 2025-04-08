@@ -517,83 +517,87 @@ export function DocumentsForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="flex flex-col gap-6">
-          <FormField
-            control={form.control}
-            name="registeration_certificate_url"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Registration Certificate</FormLabel>
-                <FormControl>
-                  <Uploader
-                    fileKey={field.value}
-                    endpoint={"documentsUploader"}
-                    input="registeration_certificate_url"
-                    onUploadError={(e) => {
-                      form.setError("registeration_certificate_url", {
-                        message: e.message,
-                      });
-                    }}
-                    onClientUploadComplete={(res) => {
-                      field.onChange(res.at(0)?.key);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="registeration_certificate_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Registration Certificate</FormLabel>
+                  <FormControl>
+                    <Uploader
+                      fileKey={field.value}
+                      endpoint={"documentsUploader"}
+                      input="registeration_certificate_url"
+                      onUploadError={(e) => {
+                        form.setError("registeration_certificate_url", {
+                          message: e.message,
+                        });
+                      }}
+                      onClientUploadComplete={(res) => {
+                        field.onChange(res.at(0)?.key);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-          <FormField
-            control={form.control}
-            name="aadhar_card_front_url"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Adhar Card Front</FormLabel>
-                <FormControl>
-                  <Uploader
-                    fileKey={field.value}
-                    input="aadhar_card_front_url"
-                    endpoint={"documentsUploader"}
-                    onUploadError={(e) => {
-                      form.setError("aadhar_card_front_url", {
-                        message: e.message,
-                      });
-                    }}
-                    onClientUploadComplete={(res) => {
-                      field.onChange(res.at(0)?.key);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="aadhar_card_front_url"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Adhar Card Front</FormLabel>
+                  <FormControl>
+                    <Uploader
+                      fileKey={field.value}
+                      input="aadhar_card_front_url"
+                      endpoint={"documentsUploader"}
+                      onUploadError={(e) => {
+                        form.setError("aadhar_card_front_url", {
+                          message: e.message,
+                        });
+                      }}
+                      onClientUploadComplete={(res) => {
+                        field.onChange(res.at(0)?.key);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="aadhar_card_back_url"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Aadhar Card Back</FormLabel>
-                <FormControl>
-                  <Uploader
-                    fileKey={field.value}
-                    input="aadhar_card_back_url"
-                    endpoint={"documentsUploader"}
-                    onUploadError={(e) => {
-                      form.setError("aadhar_card_back_url", {
-                        message: e.message,
-                      });
-                    }}
-                    onClientUploadComplete={(res) => {
-                      field.onChange(res.at(0)?.key);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="aadhar_card_back_url"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Aadhar Card Back</FormLabel>
+                  <FormControl>
+                    <Uploader
+                      fileKey={field.value}
+                      input="aadhar_card_back_url"
+                      endpoint={"documentsUploader"}
+                      onUploadError={(e) => {
+                        form.setError("aadhar_card_back_url", {
+                          message: e.message,
+                        });
+                      }}
+                      onClientUploadComplete={(res) => {
+                        field.onChange(res.at(0)?.key);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
         <Button
           className="w-fit"
