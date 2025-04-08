@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Button } from "@cmt/ui/components/button";
 import ClientTabs from "./client-tabs";
+import { SignOutButton } from "@clerk/nextjs";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -28,9 +29,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </p>
           </div>
         </div>
-        <Button variant={"outline"} className="w-fit">
-          Sign Out
-        </Button>
+
+        <SignOutButton component={"Button"}>
+          <Button variant={"outline"} className="w-fit">
+            Sign Out
+          </Button>
+        </SignOutButton>
       </div>
 
       {/** Sub navigation */}
