@@ -32,7 +32,7 @@ import {
 import { useOnboardingStore } from "~/lib/hooks/useOnboardingStore";
 import { getUTPublicUrl, useUploadHelpers } from "~/utils/uploadthing";
 import { Image } from "expo-image";
-import { useAuth } from "@clerk/clerk-expo";
+import { useAuth, useUser } from "@clerk/clerk-expo";
 import { ScrollView } from "react-native-gesture-handler";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
@@ -510,6 +510,7 @@ function BankInfoForm() {
   const { next, prev } = useFormSteps();
   const { getToken } = useAuth();
   const router = useRouter();
+  const { user } = useUser();
 
   async function onSubmit(values: z.infer<typeof bankInfoSchema>) {
     setState({ ...state, bankInfo: values });
@@ -522,6 +523,8 @@ function BankInfoForm() {
           authorization: `Bearer ${token}`,
         },
       });
+
+      await user?.reload();
 
       router.replace("/(home)");
 
@@ -666,7 +669,7 @@ export default function Index() {
     "Address Details",
     "Bank Account Details",
   ];
-  const {isDarkColorScheme} = useColorScheme()
+  const { isDarkColorScheme } = useColorScheme();
 
   return (
     <ScrollView
@@ -675,55 +678,68 @@ export default function Index() {
       keyboardDismissMode="interactive"
       keyboardShouldPersistTaps="handled"
     >
-
       <View className="px-6 py-8 pt-32 gap-6">
-        
         <View className="flex-row gap-2">
-
-        {
-            Array.from({ length: totalSteps }).map((_, index) => (<Animated.View key={index} className={"h-1 rounded-ful flex-1 bg-primary opacity-20"}>
-              {
-                currentStep >= index + 1 && (
-                  <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(200)} className="h-full bg-primary rounded-full" style={{width: `${100}%`}}></Animated.View>
-                )
-              }
-            </Animated.View>))
-        }
+          {Array.from({ length: totalSteps }).map((_, index) => (
+            <Animated.View
+              key={index}
+              className={"h-1 rounded-ful flex-1 bg-primary opacity-20"}
+            >
+              {currentStep >= index + 1 && (
+                <Animated.View
+                  entering={FadeIn.duration(200)}
+                  exiting={FadeOut.duration(200)}
+                  className="h-full bg-primary rounded-full"
+                  style={{ width: `${100}%` }}
+                ></Animated.View>
+              )}
+            </Animated.View>
+          ))}
         </View>
-      <Stack.Screen
-        options={{
-          title: labels[currentStep - 1],
-          headerShown: true,
-          headerTitleStyle: {
-            fontFamily: "Urbanist_400Regular",
-          },
-          headerShadowVisible: false,
-          headerTitleAlign: "center",
-          headerTransparent: true,
-          headerRight: () => (
-            <Small>
-              {currentStep}/{totalSteps}
-            </Small>
+        <Stack.Screen
+          options={{
+            title: labels[currentStep - 1],
+            headerShown: true,
+            headerTitleStyle: {
+              fontFamily: "Urbanist_400Regular",
+            },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+            headerTransparent: true,
+            headerRight: () => (
+              <Small>
+                {currentStep}/{totalSteps}
+              </Small>
             ),
-          headerBackground() {
-            return <BlurView intensity={100} tint={isDarkColorScheme?"systemChromeMaterialDark":"systemChromeMaterialLight"} className="bg-background/10 h-full w-full flex-1" />
-          },
-        }}
+            headerBackground() {
+              return (
+                <BlurView
+                  intensity={100}
+                  tint={
+                    isDarkColorScheme
+                      ? "systemChromeMaterialDark"
+                      : "systemChromeMaterialLight"
+                  }
+                  className="bg-background/10 h-full w-full flex-1"
+                />
+              );
+            },
+          }}
         />
-      <FormSteps
-        onStepChange={(step) => {
-          setCurrentStep(step);
-        }}
-        defaultStep={defaultStep}
+        <FormSteps
+          onStepChange={(step) => {
+            setCurrentStep(step);
+          }}
+          defaultStep={defaultStep}
         >
-        <PersonalInfoForm />
-        <ContactInfoForm />
-        <DocumentsForm />
-        <NomineeInfoForm />
-        <AddressInfoForm />
-        <BankInfoForm />
-      </FormSteps>
-    </View>
-  </ScrollView>
+          <PersonalInfoForm />
+          <ContactInfoForm />
+          <DocumentsForm />
+          <NomineeInfoForm />
+          <AddressInfoForm />
+          <BankInfoForm />
+        </FormSteps>
+      </View>
+    </ScrollView>
   );
 }

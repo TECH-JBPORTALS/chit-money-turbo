@@ -21,7 +21,7 @@ export default function TabsLayout() {
           },
           tabBarPosition: "bottom",
           headerShown: false,
-          animation: "shift",
+          animation: "fade",
         }}
       >
         <Tabs.Screen

@@ -134,6 +134,7 @@ function Outlet() {
       if (isLoaded) {
         const isAuthSegment = segments["0"] === "(auth)";
         const isHomeSegment = segments["0"] === "(home)";
+        const isOnboardingSegment = segments["0"] === "(onboarding)";
 
         if (!isSignedIn && isHomeSegment) {
           router.replace("/(auth)");
@@ -143,7 +144,11 @@ function Outlet() {
           (isHomeSegment || isAuthSegment)
         ) {
           router.replace("/(onboarding)");
-        } else if (isSignedIn && ( isAuthSegment || onboardingComplete)) {
+        } else if (
+          isSignedIn &&
+          (isAuthSegment || isOnboardingSegment) &&
+          onboardingComplete
+        ) {
           router.replace("/(home)/(tabs)");
         }
 
@@ -158,7 +163,7 @@ function Outlet() {
       isColorSchemeLoaded,
       fontsLoaded,
       segments,
-      router
+      router,
     ])
   );
 
