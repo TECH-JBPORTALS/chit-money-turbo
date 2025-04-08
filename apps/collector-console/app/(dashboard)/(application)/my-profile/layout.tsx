@@ -4,7 +4,7 @@ import ClientTabs from "./client-tabs";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-6 py-8 h-svh">
+    <div className="flex flex-col gap-6 py-8 pr-20">
       {/* Header */}
       <div>
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
@@ -15,7 +15,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/** Chit Fund Profile and Signout Row */}
       <div className="flex flex-row gap-4 justify-between">
         <div className="flex items-center flex-row gap-2">
-          <Avatar>
+          <Avatar className="size-16">
             <AvatarImage src="https://github.com/shadcn.png" />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
