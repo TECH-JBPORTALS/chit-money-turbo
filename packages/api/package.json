@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@clerk/nextjs": "catalog:",
+    "@trpc/server": "catalog:",
     "@zodios/core": "catalog:",
     "uploadthing": "catalog:",
+    "superjson": "2.2.2",
     "zod": "catalog:"
   },
   "devDependencies": {
