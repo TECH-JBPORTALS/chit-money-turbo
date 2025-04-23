@@ -25,7 +25,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 export function AppSidebarMenuButtonWithSubMenu(batch: {
   id: string;
-  title: string;
+  name: string;
 }) {
   const pathname = usePathname();
   return (
@@ -60,7 +60,7 @@ export function AppSidebarMenuButtonWithSubMenu(batch: {
           >
             <Link href={`/batches/${batch.id}`}>
               <BookIcon />
-              <span>{batch.title}</span>
+              <span>{batch.name}</span>
             </Link>
           </SidebarMenuButton>
         </div>

@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "catalog:",
-    "@zodios/core": "^10.9.6",
+    "@zodios/core": "catalog:",
     "uploadthing": "catalog:",
     "zod": "catalog:"
   },

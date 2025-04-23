@@ -9,6 +9,7 @@ catalog:
   dotenv-cli: ^8.0.0
   uploadthing: ^7.6.0
   "@clerk/nextjs": ^6.12.5
+  "@zodios/core": "^10.9.6"
 
 catalogs:
   react18:

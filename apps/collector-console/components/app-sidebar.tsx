@@ -36,6 +36,9 @@ import {
   AppSidebarMenuButtonWithNextLink,
   AppSidebarMenuButtonWithSubMenu,
 } from "./app-sidebar-menu-button";
+import { api } from "@/utils/api-server";
+import { apiHooks } from "@/utils/api-react";
+import { useQuery } from "@tanstack/react-query";
 
 // Menu items.
 const items = [
@@ -57,30 +60,34 @@ const items = [
   },
 ];
 
-const batches = [
-  {
-    id: "dhdkd9-dkdk-ff7f9d",
-    title: "Janaury 2024",
-    url: "#",
-  },
-  {
-    id: "ui23-d389fk9k-ff7f83d",
-    title: "JP Nagar 2024",
-    url: "#",
-  },
-  {
-    id: "ud23-d8009k-ff7f83d",
-    title: "Raguvanahalli KSIT College and Staff",
-    url: "#",
-  },
-  {
-    id: "ud289-d8009k-ff7f83d",
-    title: "Native 2024",
-    url: "#",
-  },
-];
+// const batches = [
+//   {
+//     id: "dhdkd9-dkdk-ff7f9d",
+//     title: "Janaury 2024",
+//     url: "#",
+//   },
+//   {
+//     id: "ui23-d389fk9k-ff7f83d",
+//     title: "JP Nagar 2024",
+//     url: "#",
+//   },
+//   {
+//     id: "ud23-d8009k-ff7f83d",
+//     title: "Raguvanahalli KSIT College and Staff",
+//     url: "#",
+//   },
+//   {
+//     id: "ud289-d8009k-ff7f83d",
+//     title: "Native 2024",
+//     url: "#",
+//   },
+// ];
 
-export function AppSidebar() {
+export async function AppSidebar() {
+  const batches = await api.getBatches({
+    params: { orgId: "org_01JSC3AAA6PDV7HGHDJEN0A9WP" },
+  });
+
   return (
     <Sidebar>
       <SidebarContent className="pt-6">
@@ -137,7 +144,7 @@ export function AppSidebar() {
             <CollapsibleContent className="pl-2" asChild>
               <SidebarContent>
                 <SidebarMenu>
-                  {batches.map((batch) => (
+                  {batches?.map((batch) => (
                     <AppSidebarMenuButtonWithSubMenu
                       {...batch}
                       key={batch.id}
@@ -168,7 +175,7 @@ export function AppSidebar() {
             <CollapsibleContent className="pl-2" asChild>
               <SidebarContent>
                 <SidebarMenu>
-                  {batches.map((batch, index) => (
+                  {batches?.map((batch) => (
                     <AppSidebarMenuButtonWithSubMenu
                       {...batch}
                       key={batch.id}

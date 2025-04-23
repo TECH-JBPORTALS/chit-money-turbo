@@ -5,7 +5,7 @@ import * as React from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { StepsProvider } from "react-step-builder";
 import { TooltipProvider } from "@cmt/ui/components/tooltip";
-import { QueryProvider } from "@/utils/api";
+import { QueryProvider } from "@/utils/query-client";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (

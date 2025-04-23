@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@cmt/api/*": ["./src/*"]
+      "@/src/*": ["./src/*"]
     }
   },
   "include": ["."],

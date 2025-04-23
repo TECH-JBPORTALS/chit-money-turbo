@@ -1,12 +1,6 @@
-import { mergeApis, Zodios } from "@zodios/core";
-import { batchRouter } from "./routers/batches";
+import { mergeApis } from "@zodios/core";
+import { organizationApi } from "./routers/collectors/organization";
 
-const appRouter = mergeApis({
-  "/": batchRouter,
-});
-
-export const api = new Zodios(appRouter, {
-  axiosConfig: {
-    baseURL: "https://api.nexusserp.com/api/chit_money/collector",
-  },
+export const appRouter = mergeApis({
+  "/collectors/organization": organizationApi,
 });
