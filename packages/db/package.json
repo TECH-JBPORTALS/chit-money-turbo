@@ -33,7 +33,8 @@
     "@neondatabase/serverless": "^1.0.0",
     "drizzle-orm": "^0.42.0",
     "drizzle-zod": "^0.7.1",
-    "postgres": "^3.4.5"
+    "postgres": "^3.4.5",
+    "ulid": "^3.0.0"
   },
   "devDependencies": {
     "@cmt/eslint-config": "workspace:^",

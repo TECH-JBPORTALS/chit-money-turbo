@@ -514,6 +514,9 @@ importers:
       postgres:
         specifier: ^3.4.5
         version: 3.4.5
+      ulid:
+        specifier: ^3.0.0
+        version: 3.0.0
     devDependencies:
       '@cmt/eslint-config':
         specifier: workspace:^
@@ -7511,6 +7514,10 @@ packages:
   uglify-js@3.19.3:
     resolution: {integrity: sha512-v3Xu+yuwBXisp6QYTcH4UbH+xYJXqnq2m/LtQVWKWzYc1iehYnLixoQDN9FH6/j9/oybfd6W9Ghwkl8+UMKTKQ==}
     engines: {node: '>=0.8.0'}
+    hasBin: true
+
+  ulid@3.0.0:
+    resolution: {integrity: sha512-yvZYdXInnJve6LdlPIuYmURdS2NP41ZoF4QW7SXwbUKYt53+0eDAySO+rGSvM2O/ciuB/G+8N7GQrZ1mCJpuqw==}
     hasBin: true
 
   unbox-primitive@1.1.0:
@@ -15654,6 +15661,8 @@ snapshots:
 
   uglify-js@3.19.3:
     optional: true
+
+  ulid@3.0.0: {}
 
   unbox-primitive@1.1.0:
     dependencies:
