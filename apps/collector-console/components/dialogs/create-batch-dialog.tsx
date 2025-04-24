@@ -25,7 +25,7 @@ import { Input } from "@cmt/ui/components/input";
 import { Button } from "@cmt/ui/components/button";
 import { batchSchema } from "@/lib/validators";
 import { useTRPC } from "@/trpc/react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 export default function CreateBatchDialog({
@@ -43,24 +43,30 @@ export default function CreateBatchDialog({
       due_date: "",
     },
   });
+  const queryClient = useQueryClient();
   const trpc = useTRPC();
   const { mutateAsync: createBatch, isPending } = useMutation(
-    trpc.batches.create.mutationOptions()
+    trpc.batches.create.mutationOptions({
+      onSettled() {
+        queryClient.invalidateQueries(trpc.batches.pathFilter());
+      },
+      onSuccess() {
+        setOpen(false);
+      },
+      onError(error) {
+        console.log(error);
+      },
+    })
   );
 
   async function onSubmit(values: z.infer<typeof batchSchema>) {
-    try {
-      await createBatch({
-        name: values.name,
-        startsOn: values.starts_on,
-        defaultCommissionRate: "2.0",
-        fundAmount: "20000",
-        scheme: values.number_of_months,
-      });
-      setOpen(false);
-    } catch (e) {
-      console.log(e);
-    }
+    await createBatch({
+      name: values.name,
+      startsOn: values.starts_on,
+      defaultCommissionRate: "2.0",
+      fundAmount: "20000",
+      scheme: values.number_of_months,
+    });
   }
 
   return (
