@@ -1,6 +1,8 @@
 import { foreignKey, pgEnum, pgTable } from "drizzle-orm/pg-core";
 import { ulid } from "ulid";
 import { collectorProfiles } from "./collector-profiles";
+import { relations } from "drizzle-orm";
+import { createInsertSchema } from "drizzle-zod";
 
 export const batchTypeEnum = pgEnum("batch_type_enum", ["interest", "auction"]);
 export const batchStatusEnum = pgEnum("batch_status_enum", [
@@ -38,9 +40,17 @@ export const batches = pgTable(
   ]
 );
 
-// export const batchRelations = relations(batches, ({ one }) => ({
-//   collectorProfile: one(collectorProfiles, {
-//     fields: [batches.collectorProfileUserId],
-//     references: [collectorProfiles.userId],
-//   }),
-// }));
+export const batchRelations = relations(batches, ({ one }) => ({
+  collectorProfile: one(collectorProfiles, {
+    fields: [batches.collectorProfileUserId],
+    references: [collectorProfiles.userId],
+  }),
+}));
+
+export const batchInsertSchema = createInsertSchema(batches).omit({
+  id: true,
+  collectorProfileUserId: true,
+  endsOn: true, //Calculate when inserting using startsOn field
+  createdAt: true,
+  updatedAt: true,
+});

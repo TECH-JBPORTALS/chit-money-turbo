@@ -24,27 +24,47 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@cmt/ui/components/input";
 import { Button } from "@cmt/ui/components/button";
 import { batchSchema } from "@/lib/validators";
+import { useTRPC } from "@/trpc/react";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 
 export default function CreateBatchDialog({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [isOpen, setOpen] = useState(false);
   const form = useForm<z.infer<typeof batchSchema>>({
     resolver: zodResolver(batchSchema),
     defaultValues: {
       name: "",
       number_of_months: 1,
-      start_month: "",
+      starts_on: "",
       due_date: "",
     },
   });
+  const trpc = useTRPC();
+  const { mutateAsync: createBatch, isPending } = useMutation(
+    trpc.batches.create.mutationOptions()
+  );
 
   async function onSubmit(values: z.infer<typeof batchSchema>) {
-    console.log(values);
+    try {
+      await createBatch({
+        name: values.name,
+        startsOn: values.starts_on,
+        defaultCommissionRate: "2.0",
+        fundAmount: "20000",
+        scheme: values.number_of_months,
+      });
+      setOpen(false);
+    } catch (e) {
+      console.log(e);
+    }
   }
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -94,12 +114,12 @@ export default function CreateBatchDialog({
 
             <FormField
               control={form.control}
-              name="start_month"
+              name="starts_on"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Batch Start Month</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input type="date" {...field} />
                   </FormControl>
                   <FormMessage />
                   <FormDescription>
@@ -111,7 +131,7 @@ export default function CreateBatchDialog({
 
             <FormField
               control={form.control}
-              name="start_month"
+              name="due_date"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Batch Due Date</FormLabel>
@@ -133,7 +153,7 @@ export default function CreateBatchDialog({
                   Cancel
                 </Button>
               </DialogClose>
-              <Button size={"lg"} type="submit">
+              <Button isLoading={isPending} size={"lg"} type="submit">
                 Create
               </Button>
             </DialogFooter>

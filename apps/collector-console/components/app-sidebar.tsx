@@ -37,6 +37,9 @@ import {
   AppSidebarMenuButtonWithSubMenu,
 } from "./app-sidebar-menu-button";
 import { prefetch, trpc } from "@/trpc/server";
+import { ListBatches } from "./list-batches";
+import { Suspense } from "react";
+import { Skeleton } from "@cmt/ui/components/skeleton";
 
 // Menu items.
 const items = [
@@ -82,7 +85,7 @@ const batches = [
 ];
 
 export async function AppSidebar() {
-  prefetch(trpc.hello.sayHello.queryOptions());
+  prefetch(trpc.batches.getAll.queryOptions());
 
   return (
     <Sidebar>
@@ -140,12 +143,17 @@ export async function AppSidebar() {
             <CollapsibleContent className="pl-2" asChild>
               <SidebarContent>
                 <SidebarMenu>
-                  {batches?.map((batch) => (
-                    <AppSidebarMenuButtonWithSubMenu
-                      {...batch}
-                      key={batch.id}
-                    />
-                  ))}
+                  <Suspense
+                    fallback={Array.from({ length: 6 }).flatMap((_, i) => (
+                      <Skeleton
+                        key={i}
+                        className="h-8 rounded-md w-full"
+                        style={{ opacity: `${100 - i * 10}%` }}
+                      />
+                    ))}
+                  >
+                    <ListBatches />
+                  </Suspense>
                 </SidebarMenu>
               </SidebarContent>
             </CollapsibleContent>
