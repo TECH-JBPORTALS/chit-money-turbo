@@ -21,7 +21,7 @@ import { auth, clerkClient, verifyToken } from "@clerk/nextjs/server";
  */
 const isomorphicGetSession = async (headers: Headers) => {
   const client = await clerkClient();
-  const authToken = headers.get("Authorization") ?? null;
+  const authToken = headers.get("Authorization")?.split(" ")[1] ?? null;
 
   if (authToken) {
     const authJwt = await verifyToken(authToken, {

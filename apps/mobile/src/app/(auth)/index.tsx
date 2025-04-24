@@ -37,7 +37,7 @@ export default function Welcome() {
         <View className="w-full gap-2">
           <Link asChild href={"/sign-up"}>
             <Button size={"lg"}>
-              <Text>{"Create New Accout"}</Text>
+              <Text>{"Create New Account"}</Text>
               <ArrowRight className="size-4 text-primary-foreground" />
             </Button>
           </Link>

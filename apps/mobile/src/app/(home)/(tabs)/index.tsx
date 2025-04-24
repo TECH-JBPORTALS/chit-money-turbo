@@ -13,9 +13,13 @@ import {
 } from "~/components/ui/card";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
+import { trpc } from "~/utils/api";
 const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
 
 export default function Page() {
+  const { data } = useQuery(trpc.hello.sayHello.queryOptions());
+
   return (
     <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
       <LinearBlurView>

@@ -34,6 +34,8 @@ import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { PortalHost } from "@rn-primitives/portal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "~/utils/api";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -186,10 +188,12 @@ export default function RootLayout() {
 
   return (
     <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-      <GestureHandlerRootView>
-        <Outlet />
-        <PortalHost />
-      </GestureHandlerRootView>
+      <QueryClientProvider client={queryClient}>
+        <GestureHandlerRootView>
+          <Outlet />
+          <PortalHost />
+        </GestureHandlerRootView>
+      </QueryClientProvider>
     </ClerkProvider>
   );
 }
