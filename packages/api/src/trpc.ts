@@ -12,6 +12,7 @@ import { ZodError } from "zod";
 import {
   auth as clerkAuth,
   clerkClient,
+  Session,
   verifyToken,
 } from "@clerk/nextjs/server";
 import { db } from "@cmt/db/client";
@@ -54,15 +55,18 @@ const isomorphicGetSession = async (headers: Headers) => {
  *
  * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = async (opts: { headers: Headers }) => {
+export const createTRPCContext = async (opts: {
+  headers: Headers;
+  session: Session | null;
+}) => {
   const authToken = opts.headers.get("Authorization") ?? null;
-  const auth = await isomorphicGetSession(opts.headers);
+  const session = await isomorphicGetSession(opts.headers);
 
   const source = opts.headers.get("x-trpc-source") ?? "unknown";
-  console.log(">>> tRPC Request from", source, "by", auth?.userId);
+  console.log(">>> tRPC Request from", source, "by", session?.userId);
 
   return {
-    auth,
+    session: session ?? opts.session,
     db,
     token: authToken,
   };
@@ -83,6 +87,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
     },
   }),
+  sse: { enabled: true },
 });
 
 /**
@@ -140,20 +145,20 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  * Protected (authenticated) procedure
  *
  * If you want a query or mutation to ONLY be accessible to logged in users, use this. It verifies
- * the session is valid and guarantees `ctx.session.user` is not null.
+ * the session is valid and guarantees `ctx.session` is not null.
  *
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
   .use(({ ctx, next }) => {
-    if (!ctx.auth?.userId) {
+    if (!ctx.session?.userId) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
     return next({
       ctx: {
         // infers the `session` as non-nullable
-        auth: { ...ctx.auth },
+        session: { ...ctx.session },
       },
     });
   });
