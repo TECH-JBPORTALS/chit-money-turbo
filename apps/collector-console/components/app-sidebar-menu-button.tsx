@@ -22,8 +22,6 @@ import {
 import { Button } from "@cmt/ui/components/button";
 import { cn } from "@cmt/ui/lib/utils";
 import { usePathname } from "next/navigation";
-import { useTRPC } from "@/trpc/react";
-import { useQuery } from "@tanstack/react-query";
 
 export function AppSidebarMenuButtonWithSubMenu(batch: {
   id: string;
@@ -124,8 +122,6 @@ export function AppSidebarMenuButtonWithNextLink({
   exact?: boolean;
 }) {
   const pathname = usePathname();
-  const trpc = useTRPC();
-  const {} = useQuery(trpc.hello.sayHello.queryOptions());
 
   return (
     <SidebarMenuButton
