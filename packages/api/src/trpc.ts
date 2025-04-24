@@ -12,6 +12,7 @@ import { ZodError } from "zod";
 import {
   auth as clerkAuth,
   clerkClient,
+  getAuth,
   verifyToken,
 } from "@clerk/nextjs/server";
 // import { db } from "@acme/db/client";
@@ -54,10 +55,7 @@ const isomorphicGetSession = async (headers: Headers) => {
  *
  * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = async (opts: {
-  headers: Headers;
-  auth: ReturnType<typeof clerkAuth>;
-}) => {
+export const createTRPCContext = async (opts: { headers: Headers }) => {
   const authToken = opts.headers.get("Authorization") ?? null;
   const auth = await isomorphicGetSession(opts.headers);
 

@@ -8,7 +8,6 @@ import type { AppRouter } from "@cmt/api";
 import { appRouter, createTRPCContext } from "@cmt/api";
 
 import { createQueryClient } from "./query-client";
-import { auth } from "@clerk/nextjs/server";
 
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
@@ -17,10 +16,8 @@ import { auth } from "@clerk/nextjs/server";
 const createContext = cache(async () => {
   const heads = new Headers(await headers());
   heads.set("x-trpc-source", "rsc");
-  const authObj = await auth();
 
   return createTRPCContext({
-    auth: authObj,
     headers: heads,
   });
 });
