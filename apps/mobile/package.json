@@ -2,6 +2,7 @@
   "name": "@cmt/mobile",
   "version": "1.0.0",
   "main": "index.ts",
+  "packageManager": "pnpm@10.4.1",
   "scripts": {
     "eas-build-pre-install": "cd ../../ && echo 'node-linker=hoisted\nlegacy-peer-deps=true' > .npmrc",
     "start": "expo start -c",
