@@ -1,4 +1,7 @@
 name: Deploy to production
+defaults:
+  tools:
+    pnpm: 10.4.1
 
 on:
   push:

@@ -1,4 +1,7 @@
 name: Create development builds
+defaults:
+  tools:
+    pnpm: 10.4.1
 
 jobs:
   android_development_build:
