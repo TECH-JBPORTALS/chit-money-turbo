@@ -24,5 +24,8 @@
     "globals": "^15.15.0",
     "typescript": "catalog:",
     "typescript-eslint": "^8.24.1"
+  },
+  "dependencies": {
+    "@eslint/compat": "^1.2.8"
   }
 }

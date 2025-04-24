@@ -15,11 +15,12 @@
   "dependencies": {
     "@clerk/nextjs": "catalog:",
     "@trpc/server": "catalog:",
-    "uploadthing": "catalog:",
     "superjson": "2.2.2",
+    "uploadthing": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@cmt/db": "workspace:^",
     "@cmt/eslint-config": "workspace:*",
     "@cmt/typescript-config": "workspace:*",
     "@types/node": "catalog:react18",
