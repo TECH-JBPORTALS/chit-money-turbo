@@ -5,11 +5,15 @@ packages:
 catalog:
   # Typescript
   typescript: ^5.7.3
+
   zod: ^3.24.2
+
   dotenv-cli: ^8.0.0
+
   uploadthing: ^7.6.0
+
+  # Clerk
   "@clerk/nextjs": ^6.12.5
-  "@zodios/core": "^10.9.6"
 
   # Tanstack & tRPC
   "@tanstack/react-query": ^5.69.0

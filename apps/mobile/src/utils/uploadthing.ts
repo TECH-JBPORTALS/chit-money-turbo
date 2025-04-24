@@ -1,7 +1,7 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { generateReactNativeHelpers } from "@uploadthing/expo";
 import React, { useState } from "react";
-import { OurFileRouter } from "@cmt/api/routers/uploadthing";
+import { OurFileRouter } from "@cmt/api/uploadthing";
 import { getBaseUrl } from "./base-url";
 
 export const createUploadHelpers = (token: string | null) => {

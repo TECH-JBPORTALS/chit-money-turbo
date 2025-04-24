@@ -36,9 +36,7 @@ import {
   AppSidebarMenuButtonWithNextLink,
   AppSidebarMenuButtonWithSubMenu,
 } from "./app-sidebar-menu-button";
-import { api } from "@/utils/api-server";
-import { apiHooks } from "@/utils/api-react";
-import { useQuery } from "@tanstack/react-query";
+import { prefetch, trpc } from "@/trpc/server";
 
 // Menu items.
 const items = [
@@ -60,33 +58,31 @@ const items = [
   },
 ];
 
-// const batches = [
-//   {
-//     id: "dhdkd9-dkdk-ff7f9d",
-//     title: "Janaury 2024",
-//     url: "#",
-//   },
-//   {
-//     id: "ui23-d389fk9k-ff7f83d",
-//     title: "JP Nagar 2024",
-//     url: "#",
-//   },
-//   {
-//     id: "ud23-d8009k-ff7f83d",
-//     title: "Raguvanahalli KSIT College and Staff",
-//     url: "#",
-//   },
-//   {
-//     id: "ud289-d8009k-ff7f83d",
-//     title: "Native 2024",
-//     url: "#",
-//   },
-// ];
+const batches = [
+  {
+    id: "dhdkd9-dkdk-ff7f9d",
+    name: "Janaury 2024",
+    url: "#",
+  },
+  {
+    id: "ui23-d389fk9k-ff7f83d",
+    name: "JP Nagar 2024",
+    url: "#",
+  },
+  {
+    id: "ud23-d8009k-ff7f83d",
+    name: "Raguvanahalli KSIT College and Staff",
+    url: "#",
+  },
+  {
+    id: "ud289-d8009k-ff7f83d",
+    name: "Native 2024",
+    url: "#",
+  },
+];
 
 export async function AppSidebar() {
-  const batches = await api.getBatches({
-    params: { orgId: "org_01JSC3AAA6PDV7HGHDJEN0A9WP" },
-  });
+  prefetch(trpc.hello.sayHello.queryOptions());
 
   return (
     <Sidebar>

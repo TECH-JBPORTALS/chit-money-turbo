@@ -2,6 +2,8 @@
   "extends": "@cmt/typescript-config/nextjs.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "jsx": "preserve",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "paths": {
       "@/*": ["./*"],
       "@cmt/ui/*": ["../../packages/ui/src/*"]
@@ -10,7 +12,8 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "module": "ESNext"
   },
   "include": [
     "next-env.d.ts",

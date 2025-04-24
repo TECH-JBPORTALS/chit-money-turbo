@@ -21,7 +21,7 @@ import {
 } from "@cmt/ui/components/collapsible";
 import { Button } from "@cmt/ui/components/button";
 import { cn } from "@cmt/ui/lib/utils";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export function AppSidebarMenuButtonWithSubMenu(batch: {
   id: string;
@@ -122,6 +122,7 @@ export function AppSidebarMenuButtonWithNextLink({
   exact?: boolean;
 }) {
   const pathname = usePathname();
+
   return (
     <SidebarMenuButton
       isActive={exact ? pathname === href : pathname.startsWith(href)}

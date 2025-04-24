@@ -5,12 +5,12 @@ import * as React from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { StepsProvider } from "react-step-builder";
 import { TooltipProvider } from "@cmt/ui/components/tooltip";
-import { QueryProvider } from "@/utils/query-client";
+import { TRPCReactProvider } from "@/trpc/react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <NuqsAdapter>
-      <QueryProvider>
+      <TRPCReactProvider>
         <NextThemesProvider
           attribute="class"
           defaultTheme="system"
@@ -24,7 +24,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             </TooltipProvider>
           </StepsProvider>
         </NextThemesProvider>
-      </QueryProvider>
+      </TRPCReactProvider>
     </NuqsAdapter>
   );
 }

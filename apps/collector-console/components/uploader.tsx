@@ -1,6 +1,6 @@
 "use client";
 import { getUTFile, UploadButton, UploadDropzone } from "@/utils/uploadthing";
-import { OurFileRouter } from "@cmt/api/routers/uploadthing";
+import { OurFileRouter } from "@cmt/api/uploadthing";
 import { cn } from "@cmt/ui/lib/utils";
 import { RotateCwIcon } from "lucide-react";
 import Image from "next/image";

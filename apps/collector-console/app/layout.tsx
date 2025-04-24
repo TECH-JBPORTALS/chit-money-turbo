@@ -5,7 +5,7 @@ import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { Providers } from "@/components/providers";
 import { ClerkProvider } from "@clerk/nextjs";
-import { ourFileRouter } from "@cmt/api/routers/uploadthing";
+import { ourFileRouter } from "@cmt/api/uploadthing";
 
 const fontSans = Urbanist({
   subsets: ["latin"],

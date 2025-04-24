@@ -6,13 +6,15 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "exports": {
-    ".": "./src/index.ts",
-    "./routers/*": "./src/routers/*.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./uploadthing": "./src/uploadthing.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "catalog:",
     "@trpc/server": "catalog:",
-    "@zodios/core": "catalog:",
     "uploadthing": "catalog:",
     "superjson": "2.2.2",
     "zod": "catalog:"

@@ -10,8 +10,8 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import type { Session } from "@clerk/nextjs/server";
-import { auth, verifyToken } from "@clerk/nextjs/server";
+import type { getAuth } from "@clerk/nextjs/server";
+import { auth, clerkClient, verifyToken } from "@clerk/nextjs/server";
 // import { db } from "@acme/db/client";
 
 /**
@@ -20,9 +20,18 @@ import { auth, verifyToken } from "@clerk/nextjs/server";
  * - Next.js requests will have a session token in cookies
  */
 const isomorphicGetSession = async (headers: Headers) => {
+  const client = await clerkClient();
   const authToken = headers.get("Authorization") ?? null;
-  if (authToken)
-    return verifyToken(authToken, { secretKey: process.env.CLERK_SECRET_KEY });
+
+  if (authToken) {
+    const authJwt = await verifyToken(authToken, {
+      secretKey: process.env.CLERK_SECRET_KEY,
+    });
+    const authUser = await client.sessions.getSession(authJwt.sid);
+    return authUser;
+  }
+
+  //if it's cookie
   return auth();
 };
 
@@ -40,7 +49,7 @@ const isomorphicGetSession = async (headers: Headers) => {
  */
 export const createTRPCContext = async (opts: {
   headers: Headers;
-  session: Session | null;
+  session: ReturnType<typeof getAuth> | null;
 }) => {
   const authToken = opts.headers.get("Authorization") ?? null;
   const session = await isomorphicGetSession(opts.headers);
