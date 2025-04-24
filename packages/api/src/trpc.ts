@@ -9,14 +9,11 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
-
-import { getAuth } from "@clerk/nextjs/server";
 import {
   auth as clerkAuth,
   clerkClient,
   verifyToken,
 } from "@clerk/nextjs/server";
-import { NextApiRequest } from "@trpc/server/adapters/next";
 // import { db } from "@acme/db/client";
 
 /**
@@ -59,7 +56,7 @@ const isomorphicGetSession = async (headers: Headers) => {
  */
 export const createTRPCContext = async (opts: {
   headers: Headers;
-  auth: ReturnType<typeof getAuth>;
+  auth: ReturnType<typeof clerkAuth>;
 }) => {
   const authToken = opts.headers.get("Authorization") ?? null;
   const auth = await isomorphicGetSession(opts.headers);
