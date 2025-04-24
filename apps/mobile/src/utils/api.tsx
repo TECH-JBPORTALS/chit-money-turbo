@@ -38,6 +38,7 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
           const clerk = getClerkInstance({
             publishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
           });
+
           const token = await clerk.session?.getToken();
 
           if (token) headers.set("Authorization", `Bearer ${token}`);

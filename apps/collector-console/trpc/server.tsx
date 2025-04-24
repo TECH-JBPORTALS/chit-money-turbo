@@ -17,9 +17,10 @@ import { auth } from "@clerk/nextjs/server";
 const createContext = cache(async () => {
   const heads = new Headers(await headers());
   heads.set("x-trpc-source", "rsc");
+  const authObj = await auth();
 
   return createTRPCContext({
-    session: await auth(),
+    auth: authObj,
     headers: heads,
   });
 });

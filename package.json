@@ -24,8 +24,12 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@clerk/shared",
+      "core-js",
       "core-js-pure",
       "sharp"
+    ],
+    "ignoredBuiltDependencies": [
+      "browser-tabs-lock"
     ]
   }
 }

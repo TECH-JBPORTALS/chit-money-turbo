@@ -10,8 +10,13 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import type { getAuth } from "@clerk/nextjs/server";
-import { auth, clerkClient, verifyToken } from "@clerk/nextjs/server";
+import { getAuth } from "@clerk/nextjs/server";
+import {
+  auth as clerkAuth,
+  clerkClient,
+  verifyToken,
+} from "@clerk/nextjs/server";
+import { NextApiRequest } from "@trpc/server/adapters/next";
 // import { db } from "@acme/db/client";
 
 /**
@@ -27,12 +32,17 @@ const isomorphicGetSession = async (headers: Headers) => {
     const authJwt = await verifyToken(authToken, {
       secretKey: process.env.CLERK_SECRET_KEY,
     });
-    const authUser = await client.sessions.getSession(authJwt.sid);
-    return authUser;
+    const authSession = client.sessions.getSession(authJwt.sid);
+    return authSession;
   }
 
   //if it's cookie
-  return auth();
+  const authObj = await clerkAuth();
+
+  if (!authObj.sessionId) return null;
+
+  const session = await client.sessions.getSession(authObj.sessionId);
+  return session;
 };
 
 /**
@@ -49,16 +59,16 @@ const isomorphicGetSession = async (headers: Headers) => {
  */
 export const createTRPCContext = async (opts: {
   headers: Headers;
-  session: ReturnType<typeof getAuth>;
+  auth: ReturnType<typeof getAuth>;
 }) => {
   const authToken = opts.headers.get("Authorization") ?? null;
-  const session = await isomorphicGetSession(opts.headers);
+  const auth = await isomorphicGetSession(opts.headers);
 
   const source = opts.headers.get("x-trpc-source") ?? "unknown";
-  console.log(">>> tRPC Request from", source, "by", session?.userId);
+  console.log(">>> tRPC Request from", source, "by", auth?.userId);
 
   return {
-    session,
+    auth,
     // db,
     token: authToken,
   };
@@ -143,13 +153,13 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
   .use(({ ctx, next }) => {
-    if (!ctx.session?.userId) {
+    if (!ctx.auth?.userId) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
     return next({
       ctx: {
         // infers the `session` as non-nullable
-        session: { ...ctx.session, user: ctx.session },
+        auth: { ...ctx.auth },
       },
     });
   });
