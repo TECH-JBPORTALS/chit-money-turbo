@@ -33,10 +33,6 @@ export function OnboardingMultiStepForm({
   const trpc = useTRPC();
   const { mutateAsync: createCollectorProfle } = useMutation(
     trpc.collectors.createProfile.mutationOptions({
-      async onSuccess() {
-        await user?.reload();
-        router.refresh();
-      },
       onError(error) {
         console.log("Error in creating collector profile", error);
         toast.error("Something went wrong, Try again");
@@ -130,20 +126,16 @@ export function OnboardingMultiStepForm({
         <DocumentsForm
           {...{ prev, next }}
           setState={async (values) => {
-            //1. Update in the private meta data
-            await updateOnboardingData({
-              ...initialState,
-              documents: values,
-            });
-
-            //2. Create collector profile in the db
-            await createCollectorProfle(initialState);
-
-            //3. Mark onboarding as completed
+            //1. Create collector profile in the db
+            await createCollectorProfle({ ...initialState, documents: values });
+            //2. Mark onboarding as completed and update values
             await updateOnboardingData({
               ...initialState,
               onboardingComplete: true,
             });
+            // 3. Reload the resources
+            await user?.reload();
+            router.refresh();
           }}
           state={initialState.documents}
         />

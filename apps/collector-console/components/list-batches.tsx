@@ -11,6 +11,17 @@ export function ListBatches() {
     trpc.batches.getAll.queryOptions()
   );
 
+  if (batches.length === 0)
+    return (
+      <div className="flex items-center justify-between">
+        <p>No Batches</p>
+        <p>
+          If you have any active or upcoming batches you can see here or create
+          one.
+        </p>
+      </div>
+    );
+
   return (
     <React.Fragment>
       {batches?.map((batch) => (

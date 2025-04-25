@@ -6,10 +6,10 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
 export async function updateOnboardingData({
-  onboardingComplete = false,
+  onboardingComplete,
   ...privateMetadata
 }: z.infer<typeof onboardingSchema> & { onboardingComplete?: boolean }) {
-  const { userId } = await auth();
+  const { userId, sessionClaims } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
   try {
@@ -17,6 +17,7 @@ export async function updateOnboardingData({
     await client.users.updateUserMetadata(userId, {
       privateMetadata,
       publicMetadata: {
+        ...sessionClaims.metadata,
         onboardingComplete,
       },
     });
