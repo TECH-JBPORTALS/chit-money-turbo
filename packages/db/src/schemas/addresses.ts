@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm";
 import { pgTable } from "drizzle-orm/pg-core";
 import { ulid } from "ulid";
-import { collectorProfiles } from "./collector-profiles";
-import { subscriberProfiles } from "./subscriber-profiles";
+import { collectors } from "./collectors";
+import { subscribers } from "./subscribers";
 
 export const addresses = pgTable("addresses", (t) => ({
   id: t
@@ -10,7 +10,7 @@ export const addresses = pgTable("addresses", (t) => ({
     .$defaultFn(() => `add_${ulid()}`)
     .primaryKey(),
   addressLine: t.text().notNull(),
-  pincode: t.integer().notNull(),
+  pincode: t.numeric().notNull(),
   city: t.text().notNull(),
   state: t.text().notNull(),
   updatedAt: t.timestamp().$onUpdate(() => new Date()),
@@ -18,6 +18,6 @@ export const addresses = pgTable("addresses", (t) => ({
 }));
 
 export const addressRelations = relations(addresses, ({ many }) => ({
-  collectorProfiles: many(collectorProfiles),
-  subscriberProfiles: many(subscriberProfiles),
+  collectors: many(collectors),
+  subscribers: many(subscribers),
 }));

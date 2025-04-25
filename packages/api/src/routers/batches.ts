@@ -11,14 +11,14 @@ export const batchesRouter = {
         .insert(batches)
         .values({
           ...input,
-          collectorProfileUserId: ctx.session.userId,
+          collectorId: ctx.session.userId,
           endsOn: addMonths(input.startsOn, input.scheme).toDateString(),
         })
         .returning()
     ),
   getAll: protectedProcedure.query(async ({ ctx }) => {
     const batchesList = ctx.db.query.batches.findMany({
-      where: eq(batches.collectorProfileUserId, ctx.session.userId),
+      where: eq(batches.collectorId, ctx.session.userId),
     });
     return batchesList ?? [];
   }),

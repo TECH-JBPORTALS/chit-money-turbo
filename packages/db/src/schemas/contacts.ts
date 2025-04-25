@@ -1,8 +1,8 @@
 import { pgTable } from "drizzle-orm/pg-core";
 import { ulid } from "ulid";
 import { relations } from "drizzle-orm";
-import { collectorProfiles } from "./collector-profiles";
-import { subscriberProfiles } from "./subscriber-profiles";
+import { collectors } from "./collectors";
+import { subscribers } from "./subscribers";
 
 export const contacts = pgTable("contacts", (t) => ({
   id: t
@@ -16,6 +16,6 @@ export const contacts = pgTable("contacts", (t) => ({
 }));
 
 export const contactRelations = relations(contacts, ({ many }) => ({
-  collectorProfiles: many(collectorProfiles),
-  subscriberProfiles: many(subscriberProfiles),
+  collectors: many(collectors),
+  subscribers: many(subscribers),
 }));

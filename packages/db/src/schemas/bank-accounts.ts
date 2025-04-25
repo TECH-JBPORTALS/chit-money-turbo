@@ -1,8 +1,8 @@
 import { pgEnum, pgTable } from "drizzle-orm/pg-core";
 import { ulid } from "ulid";
 import { relations } from "drizzle-orm";
-import { collectorProfiles } from "./collector-profiles";
-import { subscriberProfiles } from "./subscriber-profiles";
+import { collectors } from "./collectors";
+import { subscribers } from "./subscribers";
 
 export const accountTypeEnum = pgEnum("account_type_enum", [
   "savings",
@@ -20,11 +20,14 @@ export const bankAccounts = pgTable("bank_accounts", (t) => ({
   upiId: t.text().notNull(),
   branchName: t.text().notNull(),
   ifscCode: t.text().notNull(),
+  city: t.text().notNull(),
+  state: t.text().notNull(),
+  pincode: t.numeric().notNull(),
   updatedAt: t.timestamp().$onUpdate(() => new Date()),
   createdAt: t.timestamp().defaultNow(),
 }));
 
 export const bankAccountRelations = relations(bankAccounts, ({ many }) => ({
-  collectorProfiles: many(collectorProfiles),
-  subscriberProfiles: many(subscriberProfiles),
+  collectors: many(collectors),
+  subscribers: many(subscribers),
 }));
