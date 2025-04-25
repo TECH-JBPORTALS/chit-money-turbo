@@ -36,7 +36,7 @@ import {
   AppSidebarMenuButtonWithNextLink,
   AppSidebarMenuButtonWithSubMenu,
 } from "./app-sidebar-menu-button";
-import { prefetch, trpc } from "@/trpc/server";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { ListBatches } from "./list-batches";
 import { Suspense } from "react";
 import { Skeleton } from "@cmt/ui/components/skeleton";
@@ -88,114 +88,116 @@ export async function AppSidebar() {
   prefetch(trpc.batches.getAll.queryOptions());
 
   return (
-    <Sidebar>
-      <SidebarContent className="pt-6">
-        <SidebarHeader className="px-4 justify-between flex">
-          <h1 className="text-xl font-semibold text-primary dark:text-foreground/70">
-            Chit.Money
-          </h1>
-        </SidebarHeader>
+    <HydrateClient>
+      <Sidebar>
+        <SidebarContent className="pt-6">
+          <SidebarHeader className="px-4 justify-between flex">
+            <h1 className="text-xl font-semibold text-primary dark:text-foreground/70">
+              Chit.Money
+            </h1>
+          </SidebarHeader>
 
-        {/** Application */}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu className="gap-2">
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <AppSidebarMenuButtonWithNextLink
-                    exact={item.exact}
-                    href={item.url}
+          {/** Application */}
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-2">
+                {items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <AppSidebarMenuButtonWithNextLink
+                      exact={item.exact}
+                      href={item.url}
+                    >
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </AppSidebarMenuButtonWithNextLink>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/** Active Semester */}
+          <SidebarGroup>
+            <Collapsible defaultOpen>
+              <SidebarGroupLabel>
+                <CollapsibleTrigger asChild>
+                  <Button
+                    size={"icon"}
+                    variant={"ghost"}
+                    className="w-fit data-[state=open]:[&_svg]:rotate-90 mr-2 rounded-xs"
                   >
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </AppSidebarMenuButtonWithNextLink>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                    <ChevronRightIcon />
+                  </Button>
+                </CollapsibleTrigger>
+                Active Batches
+                <Tooltip>
+                  <CreateBatchDialog>
+                    <TooltipTrigger asChild>
+                      <SidebarGroupAction className="size-6 ml-auto">
+                        <PlusIcon />
+                      </SidebarGroupAction>
+                    </TooltipTrigger>
+                  </CreateBatchDialog>
+                  <TooltipContent side="right">Create New Batch</TooltipContent>
+                </Tooltip>
+              </SidebarGroupLabel>
+              <CollapsibleContent className="pl-2" asChild>
+                <SidebarContent>
+                  <SidebarMenu>
+                    <Suspense
+                      fallback={Array.from({ length: 6 }).flatMap((_, i) => (
+                        <Skeleton
+                          key={i}
+                          className="h-8 rounded-md w-full"
+                          style={{ opacity: `${100 - i * 10}%` }}
+                        />
+                      ))}
+                    >
+                      <ListBatches />
+                    </Suspense>
+                  </SidebarMenu>
+                </SidebarContent>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarGroup>
 
-        {/** Active Semester */}
-        <SidebarGroup>
-          <Collapsible defaultOpen>
-            <SidebarGroupLabel>
-              <CollapsibleTrigger asChild>
-                <Button
-                  size={"icon"}
-                  variant={"ghost"}
-                  className="w-fit data-[state=open]:[&_svg]:rotate-90 mr-2 rounded-xs"
-                >
-                  <ChevronRightIcon />
-                </Button>
-              </CollapsibleTrigger>
-              Active Batches
-              <Tooltip>
-                <CreateBatchDialog>
-                  <TooltipTrigger asChild>
-                    <SidebarGroupAction className="size-6 ml-auto">
-                      <PlusIcon />
-                    </SidebarGroupAction>
-                  </TooltipTrigger>
-                </CreateBatchDialog>
-                <TooltipContent side="right">Create New Batch</TooltipContent>
-              </Tooltip>
-            </SidebarGroupLabel>
-            <CollapsibleContent className="pl-2" asChild>
-              <SidebarContent>
-                <SidebarMenu>
-                  <Suspense
-                    fallback={Array.from({ length: 6 }).flatMap((_, i) => (
-                      <Skeleton
-                        key={i}
-                        className="h-8 rounded-md w-full"
-                        style={{ opacity: `${100 - i * 10}%` }}
+          {/** Completed Semester */}
+          <SidebarGroup>
+            <Collapsible>
+              <SidebarGroupLabel>
+                <CollapsibleTrigger asChild>
+                  <Button
+                    size={"icon"}
+                    variant={"ghost"}
+                    className="w-fit mr-2 data-[state=open]:[&_svg]:rotate-90 rounded-xs group"
+                  >
+                    <ChevronRight />
+                  </Button>
+                </CollapsibleTrigger>
+                Completed Batches
+                <SidebarMenuBadge className="ml-auto px-4">3</SidebarMenuBadge>
+              </SidebarGroupLabel>
+              <CollapsibleContent className="pl-2" asChild>
+                <SidebarContent>
+                  <SidebarMenu>
+                    {batches?.map((batch) => (
+                      <AppSidebarMenuButtonWithSubMenu
+                        {...batch}
+                        key={batch.id}
                       />
                     ))}
-                  >
-                    <ListBatches />
-                  </Suspense>
-                </SidebarMenu>
-              </SidebarContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </SidebarGroup>
-
-        {/** Completed Semester */}
-        <SidebarGroup>
-          <Collapsible>
-            <SidebarGroupLabel>
-              <CollapsibleTrigger asChild>
-                <Button
-                  size={"icon"}
-                  variant={"ghost"}
-                  className="w-fit mr-2 data-[state=open]:[&_svg]:rotate-90 rounded-xs group"
-                >
-                  <ChevronRight />
-                </Button>
-              </CollapsibleTrigger>
-              Completed Batches
-              <SidebarMenuBadge className="ml-auto px-4">3</SidebarMenuBadge>
-            </SidebarGroupLabel>
-            <CollapsibleContent className="pl-2" asChild>
-              <SidebarContent>
-                <SidebarMenu>
-                  {batches?.map((batch) => (
-                    <AppSidebarMenuButtonWithSubMenu
-                      {...batch}
-                      key={batch.id}
-                    />
-                  ))}
-                </SidebarMenu>
-              </SidebarContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarFooter>
-        <SidebarGroupLabel className="justify-between">
-          Toggle Theme <ModeToggle />
-        </SidebarGroupLabel>
-      </SidebarFooter>
-    </Sidebar>
+                  </SidebarMenu>
+                </SidebarContent>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter>
+          <SidebarGroupLabel className="justify-between">
+            Toggle Theme <ModeToggle />
+          </SidebarGroupLabel>
+        </SidebarFooter>
+      </Sidebar>
+    </HydrateClient>
   );
 }

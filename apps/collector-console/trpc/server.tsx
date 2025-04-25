@@ -24,7 +24,7 @@ const createContext = cache(async () => {
     ? await client.sessions.getSession(authObj.sessionId)
     : null;
 
-  console.log("authSession", authSession);
+  // console.log("authSession", authSession);
 
   return createTRPCContext({
     headers: heads,
