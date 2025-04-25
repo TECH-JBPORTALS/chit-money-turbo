@@ -87,7 +87,6 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
     },
   }),
-  sse: { enabled: true },
 });
 
 /**
@@ -158,7 +157,7 @@ export const protectedProcedure = t.procedure
     return next({
       ctx: {
         // infers the `session` as non-nullable
-        session: { ...ctx.session },
+        session: ctx.session,
       },
     });
   });

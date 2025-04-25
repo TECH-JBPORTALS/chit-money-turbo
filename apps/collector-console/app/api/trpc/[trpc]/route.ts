@@ -24,16 +24,17 @@ export const OPTIONS = () => {
 };
 
 const handler = async (req: NextRequest) => {
+  const authObj = getAuth(req);
+  const client = await clerkClient();
+  const session = authObj.sessionId
+    ? await client.sessions.getSession(authObj.sessionId)
+    : null;
+
   const response = await fetchRequestHandler({
     endpoint: "/api/trpc",
     router: appRouter,
-    req,
+    req: req as Request,
     createContext: async () => {
-      const authObj = getAuth(req);
-      const client = await clerkClient();
-      const session = authObj.sessionId
-        ? await client.sessions.getSession(authObj.sessionId)
-        : null;
       return createTRPCContext({
         headers: req.headers,
         session,

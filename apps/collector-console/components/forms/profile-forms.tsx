@@ -20,7 +20,7 @@ import {
   documentsSchema,
   orgInfoSchema,
   personalInfoSchema,
-} from "@/lib/validators";
+} from "@cmt/validator";
 import Uploader from "../uploader";
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Building2Icon } from "lucide-react";

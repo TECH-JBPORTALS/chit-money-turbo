@@ -6,6 +6,7 @@ import { extractRouterConfig } from "uploadthing/server";
 import { Providers } from "@/components/providers";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ourFileRouter } from "@cmt/api/uploadthing";
+import { Toaster } from "@cmt/ui/components/sonner";
 
 const fontSans = Urbanist({
   subsets: ["latin"],
@@ -50,6 +51,7 @@ export default function RootLayout({
               routerConfig={extractRouterConfig(ourFileRouter)}
             />
             {children}
+            <Toaster />
           </Providers>
         </body>
       </html>
