@@ -61,29 +61,6 @@ const items = [
   },
 ];
 
-const batches = [
-  {
-    id: "dhdkd9-dkdk-ff7f9d",
-    name: "Janaury 2024",
-    url: "#",
-  },
-  {
-    id: "ui23-d389fk9k-ff7f83d",
-    name: "JP Nagar 2024",
-    url: "#",
-  },
-  {
-    id: "ud23-d8009k-ff7f83d",
-    name: "Raguvanahalli KSIT College and Staff",
-    url: "#",
-  },
-  {
-    id: "ud289-d8009k-ff7f83d",
-    name: "Native 2024",
-    url: "#",
-  },
-];
-
 export async function AppSidebar() {
   prefetch(trpc.batches.getAll.queryOptions());
 
@@ -179,14 +156,7 @@ export async function AppSidebar() {
               </SidebarGroupLabel>
               <CollapsibleContent className="pl-2" asChild>
                 <SidebarContent>
-                  <SidebarMenu>
-                    {batches?.map((batch) => (
-                      <AppSidebarMenuButtonWithSubMenu
-                        {...batch}
-                        key={batch.id}
-                      />
-                    ))}
-                  </SidebarMenu>
+                  <SidebarMenu>{/** Completed batches list */}</SidebarMenu>
                 </SidebarContent>
               </CollapsibleContent>
             </Collapsible>

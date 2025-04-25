@@ -1,4 +1,3 @@
-import { auth, clerkClient } from "@clerk/nextjs/server";
 import {
   Card,
   CardDescription,
@@ -8,20 +7,21 @@ import {
 } from "@cmt/ui/components/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@cmt/ui/components/avatar";
 import { Progress } from "@cmt/ui/components/progress";
+import { trpc } from "@/trpc/server";
+import { createQueryClient } from "@/trpc/query-client";
 
 export default async function Page() {
-  const { userId } = await auth();
-
-  if (!userId) throw Error("No user");
-  const { users } = await clerkClient();
-  const data = await users.getUser(userId);
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.collectors.getOrgInfo.queryOptions()
+  );
 
   return (
     <div className="flex flex-col  py-8 gap-8">
       {/* Chit Fund Title */}
       <div>
         <h2 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">
-          {data.privateMetadata.orgInfo?.company_fullname ?? "Chit Fund"}
+          {data?.orgName}
         </h2>
         <p className="text-sm text-muted-foreground">
           All over details in this chit fund

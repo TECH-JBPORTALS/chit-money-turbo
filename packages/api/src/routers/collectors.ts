@@ -2,6 +2,7 @@ import { addresses, bankAccounts, collectors, contacts } from "@cmt/db/schemas";
 import { protectedProcedure } from "../trpc";
 import { onboardingSchema } from "@cmt/validator";
 import { TRPCError } from "@trpc/server";
+import { eq } from "@cmt/db";
 
 export const collectorsRouter = {
   createProfile: protectedProcedure
@@ -47,4 +48,13 @@ export const collectorsRouter = {
         return profile;
       })
     ),
+  getOrgInfo: protectedProcedure.query(({ ctx }) =>
+    ctx.db.query.collectors.findFirst({
+      columns: {
+        orgName: true,
+        orgCertificateKey: true,
+      },
+      where: eq(collectors.id, ctx.session.userId),
+    })
+  ),
 };
