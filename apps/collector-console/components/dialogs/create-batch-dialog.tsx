@@ -23,7 +23,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@cmt/ui/components/input";
 import { Button } from "@cmt/ui/components/button";
-import { batchSchema } from "@cmt/validator";
+import { batchSchema } from "@cmt/validators";
 import { useTRPC } from "@/trpc/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";

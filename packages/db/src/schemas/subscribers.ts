@@ -3,6 +3,8 @@ import { addresses } from "./addresses";
 import { relations } from "drizzle-orm";
 import { bankAccounts } from "./bank-accounts";
 import { contacts } from "./contacts";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const subscribers = pgTable("subscribers", (t) => ({
   /** Clerk userId will be used as collector ID */
@@ -37,6 +39,21 @@ export const subscribers = pgTable("subscribers", (t) => ({
   updatedAt: t.timestamp().$onUpdate(() => new Date()),
   createdAt: t.timestamp().defaultNow(),
 }));
+
+export const subscriberInsertSchema = createInsertSchema(subscribers, {
+  faceId: z.string().min(1, "Required"),
+  dateOfBirth: z.string().min(1, "Required"),
+  aadharBackFileKey: z.string().min(1, "Required"),
+  aadharFrontFileKey: z.string().min(1, "Required"),
+  nomineeName: z.string().min(2, "Invalid name"),
+  nomineeRelationship: z.string().min(2, "Invalid relationship"),
+}).omit({
+  updatedAt: true,
+  createdAt: true,
+  homeAddressId: true,
+  contactId: true,
+  bankAccountId: true,
+});
 
 export const subscriberProfileRelations = relations(subscribers, ({ one }) => ({
   homeAddress: one(addresses, {

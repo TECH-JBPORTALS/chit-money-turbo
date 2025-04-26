@@ -1,4 +1,4 @@
-import { onboardingSchema } from "@cmt/validator";
+import { onboardingSchema } from "@cmt/validators";
 import { z } from "zod";
 
 export {};

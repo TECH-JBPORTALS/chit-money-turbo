@@ -1,7 +1,10 @@
 {
-  "name": "@cmt/validator",
+  "name": "@cmt/validators",
   "version": "1.0.0",
   "description": "All zod schemas for @cmt apps",
+  "type": "module",
+  "private": "true",
+  "license": "MIT",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -18,6 +21,7 @@
   "devDependencies": {
     "@cmt/db": "workspace:*",
     "@cmt/eslint-config": "workspace:^",
-    "@cmt/typescript-config": "workspace:^"
+    "@cmt/typescript-config": "workspace:^",
+    "typescript": "catalog:"
   }
 }

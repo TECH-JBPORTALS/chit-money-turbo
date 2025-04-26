@@ -6,7 +6,7 @@ import superjson from "superjson";
 import type { AppRouter } from "@cmt/api";
 
 import { getBaseUrl } from "./base-url";
-import { useAuth, getClerkInstance } from "@clerk/clerk-expo";
+import { getClerkInstance } from "@clerk/clerk-expo";
 
 export const queryClient = new QueryClient({
   defaultOptions: {

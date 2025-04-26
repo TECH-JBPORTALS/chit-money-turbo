@@ -3,6 +3,7 @@ import {
   bankAccountInsertSchema,
   collectorInsertSchema,
   contactInsertSchema,
+  subscriberInsertSchema,
 } from "@cmt/db/schemas";
 import { z } from "zod";
 
@@ -61,4 +62,42 @@ export const batchSchema = z.object({
   number_of_months: z.number().min(1, "Required"),
   starts_on: z.string().nonempty("Required"),
   due_date: z.string().nonempty("Required"),
+});
+
+/* Subscriber Onboarding Schema's */
+export const subscriberPersonalInfoSchema = subscriberInsertSchema
+  .pick({ dateOfBirth: true })
+  .and(
+    z.object({
+      firstName: z
+        .string()
+        .trim()
+        .min(2, "First name must be at least 2 characters long"),
+      lastName: z.string().trim(),
+    })
+  );
+
+export const nomineeInfoSchema = subscriberInsertSchema.pick({
+  nomineeName: true,
+  nomineeRelationship: true,
+});
+
+export const subscriberDocumentsSchema = subscriberInsertSchema.pick({
+  aadharBackFileKey: true,
+  aadharFrontFileKey: true,
+  panCardNumber: true,
+});
+
+export const subscriberAddressInfoSchema = addressInfoSchema;
+export const subscriberContactInfoSchema = contactInfoSchema;
+
+export const subscriberBankInfoSchema = bankInfoSchema;
+
+export const subscriberOnboardingSchema = z.object({
+  personalInfo: subscriberPersonalInfoSchema,
+  contactInfo: subscriberContactInfoSchema,
+  nomineeInfo: nomineeInfoSchema,
+  documents: subscriberDocumentsSchema,
+  addressInfo: subscriberAddressInfoSchema,
+  bankInfo: subscriberBankInfoSchema,
 });

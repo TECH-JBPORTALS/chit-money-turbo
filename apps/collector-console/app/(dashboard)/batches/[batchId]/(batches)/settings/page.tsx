@@ -1,6 +1,6 @@
 "use client";
 import BackButton from "@/components/back-button";
-import { batchSchema } from "@cmt/validator";
+import { batchSchema } from "@cmt/validators";
 import { Button } from "@cmt/ui/components/button";
 import {
   Form,

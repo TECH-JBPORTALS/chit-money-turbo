@@ -21,7 +21,12 @@ const config = withTurborepoManagedCache(
 
 // XXX: Resolve our exports in workspace packages
 // https://github.com/expo/expo/issues/26926
-// config.resolver.unstable_enablePackageExports = true;
+config.resolver.unstable_enablePackageExports = true;
+config.resolver.unstable_conditionNames = [
+  "browser",
+  "require",
+  "react-native",
+];
 
 module.exports = config;
 

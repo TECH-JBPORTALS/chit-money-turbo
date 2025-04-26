@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { onboardingSchema } from "@cmt/validator";
+import { onboardingSchema } from "@cmt/validators";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 

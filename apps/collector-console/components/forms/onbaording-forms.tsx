@@ -37,7 +37,7 @@ import {
   documentsSchema,
   orgInfoSchema,
   personalInfoSchema,
-} from "@cmt/validator";
+} from "@cmt/validators";
 import Uploader from "../uploader";
 import { useSteps } from "react-step-builder";
 

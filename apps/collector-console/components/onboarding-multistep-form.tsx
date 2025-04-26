@@ -11,7 +11,7 @@ import {
   PersonalInfoForm,
 } from "./forms/onbaording-forms";
 import { z } from "zod";
-import { onboardingSchema } from "@cmt/validator";
+import { onboardingSchema } from "@cmt/validators";
 import { useEffect, useState } from "react";
 import { Loader2Icon } from "lucide-react";
 import Image from "next/image";

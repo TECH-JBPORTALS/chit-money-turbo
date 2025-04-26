@@ -22,13 +22,13 @@ import { Small } from "~/components/ui/typography";
 import { Camera } from "~/lib/icons/Camera";
 import { RotateCcw } from "~/lib/icons/RotateCcw";
 import {
-  personalInfoSchema,
-  contactInfoSchema,
+  subscriberPersonalInfoSchema,
+  subscriberContactInfoSchema,
   nomineeInfoSchema,
-  documentsSchema,
-  bankInfoSchema,
-  addressInfoSchema,
-} from "~/lib/validators";
+  subscriberDocumentsSchema,
+  subscriberBankInfoSchema,
+  subscriberAddressInfoSchema,
+} from "@cmt/validators";
 import { useOnboardingStore } from "~/lib/hooks/useOnboardingStore";
 import { getUTPublicUrl, useUploadHelpers } from "~/utils/uploadthing";
 import { Image } from "expo-image";
@@ -37,20 +37,24 @@ import { ScrollView } from "react-native-gesture-handler";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import { useColorScheme } from "~/lib/useColorScheme";
+import { useMutation } from "@tanstack/react-query";
+import { trpc } from "~/utils/api";
 
 function PersonalInfoForm() {
   const {
     setState,
     state: { personalInfo, ...state },
   } = useOnboardingStore();
-  const form = useForm<z.infer<typeof personalInfoSchema>>({
-    resolver: zodResolver(personalInfoSchema),
+  const form = useForm<z.infer<typeof subscriberPersonalInfoSchema>>({
+    resolver: zodResolver(subscriberPersonalInfoSchema),
     defaultValues: personalInfo,
   });
 
   const { next } = useFormSteps();
 
-  async function onSubmit(values: z.infer<typeof personalInfoSchema>) {
+  async function onSubmit(
+    values: z.infer<typeof subscriberPersonalInfoSchema>
+  ) {
     setState({ ...state, personalInfo: values });
     next();
   }
@@ -60,16 +64,16 @@ function PersonalInfoForm() {
       <Form {...form}>
         <FormField
           control={form.control}
-          name="full_name"
+          name="firstName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Full Name</FormLabel>
+              <FormLabel>First Name</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   autoFocus
                   onChangeText={field.onChange}
-                  placeholder="Gean Gun Hi"
+                  placeholder="Badhra"
                 />
               </FormControl>
               <FormMessage />
@@ -78,7 +82,25 @@ function PersonalInfoForm() {
         />
         <FormField
           control={form.control}
-          name="date_of_birth"
+          name="lastName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Last Name</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  autoFocus
+                  onChangeText={field.onChange}
+                  placeholder="Kumar"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="dateOfBirth"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Date Of Birth</FormLabel>
@@ -107,13 +129,13 @@ function ContactInfoForm() {
     setState,
     state: { contactInfo, ...state },
   } = useOnboardingStore();
-  const form = useForm<z.infer<typeof contactInfoSchema>>({
-    resolver: zodResolver(contactInfoSchema),
+  const form = useForm<z.infer<typeof subscriberContactInfoSchema>>({
+    resolver: zodResolver(subscriberContactInfoSchema),
     defaultValues: contactInfo,
   });
   const { next, prev } = useFormSteps();
 
-  async function onSubmit(values: z.infer<typeof contactInfoSchema>) {
+  async function onSubmit(values: z.infer<typeof subscriberContactInfoSchema>) {
     setState({ ...state, contactInfo: values });
     next();
   }
@@ -123,7 +145,7 @@ function ContactInfoForm() {
       <Form {...form}>
         <FormField
           control={form.control}
-          name="primary_phone_number"
+          name="primaryPhoneNumber"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Primary Phone Number</FormLabel>
@@ -142,10 +164,10 @@ function ContactInfoForm() {
         />
         <FormField
           control={form.control}
-          name="alternative_phone_number"
+          name="secondaryPhoneNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Alternative Phone Number</FormLabel>
+              <FormLabel>Secondary Phone Number</FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -204,10 +226,10 @@ function NomineeInfoForm() {
       <Form {...form}>
         <FormField
           control={form.control}
-          name="full_name"
+          name="nomineeName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Full Name</FormLabel>
+              <FormLabel>Nominee Full Name</FormLabel>
               <FormControl>
                 <Input {...field} autoFocus onChangeText={field.onChange} />
               </FormControl>
@@ -217,7 +239,7 @@ function NomineeInfoForm() {
         />
         <FormField
           control={form.control}
-          name="relationship"
+          name="nomineeRelationship"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Relationship</FormLabel>
@@ -258,19 +280,25 @@ function DocumentsForm() {
     setState,
     state: { documents, ...state },
   } = useOnboardingStore();
-  const form = useForm<z.infer<typeof documentsSchema>>({
-    resolver: zodResolver(documentsSchema),
+  const form = useForm<z.infer<typeof subscriberDocumentsSchema>>({
+    resolver: zodResolver(subscriberDocumentsSchema),
     defaultValues: documents,
   });
   const { next, prev } = useFormSteps();
   const { useImageUploader } = useUploadHelpers();
-  const { openImagePicker, isUploading } = useImageUploader("imageUploader", {
+  const {
+    openImagePicker: aadharFrontImagePicker,
+    isUploading: isAadharFrontImageUploading,
+  } = useImageUploader("imageUploader", {
     onClientUploadComplete: (res) => {
       setState({
         ...state,
-        documents: { ...form.getValues(), aadhar_uri: res.at(0)?.key ?? "" },
+        documents: {
+          ...form.getValues(),
+          aadharFrontFileKey: res.at(0)?.key ?? "",
+        },
       });
-      form.setValue("aadhar_uri", res.at(0)?.key ?? "");
+      form.setValue("aadharFrontFileKey", res.at(0)?.key ?? "");
     },
     onUploadError: (error) => {
       console.log(error);
@@ -280,7 +308,29 @@ function DocumentsForm() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof documentsSchema>) {
+  const {
+    openImagePicker: aadharBackImagePicker,
+    isUploading: isAadharBackImageUploading,
+  } = useImageUploader("imageUploader", {
+    onClientUploadComplete: (res) => {
+      setState({
+        ...state,
+        documents: {
+          ...form.getValues(),
+          aadharFrontFileKey: res.at(0)?.key ?? "",
+        },
+      });
+      form.setValue("aadharBackFileKey", res.at(0)?.key ?? "");
+    },
+    onUploadError: (error) => {
+      console.log(error);
+      Alert.alert("Upload Error", error.message, undefined, {
+        userInterfaceStyle: "dark",
+      });
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof subscriberDocumentsSchema>) {
     setState({ ...state, documents: values });
     next();
   }
@@ -290,10 +340,10 @@ function DocumentsForm() {
       <Form {...form}>
         <FormField
           control={form.control}
-          name="pan_number"
+          name="panCardNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>PAN Number</FormLabel>
+              <FormLabel>PAN Card Number</FormLabel>
               <FormControl>
                 <Input {...field} autoFocus onChangeText={field.onChange} />
               </FormControl>
@@ -303,10 +353,10 @@ function DocumentsForm() {
         />
         <FormField
           control={form.control}
-          name="aadhar_uri"
+          name="aadharFrontFileKey"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Aadhar Card</FormLabel>
+              <FormLabel>{"Aadhar Card Photo (front)"}</FormLabel>
               <FormControl>
                 {field.value ? (
                   <>
@@ -315,9 +365,9 @@ function DocumentsForm() {
                       style={{ width: "auto", height: 200, borderRadius: 6 }}
                     />
                     <Button
-                      isLoading={isUploading}
+                      isLoading={isAadharFrontImageUploading}
                       onPress={() => {
-                        openImagePicker({
+                        aadharFrontImagePicker({
                           allowsEditing: true,
                           source: "camera", // or "camera"
                           onInsufficientPermissions: () => {
@@ -345,9 +395,84 @@ function DocumentsForm() {
                   </>
                 ) : (
                   <Button
-                    isLoading={isUploading}
+                    isLoading={isAadharFrontImageUploading}
                     onPress={() => {
-                      openImagePicker({
+                      aadharFrontImagePicker({
+                        allowsEditing: true,
+                        source: "camera", // or "camera"
+                        onInsufficientPermissions: () => {
+                          Alert.alert(
+                            "No Permissions",
+                            "You need to grant permission to your Photos to use this",
+                            [
+                              { text: "Dismiss" },
+                              { text: "Open Settings", onPress: openSettings },
+                            ],
+                            { userInterfaceStyle: "dark" }
+                          );
+                        },
+                      });
+                    }}
+                    size={"lg"}
+                    variant={"outline"}
+                  >
+                    <Camera className="size-5 text-secondary-foreground" />
+                    <Text>Capture Image</Text>
+                  </Button>
+                )}
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="aadharBackFileKey"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{"Aadhar Card Photo (back)"}</FormLabel>
+              <FormControl>
+                {field.value ? (
+                  <>
+                    <Image
+                      source={{ uri: getUTPublicUrl(field.value) }}
+                      style={{ width: "auto", height: 200, borderRadius: 6 }}
+                    />
+                    <Button
+                      isLoading={isAadharBackImageUploading}
+                      onPress={() => {
+                        aadharBackImagePicker({
+                          allowsEditing: true,
+                          source: "camera", // or "camera"
+                          onInsufficientPermissions: () => {
+                            Alert.alert(
+                              "No Permissions",
+                              "You need to grant permission to your Photos to use this",
+                              [
+                                { text: "Dismiss" },
+                                {
+                                  text: "Open Settings",
+                                  onPress: openSettings,
+                                },
+                              ],
+                              { userInterfaceStyle: "dark" }
+                            );
+                          },
+                        });
+                      }}
+                      size={"lg"}
+                      variant={"outline"}
+                    >
+                      <RotateCcw className="size-5 text-secondary-foreground" />
+                      <Text>Re-Capture Image</Text>
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    isLoading={isAadharBackImageUploading}
+                    onPress={() => {
+                      aadharBackImagePicker({
                         allowsEditing: true,
                         source: "camera", // or "camera"
                         onInsufficientPermissions: () => {
@@ -406,14 +531,14 @@ function AddressInfoForm() {
     state: { addressInfo, ...state },
   } = useOnboardingStore();
 
-  const form = useForm<z.infer<typeof addressInfoSchema>>({
-    resolver: zodResolver(addressInfoSchema),
+  const form = useForm<z.infer<typeof subscriberAddressInfoSchema>>({
+    resolver: zodResolver(subscriberAddressInfoSchema),
     defaultValues: addressInfo,
   });
 
   const { next, prev } = useFormSteps();
 
-  async function onSubmit(values: z.infer<typeof addressInfoSchema>) {
+  async function onSubmit(values: z.infer<typeof subscriberAddressInfoSchema>) {
     setState({ ...state, addressInfo: values });
     next();
   }
@@ -423,10 +548,10 @@ function AddressInfoForm() {
       <Form {...form}>
         <FormField
           control={form.control}
-          name="complete_address"
+          name="addressLine"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Complete Address</FormLabel>
+              <FormLabel>Address Line</FormLabel>
               <FormControl>
                 <Input {...field} autoFocus onChangeText={field.onChange} />
               </FormControl>
@@ -503,19 +628,27 @@ function BankInfoForm() {
     setState,
     state: { bankInfo, ...state },
   } = useOnboardingStore();
-  const form = useForm<z.infer<typeof bankInfoSchema>>({
-    resolver: zodResolver(bankInfoSchema),
+  const form = useForm<z.infer<typeof subscriberBankInfoSchema>>({
+    resolver: zodResolver(subscriberBankInfoSchema),
     defaultValues: bankInfo,
   });
   const { next, prev } = useFormSteps();
   const { getToken } = useAuth();
   const router = useRouter();
   const { user } = useUser();
+  const { mutateAsync: createProfile } = useMutation(
+    trpc.subscribers.createProfile.mutationOptions()
+  );
 
-  async function onSubmit(values: z.infer<typeof bankInfoSchema>) {
+  async function onSubmit(values: z.infer<typeof subscriberBankInfoSchema>) {
     setState({ ...state, bankInfo: values });
+
     const token = await getToken();
     try {
+      // 1. Create profile
+      await createProfile({ ...state, bankInfo });
+
+      // 2. Update onboarding state
       await fetch("/api/onboarding", {
         method: "POST",
         body: JSON.stringify({ onboardingComplete: true }),
@@ -524,6 +657,7 @@ function BankInfoForm() {
         },
       });
 
+      // 3. Reload state
       await user?.reload();
 
       router.replace("/(home)");
@@ -539,7 +673,7 @@ function BankInfoForm() {
       <Form {...form}>
         <FormField
           control={form.control}
-          name="account_number"
+          name="accountNumber"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Account Number</FormLabel>
@@ -553,7 +687,7 @@ function BankInfoForm() {
         {/* <Text>{JSON.stringify(form.formState.errors, undefined, 2)}</Text> */}
         <FormField
           control={form.control}
-          name="confirm_account_number"
+          name="confirmAccountNumber"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Confirm Account Number</FormLabel>
@@ -567,7 +701,7 @@ function BankInfoForm() {
 
         <FormField
           control={form.control}
-          name="account_holder_name"
+          name="accountHolderName"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Account Holder Name</FormLabel>
@@ -581,7 +715,7 @@ function BankInfoForm() {
 
         <FormField
           control={form.control}
-          name="ifsc_code"
+          name="ifscCode"
           render={({ field }) => (
             <FormItem>
               <FormLabel>IFSC Code</FormLabel>
@@ -594,7 +728,7 @@ function BankInfoForm() {
         />
         <FormField
           control={form.control}
-          name="branch_name"
+          name="branchName"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Branch Name</FormLabel>
@@ -607,7 +741,7 @@ function BankInfoForm() {
         />
         <FormField
           control={form.control}
-          name="upi_id"
+          name="upiId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>UPI Id</FormLabel>
@@ -621,10 +755,52 @@ function BankInfoForm() {
 
         <FormField
           control={form.control}
-          name="account_type"
+          name="accountType"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Account Type</FormLabel>
+              <FormControl>
+                <Input {...field} onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>City</FormLabel>
+              <FormControl>
+                <Input {...field} onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="state"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>State</FormLabel>
+              <FormControl>
+                <Input {...field} onChangeText={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="pincode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Pincode</FormLabel>
               <FormControl>
                 <Input {...field} onChangeText={field.onChange} />
               </FormControl>
@@ -683,7 +859,7 @@ export default function Index() {
           {Array.from({ length: totalSteps }).map((_, index) => (
             <Animated.View
               key={index}
-              className={"h-1 rounded-ful flex-1 bg-primary opacity-20"}
+              className={"h-1 rounded-ful flex-1 bg-accent"}
             >
               {currentStep >= index + 1 && (
                 <Animated.View
