@@ -12,7 +12,7 @@ import { User } from "~/lib/icons/User";
 import { Files } from "~/lib/icons/Files";
 import { Contact } from "~/lib/icons/Contact";
 import { LogOut } from "~/lib/icons/LogOut";
-import { useAuth } from "@clerk/clerk-expo";
+import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Link } from "expo-router";
 
 const items = [
@@ -46,6 +46,7 @@ const items = [
 export default function Profile() {
   const { signOut } = useAuth();
   const [isSigningOut, setIsSingingOut] = useState(false);
+  const { user } = useUser();
 
   async function onSignout() {
     setIsSingingOut(true);
@@ -67,8 +68,10 @@ export default function Profile() {
             </AvatarFallback>
           </Avatar>
           <View className="gap-1">
-            <Large>Tommy</Large>
-            <Muted>tommy@gmail.com</Muted>
+            <Large>
+              {user?.firstName} {user?.lastName}
+            </Large>
+            <Muted>{user?.primaryEmailAddress?.emailAddress}</Muted>
           </View>
         </View>
 
