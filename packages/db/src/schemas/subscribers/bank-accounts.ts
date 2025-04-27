@@ -3,6 +3,7 @@ import { subscribersSchema } from "./_schema";
 import { users } from "./users";
 import { relations } from "drizzle-orm";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const accountTypeEnum = subscribersSchema.enum("account_type_enum", [
   "savings",
@@ -40,7 +41,9 @@ export const bankAccountRelations = relations(bankAccounts, ({ one }) => ({
 }));
 
 // Validation Schemas
-export const bankAccountInsertSchema = createInsertSchema(bankAccounts).omit({
+export const bankAccountInsertSchema = createInsertSchema(bankAccounts, {
+  accountType: z.enum(["savings", "current"]).default("savings"),
+}).omit({
   userId: true,
 });
 export const bankAccountUpdateSchema = createUpdateSchema(bankAccounts);

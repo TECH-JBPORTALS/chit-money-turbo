@@ -2,7 +2,7 @@ import { ulid } from "ulid";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { users } from "@/schemas/collectors/users";
+import { users } from "../schemas/collectors/users";
 import { pgEnum, pgTable } from "drizzle-orm/pg-core";
 
 export const batchTypeEnum = pgEnum("batch_type_enum", ["interest", "auction"]);

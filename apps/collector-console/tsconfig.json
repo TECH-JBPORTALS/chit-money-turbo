@@ -6,7 +6,8 @@
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "paths": {
       "@/*": ["./*"],
-      "@cmt/ui/*": ["../../packages/ui/src/*"]
+      "@cmt/ui/*": ["../../packages/ui/src/*"],
+      "@cmt/db/*": ["../../packages/ui/src/*"]
     },
     "plugins": [
       {

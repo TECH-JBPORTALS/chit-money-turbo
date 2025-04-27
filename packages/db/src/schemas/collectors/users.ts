@@ -4,7 +4,7 @@ import { bankAccounts } from "./bank-accounts";
 import { contacts } from "./contacts";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import { z } from "zod";
-import { batches } from "@/schemas";
+import { batches } from "../";
 import { collectorsSchema } from "./_schema";
 
 export const users = collectorsSchema.table("users", (t) => ({
