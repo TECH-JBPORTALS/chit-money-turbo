@@ -6,15 +6,15 @@
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "paths": {
       "@/*": ["./*"],
-      "@cmt/ui/*": ["../../packages/ui/src/*"],
-      "@cmt/db/*": ["../../packages/ui/src/*"]
+      "@cmt/ui/*": ["../../packages/ui/src/*"]
     },
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "module": "ESNext"
   },
-  "include": [".", ".next/types/**/*.ts"],
+  "include": [".", ".next/types/**/*.ts", ""],
   "exclude": ["node_modules"]
 }
