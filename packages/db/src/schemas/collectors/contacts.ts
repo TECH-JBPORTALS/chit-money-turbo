@@ -20,7 +20,7 @@ export const contacts = collectorsSchema.table("contacts", (t) => ({
 }));
 
 // Realtions
-export const bankAccountRelations = relations(contacts, ({ one }) => ({
+export const contactRelations = relations(contacts, ({ one }) => ({
   user: one(users, {
     fields: [contacts.userId],
     references: [users.id],
