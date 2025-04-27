@@ -28,5 +28,7 @@ export const contactRelations = relations(contacts, ({ one }) => ({
 }));
 
 // Validation Schemas
-export const contactInsertSchema = createInsertSchema(contacts);
+export const contactInsertSchema = createInsertSchema(contacts).omit({
+  userId: true,
+});
 export const contactUpdateSchema = createUpdateSchema(contacts);

@@ -40,7 +40,7 @@ export const bankAccountRelations = relations(bankAccounts, ({ one }) => ({
 }));
 
 // Validation Schemas
-export const subscriberBankAccountInsertSchema =
-  createInsertSchema(bankAccounts);
-export const subscriberBankAccountUpdateSchema =
-  createUpdateSchema(bankAccounts);
+export const bankAccountInsertSchema = createInsertSchema(bankAccounts).omit({
+  userId: true,
+});
+export const bankAccountUpdateSchema = createUpdateSchema(bankAccounts);

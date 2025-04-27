@@ -15,7 +15,7 @@ import {
   Session,
   verifyToken,
 } from "@clerk/nextjs/server";
-import { db } from "@cmt/db/client";
+import { collectorsDb, subscribersDb, db } from "@cmt/db/client";
 
 /**
  * Isomorphic Session getter for API requests
@@ -68,6 +68,8 @@ export const createTRPCContext = async (opts: {
   return {
     session: session ?? opts.session,
     db,
+    collectorsDb,
+    subscribersDb,
     token: authToken,
   };
 };

@@ -1,8 +1,6 @@
-import {
-  publicSchema,
-  collectorsSchema,
-  subscribersSchema,
-} from "@cmt/db/client";
+import * as publicSchema from "@cmt/db/schemas/public";
+import * as collectorsSchema from "@cmt/db/schemas/collectors";
+import * as subscribersSchema from "@cmt/db/schemas/subscribers";
 import { z } from "zod";
 
 export const personalInfoSchema = collectorsSchema.collectorInsertSchema
@@ -68,23 +66,22 @@ export const subscriberPersonalInfoSchema =
       lastName: z.string().trim(),
     })
   );
-
 export const nomineeInfoSchema = subscribersSchema.subscriberInsertSchema.pick({
   nomineeName: true,
   nomineeRelationship: true,
 });
-
 export const subscriberDocumentsSchema =
   subscribersSchema.subscriberInsertSchema.pick({
     aadharBackFileKey: true,
     aadharFrontFileKey: true,
     panCardNumber: true,
   });
-
-export const subscriberAddressInfoSchema = addressInfoSchema;
-export const subscriberContactInfoSchema = contactInfoSchema;
-
-export const subscriberBankInfoSchema = bankInfoSchema;
+export const subscriberAddressInfoSchema =
+  subscribersSchema.addressInsertSchema;
+export const subscriberContactInfoSchema =
+  subscribersSchema.contactInsertSchema;
+export const subscriberBankInfoSchema =
+  subscribersSchema.bankAccountInsertSchema;
 
 export const subscriberOnboardingSchema = z.object({
   personalInfo: subscriberPersonalInfoSchema,

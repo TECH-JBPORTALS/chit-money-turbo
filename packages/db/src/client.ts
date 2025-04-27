@@ -11,12 +11,18 @@ const client = new Pool({
 
 export const db = drizzle({
   client,
-  schema: {
-    ...collectorsSchema,
-    ...subscribersSchema,
-    ...publicSchema,
-  },
+  schema: publicSchema,
   casing: "snake_case",
 });
 
-export { collectorsSchema, subscribersSchema, publicSchema };
+export const collectorsDb = drizzle({
+  client,
+  schema: collectorsSchema,
+  casing: "snake_case",
+});
+
+export const subscribersDb = drizzle({
+  client,
+  schema: collectorsSchema,
+  casing: "snake_case",
+});

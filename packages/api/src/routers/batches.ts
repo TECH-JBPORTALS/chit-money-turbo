@@ -1,14 +1,14 @@
-import { schema } from "@cmt/db/client";
+import { batches, batchInsertSchema } from "@cmt/db/schemas/public";
 import { eq } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { addMonths } from "date-fns";
 
 export const batchesRouter = {
   create: protectedProcedure
-    .input(schema.batchInsertSchema)
+    .input(batchInsertSchema)
     .mutation(({ ctx, input }) =>
       ctx.db
-        .insert(schema.batches)
+        .insert(batches)
         .values({
           ...input,
           collectorId: ctx.session.userId,
@@ -18,7 +18,7 @@ export const batchesRouter = {
     ),
   getAll: protectedProcedure.query(async ({ ctx }) => {
     const batchesList = ctx.db.query.batches.findMany({
-      where: eq(schema.batches.collectorId, ctx.session.userId),
+      where: eq(batches.collectorId, ctx.session.userId),
     });
     return batchesList ?? [];
   }),

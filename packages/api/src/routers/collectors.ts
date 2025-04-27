@@ -1,4 +1,9 @@
-import { schema } from "@cmt/db/client";
+import {
+  addresses,
+  bankAccounts,
+  contacts,
+  users,
+} from "@cmt/db/schemas/collectors";
 import { protectedProcedure } from "../trpc";
 import { onboardingSchema } from "@cmt/validators";
 import { TRPCError } from "@trpc/server";
@@ -10,32 +15,7 @@ export const collectorsRouter = {
     .input(onboardingSchema)
     .mutation(({ ctx, input }) =>
       // DB Transaction to prevent unsync data
-      ctx.db.transaction(async (tx) => {
-        // 1. Add bank account
-        const bankAccount = await tx
-          .insert(schema.bankAccounts)
-          .values(input.bankInfo)
-          .returning();
-
-        if (!bankAccount.at(0)?.id)
-          throw new TRPCError({
-            message: "Couldn't able to create bank account record",
-            code: "INTERNAL_SERVER_ERROR",
-          });
-
-        // 2. Add contact
-        const contact = await tx
-          .insert(schema.contacts)
-          .values(input.contactInfo)
-          .returning();
-
-        // 3. Add org address
-        const address = await tx
-          .insert(schema.addresses)
-          .values(input.addressInfo)
-          .returning();
-
-        // 4. Finally: Add collector profile
+      ctx.collectorsDb.transaction(async (tx) => {
         const client = await clerkClient();
         const user = await client.users.updateUser(ctx.session.userId, {
           firstName: input.personalInfo.firstName,
@@ -48,26 +28,38 @@ export const collectorsRouter = {
             code: "INTERNAL_SERVER_ERROR",
           });
 
-        const profile = await tx.insert(schema.collectors).values({
-          id: ctx.session.userId,
-          ...input.documents,
-          ...input.personalInfo,
-          ...input.orgInfo,
-          bankAccountId: bankAccount.at(0)?.id,
-          orgAddressId: address.at(0)?.id,
-          contactId: contact.at(0)?.id,
-        });
+        const collector = await tx
+          .insert(users)
+          .values({
+            id: ctx.session.userId,
+            ...input.documents,
+            ...input.personalInfo,
+            ...input.orgInfo,
+          })
+          .returning();
 
-        return profile;
+        await tx
+          .insert(bankAccounts)
+          .values({ ...input.bankInfo, userId: ctx.session.userId });
+
+        await tx
+          .insert(contacts)
+          .values({ ...input.contactInfo, userId: ctx.session.userId });
+
+        await tx
+          .insert(addresses)
+          .values({ ...input.addressInfo, userId: ctx.session.userId });
+
+        return collector;
       })
     ),
   getOrgInfo: protectedProcedure.query(({ ctx }) =>
-    ctx.db.query.collectors.findFirst({
+    ctx.collectorsDb.query.users.findFirst({
       columns: {
         orgName: true,
         orgCertificateKey: true,
       },
-      where: eq(schema.collectors.id, ctx.session.userId),
+      where: eq(users.id, ctx.session.userId),
     })
   ),
 };

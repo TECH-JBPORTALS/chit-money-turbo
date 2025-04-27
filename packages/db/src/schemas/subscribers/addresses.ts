@@ -30,5 +30,7 @@ export const addressRelations = relations(addresses, ({ one }) => ({
 }));
 
 // Validation Schemas
-export const subscriberAddressInsertSchema = createInsertSchema(addresses);
-export const subscriberAddressUpdateSchema = createUpdateSchema(addresses);
+export const addressInsertSchema = createInsertSchema(addresses).omit({
+  userId: true,
+});
+export const addressUpdateSchema = createUpdateSchema(addresses);
