@@ -24,6 +24,15 @@ export const users = collectorsSchema.table("users", (t) => ({
   createdAt: t.timestamp().defaultNow(),
 }));
 
+// Relations
+export const collectorRelations = relations(users, ({ one, many }) => ({
+  orgAddress: one(addresses),
+  bankAccount: one(bankAccounts),
+  contact: one(contacts),
+  batches: many(batches),
+}));
+
+// Validation Schemas
 export const collectorInsertSchema = createInsertSchema(users, {
   orgName: z.string().min(1, "Required"),
   orgCertificateKey: z.string().min(1, "Required"),
@@ -41,10 +50,3 @@ export const collectorUpdateSchema = createUpdateSchema(users).omit({
   createdAt: true,
   updatedAt: true,
 });
-
-export const collectorRelations = relations(users, ({ one, many }) => ({
-  orgAddress: one(addresses),
-  bankAccount: one(bankAccounts),
-  contact: one(contacts),
-  batches: many(batches),
-}));

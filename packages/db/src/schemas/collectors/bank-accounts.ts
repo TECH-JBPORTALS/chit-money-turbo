@@ -1,6 +1,8 @@
 import { ulid } from "ulid";
 import { collectorsSchema } from "./_schema";
 import { users } from "./users";
+import { relations } from "drizzle-orm";
+import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 
 export const accountTypeEnum = collectorsSchema.enum("account_type_enum", [
   "savings",
@@ -28,3 +30,17 @@ export const bankAccounts = collectorsSchema.table("bank_accounts", (t) => ({
   updatedAt: t.timestamp().$onUpdate(() => new Date()),
   createdAt: t.timestamp().defaultNow(),
 }));
+
+// Realtions
+export const bankAccountRelations = relations(bankAccounts, ({ one }) => ({
+  user: one(users, {
+    fields: [bankAccounts.userId],
+    references: [users.id],
+  }),
+}));
+
+// Validation Schemas
+export const collectorBankAccountInsertSchema =
+  createInsertSchema(bankAccounts);
+export const collectorBankAccountUpdateSchema =
+  createUpdateSchema(bankAccounts);

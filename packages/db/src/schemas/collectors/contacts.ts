@@ -1,6 +1,8 @@
 import { collectorsSchema } from "./_schema";
 import { ulid } from "ulid";
 import { users } from "./users";
+import { relations } from "drizzle-orm";
+import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 
 export const contacts = collectorsSchema.table("contacts", (t) => ({
   id: t
@@ -16,3 +18,15 @@ export const contacts = collectorsSchema.table("contacts", (t) => ({
   updatedAt: t.timestamp().$onUpdate(() => new Date()),
   createdAt: t.timestamp().defaultNow(),
 }));
+
+// Realtions
+export const bankAccountRelations = relations(contacts, ({ one }) => ({
+  user: one(users, {
+    fields: [contacts.userId],
+    references: [users.id],
+  }),
+}));
+
+// Validation Schemas
+export const collectorContactInsertSchema = createInsertSchema(contacts);
+export const collectorContactUpdateSchema = createUpdateSchema(contacts);

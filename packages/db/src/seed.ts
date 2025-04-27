@@ -1,7 +1,10 @@
 import { en_IN, Faker } from "@faker-js/faker";
 import { createClerkClient } from "@clerk/backend";
-import { db, schema } from "./client";
+import { db } from "./client";
 import { seed, reset, getGeneratorsFunctions } from "drizzle-seed";
+import { publicSchema, collectorsSchema, subscribersSchema } from ".";
+
+const schema = { ...publicSchema, collectorsSchema, subscribersSchema };
 
 async function main() {
   //Check for seed mode
@@ -43,7 +46,7 @@ async function main() {
     });
 
     //address
-    await seed(db, schema);
+    await seed(db, schema).refine((func) => ({}));
   }
 }
 

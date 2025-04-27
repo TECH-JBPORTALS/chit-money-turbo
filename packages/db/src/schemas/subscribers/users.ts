@@ -3,7 +3,7 @@ import { addresses } from "./addresses";
 import { relations } from "drizzle-orm";
 import { bankAccounts } from "./bank-accounts";
 import { contacts } from "./contacts";
-import { createInsertSchema } from "drizzle-zod";
+import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = subscribersSchema.table("users", (t) => ({
@@ -28,7 +28,7 @@ export const users = subscribersSchema.table("users", (t) => ({
 }));
 
 // Relation
-export const subscriberProfileRelations = relations(users, ({ one }) => ({
+export const userRelations = relations(users, ({ one }) => ({
   homeAddress: one(addresses),
   bankAccount: one(bankAccounts),
   contact: one(contacts),
@@ -36,6 +36,18 @@ export const subscriberProfileRelations = relations(users, ({ one }) => ({
 
 // Validation Schemas
 export const subscriberInsertSchema = createInsertSchema(users, {
+  faceId: z.string().min(1, "Required"),
+  dateOfBirth: z.string().min(1, "Required"),
+  aadharBackFileKey: z.string().min(1, "Required"),
+  aadharFrontFileKey: z.string().min(1, "Required"),
+  nomineeName: z.string().min(2, "Invalid name"),
+  nomineeRelationship: z.string().min(2, "Invalid relationship"),
+}).omit({
+  updatedAt: true,
+  createdAt: true,
+});
+
+export const subscriberUpdateSchema = createUpdateSchema(users, {
   faceId: z.string().min(1, "Required"),
   dateOfBirth: z.string().min(1, "Required"),
   aadharBackFileKey: z.string().min(1, "Required"),

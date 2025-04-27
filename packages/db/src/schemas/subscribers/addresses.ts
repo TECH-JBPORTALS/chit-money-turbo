@@ -1,6 +1,8 @@
 import { ulid } from "ulid";
 import { subscribersSchema } from "./_schema";
 import { users } from "./users";
+import { relations } from "drizzle-orm";
+import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 
 export const addresses = subscribersSchema.table("addresses", (t) => ({
   id: t
@@ -18,3 +20,15 @@ export const addresses = subscribersSchema.table("addresses", (t) => ({
   updatedAt: t.timestamp().$onUpdate(() => new Date()),
   createdAt: t.timestamp().defaultNow(),
 }));
+
+// Realtions
+export const addressRelations = relations(addresses, ({ one }) => ({
+  user: one(users, {
+    fields: [addresses.userId],
+    references: [users.id],
+  }),
+}));
+
+// Validation Schemas
+export const subscriberAddressInsertSchema = createInsertSchema(addresses);
+export const subscriberAddressUpdateSchema = createUpdateSchema(addresses);

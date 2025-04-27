@@ -16,13 +16,10 @@ export const batches = pgTable("batches", (t) => ({
     .text()
     .$defaultFn(() => `batch_${ulid()}`)
     .primaryKey(),
-  collectorId: t
-    .text()
-    .references(() => users.id, {
-      onDelete: "cascade",
-      onUpdate: "cascade",
-    })
-    .notNull(),
+  collectorId: t.text().references(() => users.id, {
+    onDelete: "cascade",
+    onUpdate: "cascade",
+  }),
   name: t.text().notNull(),
   batchType: batchTypeEnum("batch_type").default("interest").notNull(),
   dueOn: t.numeric().notNull(),
@@ -36,6 +33,7 @@ export const batches = pgTable("batches", (t) => ({
   createdAt: t.timestamp().defaultNow(),
 }));
 
+// Relations
 export const batchRelations = relations(batches, ({ one }) => ({
   collector: one(users, {
     fields: [batches.collectorId],
@@ -43,6 +41,7 @@ export const batchRelations = relations(batches, ({ one }) => ({
   }),
 }));
 
+// Validation Schemas
 export const batchInsertSchema = createInsertSchema(batches).omit({
   id: true,
   collectorId: true,
