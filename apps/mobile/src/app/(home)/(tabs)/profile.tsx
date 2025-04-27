@@ -62,9 +62,9 @@ export default function Profile() {
         {/** Profile Pic & Details */}
         <View className="flex-row gap-3.5 items-center">
           <Avatar alt="Your Profile Pic" className="size-16">
-            <AvatarImage source={{ uri: "https://github.com/shadcn.png" }} />
+            <AvatarImage source={{ uri: user?.imageUrl }} />
             <AvatarFallback>
-              <Text>A</Text>
+              <Text>{user?.firstName?.charAt(0).toUpperCase()}</Text>
             </AvatarFallback>
           </Avatar>
           <View className="gap-1">
