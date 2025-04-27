@@ -2,7 +2,7 @@ import { fakerEN_IN } from "@faker-js/faker";
 import { createClerkClient } from "@clerk/backend";
 import { db } from "./client";
 import { reset } from "drizzle-seed";
-import { publicSchema, collectorsSchema, subscribersSchema } from ".";
+import { publicSchema, collectorsSchema, subscribersSchema } from "./client";
 import { addMonths } from "date-fns";
 
 async function main() {

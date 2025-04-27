@@ -5,18 +5,18 @@ import * as collectorsSchema from "./schemas/collectors";
 import * as publicSchema from "./schemas";
 import * as subscribersSchema from "./schemas/subscribers";
 
-const schema = {
-  ...collectorsSchema,
-  ...subscribersSchema,
-  ...publicSchema,
-};
-
 const client = new Pool({
   connectionString: process.env.DATABASE_URL!,
 });
 
 export const db = drizzle({
   client,
-  schema,
+  schema: {
+    ...collectorsSchema,
+    ...subscribersSchema,
+    ...publicSchema,
+  },
   casing: "snake_case",
 });
+
+export { collectorsSchema, subscribersSchema, publicSchema };

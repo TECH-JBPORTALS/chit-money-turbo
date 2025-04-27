@@ -28,5 +28,5 @@ export const contactRelations = relations(contacts, ({ one }) => ({
 }));
 
 // Validation Schemas
-export const collectorContactInsertSchema = createInsertSchema(contacts);
-export const collectorContactUpdateSchema = createUpdateSchema(contacts);
+export const contactInsertSchema = createInsertSchema(contacts);
+export const contactUpdateSchema = createUpdateSchema(contacts);

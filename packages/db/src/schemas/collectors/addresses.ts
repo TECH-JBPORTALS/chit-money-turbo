@@ -30,5 +30,5 @@ export const addressRelations = relations(addresses, ({ one }) => ({
 }));
 
 // Validation Schemas
-export const collectorAddressInsertSchema = createInsertSchema(addresses);
-export const collectorAddressUpdateSchema = createUpdateSchema(addresses);
+export const addressInsertSchema = createInsertSchema(addresses);
+export const addressUpdateSchema = createUpdateSchema(addresses);

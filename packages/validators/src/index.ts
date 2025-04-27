@@ -1,7 +1,11 @@
-import { schema } from "@cmt/db/client";
+import {
+  publicSchema,
+  collectorsSchema,
+  subscribersSchema,
+} from "@cmt/db/client";
 import { z } from "zod";
 
-export const personalInfoSchema = schema.collectorInsertSchema
+export const personalInfoSchema = collectorsSchema.collectorInsertSchema
   .pick({ dateOfBirth: true })
   .and(
     z.object({
@@ -13,22 +17,22 @@ export const personalInfoSchema = schema.collectorInsertSchema
     })
   );
 
-export const contactInfoSchema = schema.contactInsertSchema;
+export const contactInfoSchema = collectorsSchema.contactInsertSchema;
 
-export const addressInfoSchema = schema.addressInsertSchema;
+export const addressInfoSchema = collectorsSchema.addressInsertSchema;
 
-export const orgInfoSchema = schema.collectorInsertSchema.pick({
+export const orgInfoSchema = collectorsSchema.collectorInsertSchema.pick({
   orgName: true,
 });
 
-export const bankInfoSchema = schema.bankAccountInsertSchema
+export const bankInfoSchema = collectorsSchema.bankAccountInsertSchema
   .and(z.object({ confirmAccountNumber: z.string().min(1) }))
   .refine((s) => s.accountNumber === s.confirmAccountNumber, {
     message: "Confirm account number not matched with original account number ",
     path: ["confirm_account_number"],
   });
 
-export const documentsSchema = schema.collectorInsertSchema.pick({
+export const documentsSchema = collectorsSchema.collectorInsertSchema.pick({
   aadharBackFileKey: true,
   aadharFrontFileKey: true,
   orgCertificateKey: true,
@@ -51,12 +55,11 @@ const documentKeys = Object.keys(documentsSchema.shape) as [
 
 export const DocumentKeysEnum = z.enum(documentKeys);
 
-export const batchSchema = schema.batchUpdateSchema;
+export const batchSchema = publicSchema.batchUpdateSchema;
 
 /* Subscriber Onboarding Schema's */
-export const subscriberPersonalInfoSchema = schema.subscriberInsertSchema
-  .pick({ dateOfBirth: true })
-  .and(
+export const subscriberPersonalInfoSchema =
+  subscribersSchema.subscriberInsertSchema.pick({ dateOfBirth: true }).and(
     z.object({
       firstName: z
         .string()
@@ -66,16 +69,17 @@ export const subscriberPersonalInfoSchema = schema.subscriberInsertSchema
     })
   );
 
-export const nomineeInfoSchema = schema.subscriberInsertSchema.pick({
+export const nomineeInfoSchema = subscribersSchema.subscriberInsertSchema.pick({
   nomineeName: true,
   nomineeRelationship: true,
 });
 
-export const subscriberDocumentsSchema = schema.subscriberInsertSchema.pick({
-  aadharBackFileKey: true,
-  aadharFrontFileKey: true,
-  panCardNumber: true,
-});
+export const subscriberDocumentsSchema =
+  subscribersSchema.subscriberInsertSchema.pick({
+    aadharBackFileKey: true,
+    aadharFrontFileKey: true,
+    panCardNumber: true,
+  });
 
 export const subscriberAddressInfoSchema = addressInfoSchema;
 export const subscriberContactInfoSchema = contactInfoSchema;
