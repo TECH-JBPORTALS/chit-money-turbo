@@ -27,6 +27,7 @@ import { batchSchema } from "@cmt/validators";
 import { useTRPC } from "@/trpc/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { batchInsertSchema } from "@cmt/db/schemas";
 
 export default function CreateBatchDialog({
   children,
@@ -34,13 +35,16 @@ export default function CreateBatchDialog({
   children: React.ReactNode;
 }) {
   const [isOpen, setOpen] = useState(false);
-  const form = useForm<z.infer<typeof batchSchema>>({
-    resolver: zodResolver(batchSchema),
+  const form = useForm<z.infer<typeof batchInsertSchema>>({
+    resolver: zodResolver(batchInsertSchema),
     defaultValues: {
       name: "",
-      number_of_months: 1,
-      starts_on: "",
-      due_date: "",
+      scheme: 10,
+      startsOn: "",
+      dueOn: "",
+      batchType: "interest",
+      defaultCommissionRate: "2",
+      fundAmount: "100000",
     },
   });
   const queryClient = useQueryClient();
@@ -59,14 +63,8 @@ export default function CreateBatchDialog({
     })
   );
 
-  async function onSubmit(values: z.infer<typeof batchSchema>) {
-    await createBatch({
-      name: values.name,
-      startsOn: values.starts_on,
-      defaultCommissionRate: "2.0",
-      fundAmount: "20000",
-      scheme: values.number_of_months,
-    });
+  async function onSubmit(values: z.infer<typeof batchInsertSchema>) {
+    await createBatch(values);
   }
 
   return (
@@ -98,10 +96,28 @@ export default function CreateBatchDialog({
 
             <FormField
               control={form.control}
-              name="number_of_months"
+              name="fundAmount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Number Of Months</FormLabel>
+                  <FormLabel>Target Fund Amount</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                  <FormDescription>
+                    This batch montly subscription will be calculated based
+                    scheme you choose
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="scheme"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Scheme</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -120,7 +136,7 @@ export default function CreateBatchDialog({
 
             <FormField
               control={form.control}
-              name="starts_on"
+              name="startsOn"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Batch Start Month</FormLabel>
@@ -137,7 +153,7 @@ export default function CreateBatchDialog({
 
             <FormField
               control={form.control}
-              name="due_date"
+              name="dueOn"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Batch Due Date</FormLabel>

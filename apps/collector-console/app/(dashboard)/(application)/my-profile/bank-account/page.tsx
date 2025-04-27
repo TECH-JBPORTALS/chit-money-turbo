@@ -11,18 +11,7 @@ export default function Page() {
         </p>
       </div>
       <Separator />
-      <BankInfoForm
-        state={{
-          account_holder_name: "",
-          account_number: "",
-          bank_address_pincode: "",
-          bank_city: "",
-          bank_state: "",
-          branch_name: "",
-          confirm_account_number: "",
-          ifsc_code: "",
-        }}
-      />
+      <BankInfoForm />
     </>
   );
 }

@@ -11,16 +11,7 @@ export default function Page() {
         </p>
       </div>
       <Separator />
-      <OrgInfoForm
-        state={{
-          company_fullname: "",
-          company_address: "",
-          company_pincode: "",
-          company_city: "",
-          company_state: "",
-          company_logo_url: "",
-        }}
-      />
+      <OrgInfoForm />
     </>
   );
 }

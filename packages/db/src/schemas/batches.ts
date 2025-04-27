@@ -3,10 +3,10 @@ import { ulid } from "ulid";
 import { collectors } from "./collectors";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const batchTypeEnum = pgEnum("batch_type_enum", ["interest", "auction"]);
 export const batchStatusEnum = pgEnum("batch_status_enum", [
-  "upcoming",
   "active",
   "completed",
 ]);
@@ -25,12 +25,13 @@ export const batches = pgTable("batches", (t) => ({
     .notNull(),
   name: t.text().notNull(),
   batchType: batchTypeEnum("batch_type").default("interest").notNull(),
+  dueOn: t.numeric().notNull(),
   startsOn: t.date().notNull(),
   endsOn: t.date().notNull(),
   scheme: t.integer().notNull(),
   fundAmount: t.numeric().notNull(),
   defaultCommissionRate: t.numeric().notNull(),
-  batchStatus: batchStatusEnum("batch_status").default("upcoming").notNull(),
+  batchStatus: batchStatusEnum("batch_status").default("active").notNull(),
   updatedAt: t.timestamp().$onUpdate(() => new Date()),
   createdAt: t.timestamp().defaultNow(),
 }));
@@ -48,4 +49,17 @@ export const batchInsertSchema = createInsertSchema(batches).omit({
   endsOn: true, //Calculate when inserting using startsOn field
   createdAt: true,
   updatedAt: true,
+  batchStatus: true,
 });
+
+export const batchUpdateSchema = createInsertSchema(batches)
+  .omit({
+    id: true,
+    collectorId: true,
+    endsOn: true, //Calculate when inserting using startsOn field
+    createdAt: true,
+    updatedAt: true,
+  })
+  .and(
+    z.object({ batchId: z.string().min(1, "batchId is required for updation") })
+  );

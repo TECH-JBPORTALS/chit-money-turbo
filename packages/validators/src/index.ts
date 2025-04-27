@@ -1,6 +1,7 @@
 import {
   addressInsertSchema,
   bankAccountInsertSchema,
+  batchUpdateSchema,
   collectorInsertSchema,
   contactInsertSchema,
   subscriberInsertSchema,
@@ -57,12 +58,7 @@ const documentKeys = Object.keys(documentsSchema.shape) as [
 
 export const DocumentKeysEnum = z.enum(documentKeys);
 
-export const batchSchema = z.object({
-  name: z.string().nonempty("Required"),
-  number_of_months: z.number().min(1, "Required"),
-  starts_on: z.string().nonempty("Required"),
-  due_date: z.string().nonempty("Required"),
-});
+export const batchSchema = batchUpdateSchema;
 
 /* Subscriber Onboarding Schema's */
 export const subscriberPersonalInfoSchema = subscriberInsertSchema

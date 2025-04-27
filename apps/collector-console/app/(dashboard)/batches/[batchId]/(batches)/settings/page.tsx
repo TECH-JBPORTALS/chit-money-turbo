@@ -21,12 +21,6 @@ import { z } from "zod";
 export default function Page() {
   const form = useForm<z.infer<typeof batchSchema>>({
     resolver: zodResolver(batchSchema),
-    defaultValues: {
-      name: "January 2024",
-      number_of_months: 1,
-      start_month: "Apr 2024",
-      due_date: "Every Month 20th",
-    },
   });
 
   const router = useRouter();
@@ -62,7 +56,7 @@ export default function Page() {
 
           <FormField
             control={form.control}
-            name="number_of_months"
+            name="scheme"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Number Of Months</FormLabel>
@@ -84,7 +78,7 @@ export default function Page() {
 
           <FormField
             control={form.control}
-            name="start_month"
+            name="startsOn"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Batch Start Month</FormLabel>
@@ -101,7 +95,7 @@ export default function Page() {
 
           <FormField
             control={form.control}
-            name="start_month"
+            name="dueOn"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Batch Due Date</FormLabel>
