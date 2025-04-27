@@ -1,4 +1,4 @@
-import { addresses, bankAccounts, collectors, contacts } from "@cmt/db/schemas";
+import { schema } from "@cmt/db/client";
 import { protectedProcedure } from "../trpc";
 import { onboardingSchema } from "@cmt/validators";
 import { TRPCError } from "@trpc/server";
@@ -13,7 +13,7 @@ export const collectorsRouter = {
       ctx.db.transaction(async (tx) => {
         // 1. Add bank account
         const bankAccount = await tx
-          .insert(bankAccounts)
+          .insert(schema.bankAccounts)
           .values(input.bankInfo)
           .returning();
 
@@ -25,13 +25,13 @@ export const collectorsRouter = {
 
         // 2. Add contact
         const contact = await tx
-          .insert(contacts)
+          .insert(schema.contacts)
           .values(input.contactInfo)
           .returning();
 
         // 3. Add org address
         const address = await tx
-          .insert(addresses)
+          .insert(schema.addresses)
           .values(input.addressInfo)
           .returning();
 
@@ -48,7 +48,7 @@ export const collectorsRouter = {
             code: "INTERNAL_SERVER_ERROR",
           });
 
-        const profile = await tx.insert(collectors).values({
+        const profile = await tx.insert(schema.collectors).values({
           id: ctx.session.userId,
           ...input.documents,
           ...input.personalInfo,
@@ -67,7 +67,7 @@ export const collectorsRouter = {
         orgName: true,
         orgCertificateKey: true,
       },
-      where: eq(collectors.id, ctx.session.userId),
+      where: eq(schema.collectors.id, ctx.session.userId),
     })
   ),
 };

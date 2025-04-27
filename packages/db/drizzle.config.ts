@@ -7,8 +7,9 @@ if (!process.env.DATABASE_URL) {
 const url = process.env.DATABASE_URL;
 
 export default {
-  schema: "./src/schemas/index.ts",
+  schema: "./src/schemas/*",
   dialect: "postgresql",
   dbCredentials: { url },
+  schemaFilter: ["collectors", "subscribers", "public"],
   casing: "snake_case",
 } satisfies Config;

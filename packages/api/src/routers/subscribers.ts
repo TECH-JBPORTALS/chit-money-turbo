@@ -1,10 +1,4 @@
-import {
-  addresses,
-  bankAccounts,
-  collectors,
-  contacts,
-  subscribers,
-} from "@cmt/db/schemas";
+import { schema } from "@cmt/db/client";
 import { protectedProcedure } from "../trpc";
 import { subscriberOnboardingSchema } from "@cmt/validators";
 import { TRPCError } from "@trpc/server";
@@ -21,7 +15,7 @@ export const subscribersRouter = {
         const randomFaceId = customAlphabet("0123456789", 10);
         // 1. Add bank account
         const bankAccount = await tx
-          .insert(bankAccounts)
+          .insert(schema.bankAccounts)
           .values(input.bankInfo)
           .returning();
 
@@ -33,13 +27,13 @@ export const subscribersRouter = {
 
         // 2. Add contact
         const contact = await tx
-          .insert(contacts)
+          .insert(schema.contacts)
           .values(input.contactInfo)
           .returning();
 
         // 3. Add org address
         const address = await tx
-          .insert(addresses)
+          .insert(schema.addresses)
           .values(input.addressInfo)
           .returning();
 
@@ -58,7 +52,7 @@ export const subscribersRouter = {
             code: "INTERNAL_SERVER_ERROR",
           });
 
-        const profile = await tx.insert(subscribers).values({
+        const profile = await tx.insert(schema.subscribers).values({
           id: ctx.session.userId,
           ...input.documents,
           ...input.personalInfo,
@@ -78,7 +72,7 @@ export const subscribersRouter = {
         orgName: true,
         orgCertificateKey: true,
       },
-      where: eq(collectors.id, ctx.session.userId),
+      where: eq(schema.collectors.id, ctx.session.userId),
     })
   ),
 };

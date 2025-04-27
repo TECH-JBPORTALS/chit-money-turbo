@@ -11,10 +11,6 @@
     "./client": {
       "types": "./dist/client.d.ts",
       "default": "./src/client.ts"
-    },
-    "./schemas": {
-      "types": "./dist/schemas/index.d.ts",
-      "default": "./src/schemas/index.ts"
     }
   },
   "scripts": {
@@ -23,23 +19,27 @@
     "dev": "tsc",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
-    "push": "pnpm with-env drizzle-kit push",
-    "studio": "pnpm with-env drizzle-kit studio",
+    "push": "pnpm with-env  -- drizzle-kit push",
+    "studio": "pnpm with-env  --  drizzle-kit studio",
+    "seed": "pnpm with-env -v SEED_MODE=true -- tsx src/seed.ts",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "with-env": "dotenv -e ../../.env --"
+    "with-env": "dotenv -e ../../.env"
   },
   "license": "MIT",
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",
     "drizzle-orm": "^0.42.0",
+    "drizzle-seed": "^0.3.1",
     "drizzle-zod": "^0.7.1",
     "postgres": "^3.4.5",
     "ulid": "^3.0.0",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@clerk/backend": "^1.25.8",
     "@cmt/eslint-config": "workspace:^",
     "@cmt/typescript-config": "workspace:^",
+    "@faker-js/faker": "^9.7.0",
     "dotenv-cli": "catalog:",
     "drizzle-kit": "^0.31.0"
   }

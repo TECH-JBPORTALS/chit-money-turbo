@@ -1,7 +1,9 @@
 import { Pool } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
 
-import * as schema from "./schemas";
+import * as collectorsSchema from "./schemas/collectors";
+import * as publicSchema from "./schemas";
+import * as subscribersSchema from "./schemas/subscribers";
 
 const client = new Pool({
   connectionString: process.env.DATABASE_URL!,
@@ -9,6 +11,12 @@ const client = new Pool({
 
 export const db = drizzle({
   client,
-  schema,
+  schema: {
+    ...collectorsSchema,
+    ...subscribersSchema,
+    ...publicSchema,
+  },
   casing: "snake_case",
 });
+
+export const schema = { collectorsSchema, subscribersSchema, ...publicSchema };
