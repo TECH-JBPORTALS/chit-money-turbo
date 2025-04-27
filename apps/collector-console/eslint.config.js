@@ -1,4 +1,4 @@
-import { nextJsConfig } from "@cmt/eslint-config/next-js";
+import nextJsConfig from "@cmt/eslint-config/next-js";
 
-/** @type {import("eslint").Linter.Config} */
+/** @type {Awaited<import('typescript-eslint').Config>} */
 export default nextJsConfig;

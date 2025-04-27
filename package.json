@@ -6,9 +6,11 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "clean": "git clean -xdf node_modules",
-    "clean:workspaces": "turbo run clean"
+    "clean:workspaces": "turbo run clean",
+    "db:push": "turbo -F @cmt/db push"
   },
   "devDependencies": {
     "@cmt/eslint-config": "workspace:*",

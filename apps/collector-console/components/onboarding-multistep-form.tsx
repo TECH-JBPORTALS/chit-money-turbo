@@ -3,6 +3,7 @@
 import { Steps, useSteps } from "react-step-builder";
 import { cn } from "@cmt/ui/lib/utils";
 import {
+  AddressInfoForm,
   BankInfoForm,
   ContactInfoForm,
   DocumentsForm,
@@ -10,13 +11,16 @@ import {
   PersonalInfoForm,
 } from "./forms/onbaording-forms";
 import { z } from "zod";
-import { onboardingSchema } from "@/lib/validators";
+import { onboardingSchema } from "@cmt/validators";
 import { useEffect, useState } from "react";
 import { Loader2Icon } from "lucide-react";
 import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
 import { updateOnboardingData } from "@/lib/actions";
 import { useRouter } from "next/navigation";
+import { useTRPC } from "@/trpc/react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export function OnboardingMultiStepForm({
   initialState,
@@ -26,6 +30,15 @@ export function OnboardingMultiStepForm({
   const [hydrated, setHydrated] = useState(false);
   const { next, prev, current: currentStep, total } = useSteps();
   const { user } = useUser();
+  const trpc = useTRPC();
+  const { mutateAsync: createCollectorProfle } = useMutation(
+    trpc.collectors.createProfile.mutationOptions({
+      onError(error) {
+        console.log("Error in creating collector profile", error);
+        toast.error("Something went wrong, Try again");
+      },
+    })
+  );
   const router = useRouter();
   // Ensure the component is fully hydrated before rendering Steps
   useEffect(() => {
@@ -81,6 +94,13 @@ export function OnboardingMultiStepForm({
           }
           state={initialState.personalInfo}
         />
+        <OrgInfoForm
+          {...{ prev, next }}
+          setState={(values) =>
+            updateOnboardingData({ ...initialState, orgInfo: values })
+          }
+          state={initialState.orgInfo}
+        />
         <ContactInfoForm
           {...{ prev, next }}
           setState={(values) =>
@@ -88,12 +108,12 @@ export function OnboardingMultiStepForm({
           }
           state={initialState.contactInfo}
         />
-        <OrgInfoForm
+        <AddressInfoForm
           {...{ prev, next }}
           setState={(values) =>
-            updateOnboardingData({ ...initialState, orgInfo: values })
+            updateOnboardingData({ ...initialState, addressInfo: values })
           }
-          state={initialState.orgInfo}
+          state={initialState.addressInfo}
         />
         <BankInfoForm
           {...{ prev, next }}
@@ -106,11 +126,14 @@ export function OnboardingMultiStepForm({
         <DocumentsForm
           {...{ prev, next }}
           setState={async (values) => {
+            //1. Create collector profile in the db
+            await createCollectorProfle({ ...initialState, documents: values });
+            //2. Mark onboarding as completed and update values
             await updateOnboardingData({
               ...initialState,
-              documents: values,
               onboardingComplete: true,
             });
+            // 3. Reload the resources
             await user?.reload();
             router.refresh();
           }}

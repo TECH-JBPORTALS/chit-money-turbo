@@ -20,23 +20,14 @@ import {
   documentsSchema,
   orgInfoSchema,
   personalInfoSchema,
-} from "@/lib/validators";
+} from "@cmt/validators";
 import Uploader from "../uploader";
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Building2Icon } from "lucide-react";
 
-export function PersonalInfoForm({
-  state,
-}: {
-  state: z.infer<typeof personalInfoSchema>;
-}) {
+export function PersonalInfoForm() {
   const form = useForm<z.infer<typeof personalInfoSchema>>({
     resolver: zodResolver(personalInfoSchema),
-    defaultValues: {
-      date_of_birth: state?.date_of_birth ?? "",
-      first_name: state?.first_name ?? "",
-      last_name: state?.last_name ?? "",
-    },
   });
 
   const onSubmit = async (values: z.infer<typeof personalInfoSchema>) => {
@@ -49,7 +40,7 @@ export function PersonalInfoForm({
         <div className="flex flex-col gap-6">
           <FormField
             control={form.control}
-            name="first_name"
+            name="firstName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>First Name</FormLabel>
@@ -62,7 +53,7 @@ export function PersonalInfoForm({
           />
           <FormField
             control={form.control}
-            name="last_name"
+            name="lastName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Last Name</FormLabel>
@@ -76,7 +67,7 @@ export function PersonalInfoForm({
 
           <FormField
             control={form.control}
-            name="date_of_birth"
+            name="dateOfBirth"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Date of Birth</FormLabel>
@@ -100,20 +91,9 @@ export function PersonalInfoForm({
   );
 }
 
-export function ContactInfoForm({
-  state,
-}: {
-  state: z.infer<typeof contactInfoSchema>;
-}) {
+export function ContactInfoForm() {
   const form = useForm<z.infer<typeof contactInfoSchema>>({
     resolver: zodResolver(contactInfoSchema),
-    defaultValues: {
-      primary_phone_number: state?.primary_phone_number ?? "",
-      contact_address: state?.contact_address ?? "",
-      contact_city: state?.contact_city ?? "",
-      contact_pincode: state?.contact_pincode ?? "",
-      contact_state: state?.contact_state ?? "",
-    },
   });
 
   const onSubmit = async (values: z.infer<typeof contactInfoSchema>) => {
@@ -126,7 +106,7 @@ export function ContactInfoForm({
         <div className="flex flex-col gap-6">
           <FormField
             control={form.control}
-            name="primary_phone_number"
+            name="primaryPhoneNumber"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Primary Phone Number</FormLabel>
@@ -139,10 +119,10 @@ export function ContactInfoForm({
           />
           <FormField
             control={form.control}
-            name="contact_address"
+            name="secondaryPhoneNumber"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Address</FormLabel>
+                <FormLabel>Secondary Phone Number</FormLabel>
                 <FormControl>
                   <Input placeholder="#123, 1st street ...." {...field} />
                 </FormControl>
@@ -151,7 +131,7 @@ export function ContactInfoForm({
             )}
           />
 
-          <FormField
+          {/* <FormField
             control={form.control}
             name="contact_pincode"
             render={({ field }) => (
@@ -191,7 +171,7 @@ export function ContactInfoForm({
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
         </div>
         <Button
           className="w-fit"
@@ -211,20 +191,9 @@ const orgInfoSchemaWithLogo = orgInfoSchema.merge(
   })
 );
 
-export function OrgInfoForm({
-  state,
-}: {
-  state: z.infer<typeof orgInfoSchemaWithLogo>;
-}) {
+export function OrgInfoForm() {
   const form = useForm<z.infer<typeof orgInfoSchemaWithLogo>>({
     resolver: zodResolver(orgInfoSchemaWithLogo),
-    defaultValues: {
-      company_address: state?.company_address ?? "",
-      company_city: state?.company_city ?? "",
-      company_fullname: state?.company_fullname ?? "",
-      company_pincode: state?.company_pincode ?? "",
-      company_state: state?.company_state ?? "",
-    },
   });
 
   const onSubmit = async (values: z.infer<typeof orgInfoSchema>) => {
@@ -264,7 +233,7 @@ export function OrgInfoForm({
 
           <FormField
             control={form.control}
-            name="company_fullname"
+            name="orgName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Company Full Name</FormLabel>
@@ -278,9 +247,9 @@ export function OrgInfoForm({
               </FormItem>
             )}
           />
-          <FormField
+          {/* <FormField
             control={form.control}
-            name="company_address"
+            name=""
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Company Address</FormLabel>
@@ -322,7 +291,7 @@ export function OrgInfoForm({
 
           <FormField
             control={form.control}
-            name="company_state"
+            name="st"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>State</FormLabel>
@@ -332,7 +301,7 @@ export function OrgInfoForm({
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
         </div>
         <Button
           className="w-fit"
@@ -346,23 +315,9 @@ export function OrgInfoForm({
   );
 }
 
-export function BankInfoForm({
-  state,
-}: {
-  state: z.infer<typeof bankInfoSchema>;
-}) {
+export function BankInfoForm() {
   const form = useForm<z.infer<typeof bankInfoSchema>>({
     resolver: zodResolver(bankInfoSchema),
-    defaultValues: {
-      account_holder_name: state?.account_holder_name ?? "",
-      account_number: state?.account_number ?? "",
-      bank_address_pincode: state?.bank_address_pincode ?? "",
-      bank_city: state?.bank_city ?? "",
-      bank_state: state?.bank_state ?? "",
-      branch_name: state?.branch_name ?? "",
-      confirm_account_number: state?.confirm_account_number ?? "",
-      ifsc_code: state?.ifsc_code ?? "",
-    },
   });
 
   const onSubmit = async (values: z.infer<typeof bankInfoSchema>) => {
@@ -375,7 +330,7 @@ export function BankInfoForm({
         <div className="flex flex-col gap-6">
           <FormField
             control={form.control}
-            name="account_number"
+            name="accountNumber"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Account Number</FormLabel>
@@ -388,7 +343,7 @@ export function BankInfoForm({
           />
           <FormField
             control={form.control}
-            name="confirm_account_number"
+            name="confirmAccountNumber"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Confirm Account Number</FormLabel>
@@ -402,7 +357,7 @@ export function BankInfoForm({
 
           <FormField
             control={form.control}
-            name="account_holder_name"
+            name="accountHolderName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Account Holder Name</FormLabel>
@@ -416,7 +371,7 @@ export function BankInfoForm({
 
           <FormField
             control={form.control}
-            name="branch_name"
+            name="branchName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Branch Name</FormLabel>
@@ -430,7 +385,7 @@ export function BankInfoForm({
 
           <FormField
             control={form.control}
-            name="ifsc_code"
+            name="ifscCode"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>IFSC Code</FormLabel>
@@ -443,7 +398,7 @@ export function BankInfoForm({
           />
           <FormField
             control={form.control}
-            name="bank_address_pincode"
+            name="pincode"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Pincode</FormLabel>
@@ -457,7 +412,7 @@ export function BankInfoForm({
 
           <FormField
             control={form.control}
-            name="bank_city"
+            name="city"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>City</FormLabel>
@@ -471,7 +426,7 @@ export function BankInfoForm({
 
           <FormField
             control={form.control}
-            name="bank_state"
+            name="state"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>State</FormLabel>
@@ -495,18 +450,9 @@ export function BankInfoForm({
   );
 }
 
-export function DocumentsForm({
-  state,
-}: {
-  state: z.infer<typeof documentsSchema>;
-}) {
+export function DocumentsForm() {
   const form = useForm<z.infer<typeof documentsSchema>>({
     resolver: zodResolver(documentsSchema),
-    defaultValues: {
-      aadhar_card_back_url: state?.aadhar_card_back_url ?? "",
-      aadhar_card_front_url: state?.aadhar_card_front_url ?? "",
-      registeration_certificate_url: state?.registeration_certificate_url ?? "",
-    },
   });
 
   const onSubmit = async (values: z.infer<typeof documentsSchema>) => {
@@ -520,7 +466,7 @@ export function DocumentsForm({
           <div className="grid grid-cols-2 gap-6">
             <FormField
               control={form.control}
-              name="registeration_certificate_url"
+              name="orgCertificateKey"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Registration Certificate</FormLabel>
@@ -530,7 +476,7 @@ export function DocumentsForm({
                       endpoint={"documentsUploader"}
                       input="registeration_certificate_url"
                       onUploadError={(e) => {
-                        form.setError("registeration_certificate_url", {
+                        form.setError("orgCertificateKey", {
                           message: e.message,
                         });
                       }}
@@ -548,7 +494,7 @@ export function DocumentsForm({
           <div className="grid grid-cols-2 gap-6">
             <FormField
               control={form.control}
-              name="aadhar_card_front_url"
+              name="aadharFrontFileKey"
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel>Adhar Card Front</FormLabel>
@@ -558,7 +504,7 @@ export function DocumentsForm({
                       input="aadhar_card_front_url"
                       endpoint={"documentsUploader"}
                       onUploadError={(e) => {
-                        form.setError("aadhar_card_front_url", {
+                        form.setError("aadharFrontFileKey", {
                           message: e.message,
                         });
                       }}
@@ -574,7 +520,7 @@ export function DocumentsForm({
 
             <FormField
               control={form.control}
-              name="aadhar_card_back_url"
+              name="aadharBackFileKey"
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel>Aadhar Card Back</FormLabel>
@@ -584,7 +530,7 @@ export function DocumentsForm({
                       input="aadhar_card_back_url"
                       endpoint={"documentsUploader"}
                       onUploadError={(e) => {
-                        form.setError("aadhar_card_back_url", {
+                        form.setError("aadharBackFileKey", {
                           message: e.message,
                         });
                       }}

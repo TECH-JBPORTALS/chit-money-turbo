@@ -1,6 +1,6 @@
 {
   "name": "@cmt/eslint-config",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "private": true,
   "exports": {
@@ -9,9 +9,14 @@
     "./react-internal": "./react-internal.js"
   },
   "scripts": {
-    "clean": "git clean -xdf .cache .turbo node_modules"
+    "clean": "git clean -xdf .cache .turbo node_modules",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "@eslint/compat": "^1.2.8",
     "@next/eslint-plugin-next": "^15.1.7",
     "@typescript-eslint/eslint-plugin": "^8.24.1",
     "@typescript-eslint/parser": "^8.24.1",
@@ -19,10 +24,9 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-only-warn": "^1.1.0",
     "eslint-plugin-react": "^7.37.4",
-    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-turbo": "^2.4.2",
     "globals": "^15.15.0",
-    "typescript": "catalog:",
     "typescript-eslint": "^8.24.1"
   }
 }

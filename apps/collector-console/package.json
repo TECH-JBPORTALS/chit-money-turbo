@@ -35,15 +35,18 @@
     "react-dom": "catalog:react18",
     "react-hook-form": "catalog:rfh752",
     "react-step-builder": "^3.0.6",
+    "sonner": "^2.0.3",
     "superjson": "2.2.2",
     "uploadthing": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@cmt/api": "workspace:*",
+    "@cmt/db": "workspace:*",
     "@cmt/eslint-config": "workspace:^",
     "@cmt/typescript-config": "workspace:*",
     "@cmt/ui": "workspace:*",
+    "@cmt/validators": "workspace:^",
     "@tanstack/eslint-plugin-query": "^5.68.0",
     "@types/lodash": "^4.17.16",
     "@types/node": "catalog:react18",

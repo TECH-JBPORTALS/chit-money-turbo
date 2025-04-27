@@ -8,6 +8,7 @@ import type { AppRouter } from "@cmt/api";
 import { appRouter, createTRPCContext } from "@cmt/api";
 
 import { createQueryClient } from "./query-client";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
@@ -16,9 +17,18 @@ import { createQueryClient } from "./query-client";
 const createContext = cache(async () => {
   const heads = new Headers(await headers());
   heads.set("x-trpc-source", "rsc");
+  const authObj = await auth();
+  const client = await clerkClient();
+
+  const authSession = authObj.sessionId
+    ? await client.sessions.getSession(authObj.sessionId)
+    : null;
+
+  // console.log("authSession", authSession);
 
   return createTRPCContext({
     headers: heads,
+    session: authSession,
   });
 });
 
@@ -38,6 +48,7 @@ export function HydrateClient(props: { children: React.ReactNode }) {
     </HydrationBoundary>
   );
 }
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function prefetch<T extends ReturnType<TRPCQueryOptions<any>>>(
   queryOptions: T

@@ -14,13 +14,7 @@ export default function Page() {
         </p>
       </div>
       <Separator />
-      <PersonalInfoForm
-        state={{
-          date_of_birth: "",
-          first_name: "",
-          last_name: "",
-        }}
-      />
+      <PersonalInfoForm />
       <div>
         <div className="text-lg font-medium">Contact Information</div>
         <p className="text-sm text-muted-foreground">
@@ -28,15 +22,7 @@ export default function Page() {
         </p>
       </div>
       <Separator />
-      <ContactInfoForm
-        state={{
-          primary_phone_number: "",
-          contact_address: "",
-          contact_city: "",
-          contact_pincode: "",
-          contact_state: "",
-        }}
-      />
+      <ContactInfoForm />
     </>
   );
 }

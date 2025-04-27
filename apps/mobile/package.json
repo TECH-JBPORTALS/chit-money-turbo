@@ -92,6 +92,7 @@
     "@cmt/api": "workspace:*",
     "@cmt/eslint-config": "workspace:^",
     "@cmt/typescript-config": "workspace:*",
+    "@cmt/validators": "workspace:*",
     "@types/react": "catalog:react18",
     "typescript": "catalog:"
   },

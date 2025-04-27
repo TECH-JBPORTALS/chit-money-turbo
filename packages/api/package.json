@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
@@ -15,13 +16,17 @@
   "dependencies": {
     "@clerk/nextjs": "catalog:",
     "@trpc/server": "catalog:",
-    "uploadthing": "catalog:",
+    "date-fns": "^4.1.0",
+    "nanoid": "^5.1.5",
     "superjson": "2.2.2",
+    "uploadthing": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@cmt/db": "workspace:^",
     "@cmt/eslint-config": "workspace:*",
     "@cmt/typescript-config": "workspace:*",
+    "@cmt/validators": "workspace:*",
     "@types/node": "catalog:react18",
     "tailwindcss": "catalog:tailwind4",
     "typescript": "catalog:"

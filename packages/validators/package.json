@@ -1,0 +1,27 @@
+{
+  "name": "@cmt/validators",
+  "version": "1.0.0",
+  "description": "All zod schemas for @cmt apps",
+  "type": "module",
+  "private": "true",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "lint": "eslint . --max-warnings 0"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cmt/db": "workspace:*",
+    "@cmt/eslint-config": "workspace:^",
+    "@cmt/typescript-config": "workspace:^",
+    "typescript": "catalog:"
+  }
+}

@@ -28,6 +28,7 @@ export function AppSidebarMenuButtonWithSubMenu(batch: {
   name: string;
 }) {
   const pathname = usePathname();
+
   return (
     <SidebarMenuItem>
       <Collapsible

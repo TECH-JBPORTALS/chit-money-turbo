@@ -6,6 +6,7 @@ import { extractRouterConfig } from "uploadthing/server";
 import { Providers } from "@/components/providers";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ourFileRouter } from "@cmt/api/uploadthing";
+import { Toaster } from "@cmt/ui/components/sonner";
 
 const fontSans = Urbanist({
   subsets: ["latin"],
@@ -39,16 +40,19 @@ export default function RootLayout({
         <body
           className={`${fontSans.variable} ${fontGeist.variable} ${fontMono.variable} font-sans antialiased `}
         >
-          <NextSSRPlugin
-            /**
-             * The `extractRouterConfig` will extract **only** the route configs
-             * from the router to prevent additional information from being
-             * leaked to the client. The data passed to the client is the same
-             * as if you were to fetch `/api/uploadthing` directly.
-             */
-            routerConfig={extractRouterConfig(ourFileRouter)}
-          />
-          <Providers>{children}</Providers>
+          <Providers>
+            <NextSSRPlugin
+              /**
+               * The `extractRouterConfig` will extract **only** the route configs
+               * from the router to prevent additional information from being
+               * leaked to the client. The data passed to the client is the same
+               * as if you were to fetch `/api/uploadthing` directly.
+               */
+              routerConfig={extractRouterConfig(ourFileRouter)}
+            />
+            {children}
+            <Toaster />
+          </Providers>
         </body>
       </html>
     </ClerkProvider>

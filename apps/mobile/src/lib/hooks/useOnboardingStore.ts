@@ -2,12 +2,12 @@ import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { z } from "zod";
-import { onboardingSchema } from "../validators";
+import { subscriberOnboardingSchema } from "@cmt/validators";
 
 interface OnboardingStoreProps {
   currentStep: number;
-  state: z.infer<typeof onboardingSchema>;
-  setState: (state: z.infer<typeof onboardingSchema>) => void;
+  state: z.infer<typeof subscriberOnboardingSchema>;
+  setState: (state: z.infer<typeof subscriberOnboardingSchema>) => void;
   setCurrentStep: (step: number) => void;
 }
 
@@ -23,35 +23,40 @@ export const useOnboardingStore = create<OnboardingStoreProps>()(
       },
       state: {
         personalInfo: {
-          full_name: "",
-          date_of_birth: "",
+          firstName: "",
+          lastName: "",
+          dateOfBirth: "",
         },
         contactInfo: {
-          primary_phone_number: "",
-          alternative_phone_number: "",
+          primaryPhoneNumber: "",
+          secondaryPhoneNumber: "",
         },
         documents: {
-          aadhar_uri: "",
-          pan_number: "",
+          aadharBackFileKey: "",
+          aadharFrontFileKey: "",
+          panCardNumber: "",
         },
         nomineeInfo: {
-          full_name: "",
-          relationship: "",
+          nomineeName: "",
+          nomineeRelationship: "",
         },
         addressInfo: {
-          complete_address: "",
+          addressLine: "",
           pincode: "",
           state: "",
           city: "",
         },
         bankInfo: {
-          account_number: "",
-          confirm_account_number: "",
-          account_holder_name: "",
-          ifsc_code: "",
-          account_type: "",
-          branch_name: "",
-          upi_id: "",
+          accountNumber: "",
+          confirmAccountNumber: "",
+          accountHolderName: "",
+          ifscCode: "",
+          accountType: "savings",
+          branchName: "",
+          upiId: "",
+          city: "",
+          pincode: "",
+          state: "",
         },
       },
     }),

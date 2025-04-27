@@ -13,17 +13,16 @@ import {
 } from "~/components/ui/card";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
-import { trpc } from "~/utils/api";
+import { useUser } from "@clerk/clerk-expo";
 const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
 
 export default function Page() {
-  const { data } = useQuery(trpc.hello.sayHello.queryOptions());
+  const { user } = useUser();
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
       <LinearBlurView>
-        <H2>Hey, Tommy 🙏</H2>
+        <H2>Hey, {user?.firstName} 🙏</H2>
 
         {/** Credit Score */}
         <View className="gap-4">

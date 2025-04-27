@@ -2,6 +2,7 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 import { appRouter, createTRPCContext } from "@cmt/api";
 import { NextRequest } from "next/server";
+import { clerkClient, getAuth } from "@clerk/nextjs/server";
 
 /**
  * Configure basic CORS headers
@@ -23,14 +24,22 @@ export const OPTIONS = () => {
 };
 
 const handler = async (req: NextRequest) => {
+  const authObj = getAuth(req);
+  const client = await clerkClient();
+  const session = authObj.sessionId
+    ? await client.sessions.getSession(authObj.sessionId)
+    : null;
+
   const response = await fetchRequestHandler({
     endpoint: "/api/trpc",
     router: appRouter,
-    req,
-    createContext: () =>
-      createTRPCContext({
+    req: req as Request,
+    createContext: async () => {
+      return createTRPCContext({
         headers: req.headers,
-      }),
+        session,
+      });
+    },
     onError({ error, path }) {
       console.error(`>>> tRPC Error on '${path}'`, error);
     },

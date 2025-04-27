@@ -23,28 +23,52 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@cmt/ui/components/input";
 import { Button } from "@cmt/ui/components/button";
-import { batchSchema } from "@/lib/validators";
+import { batchSchema } from "@cmt/validators";
+import { useTRPC } from "@/trpc/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { batchInsertSchema } from "@cmt/db/schemas/public";
 
 export default function CreateBatchDialog({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const form = useForm<z.infer<typeof batchSchema>>({
-    resolver: zodResolver(batchSchema),
+  const [isOpen, setOpen] = useState(false);
+  const form = useForm<z.infer<typeof batchInsertSchema>>({
+    resolver: zodResolver(batchInsertSchema),
     defaultValues: {
       name: "",
-      number_of_months: 1,
-      start_month: "",
-      due_date: "",
+      scheme: 10,
+      startsOn: "",
+      dueOn: "",
+      batchType: "interest",
+      defaultCommissionRate: "2",
+      fundAmount: "100000",
     },
   });
+  const queryClient = useQueryClient();
+  const trpc = useTRPC();
+  const { mutateAsync: createBatch, isPending } = useMutation(
+    trpc.batches.create.mutationOptions({
+      onSettled() {
+        queryClient.invalidateQueries(trpc.batches.pathFilter());
+      },
+      onSuccess() {
+        setOpen(false);
+      },
+      onError(error) {
+        console.log(error);
+      },
+    })
+  );
 
-  async function onSubmit(values: z.infer<typeof batchSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof batchInsertSchema>) {
+    await createBatch(values);
   }
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -72,10 +96,28 @@ export default function CreateBatchDialog({
 
             <FormField
               control={form.control}
-              name="number_of_months"
+              name="fundAmount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Number Of Months</FormLabel>
+                  <FormLabel>Target Fund Amount</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                  <FormDescription>
+                    This batch montly subscription will be calculated based
+                    scheme you choose
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="scheme"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Scheme</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -94,12 +136,12 @@ export default function CreateBatchDialog({
 
             <FormField
               control={form.control}
-              name="start_month"
+              name="startsOn"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Batch Start Month</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input type="date" {...field} />
                   </FormControl>
                   <FormMessage />
                   <FormDescription>
@@ -111,7 +153,7 @@ export default function CreateBatchDialog({
 
             <FormField
               control={form.control}
-              name="start_month"
+              name="dueOn"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Batch Due Date</FormLabel>
@@ -133,7 +175,7 @@ export default function CreateBatchDialog({
                   Cancel
                 </Button>
               </DialogClose>
-              <Button size={"lg"} type="submit">
+              <Button isLoading={isPending} size={"lg"} type="submit">
                 Create
               </Button>
             </DialogFooter>

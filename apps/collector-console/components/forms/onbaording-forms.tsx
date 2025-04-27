@@ -21,15 +21,23 @@ import {
   FormLabel,
   FormMessage,
 } from "@cmt/ui/components/form";
+import {
+  Select,
+  SelectTrigger,
+  SelectItem,
+  SelectContent,
+  SelectValue,
+} from "@cmt/ui/components/select";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { StepProps } from "@/types/step-form";
 import {
+  addressInfoSchema,
   bankInfoSchema,
   contactInfoSchema,
   documentsSchema,
   orgInfoSchema,
   personalInfoSchema,
-} from "@/lib/validators";
+} from "@cmt/validators";
 import Uploader from "../uploader";
 import { useSteps } from "react-step-builder";
 
@@ -40,9 +48,9 @@ export function PersonalInfoForm({
   const form = useForm<z.infer<typeof personalInfoSchema>>({
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      date_of_birth: state?.date_of_birth ?? "",
-      first_name: state?.first_name ?? "",
-      last_name: state?.last_name ?? "",
+      dateOfBirth: state?.dateOfBirth ?? undefined,
+      firstName: state?.firstName ?? "",
+      lastName: state?.lastName ?? "",
     },
   });
   const { next } = useSteps();
@@ -64,7 +72,7 @@ export function PersonalInfoForm({
             <div className="flex flex-col gap-6">
               <FormField
                 control={form.control}
-                name="first_name"
+                name="firstName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
@@ -77,7 +85,7 @@ export function PersonalInfoForm({
               />
               <FormField
                 control={form.control}
-                name="last_name"
+                name="lastName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
@@ -91,7 +99,7 @@ export function PersonalInfoForm({
 
               <FormField
                 control={form.control}
-                name="date_of_birth"
+                name="dateOfBirth"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Date of Birth</FormLabel>
@@ -113,128 +121,6 @@ export function PersonalInfoForm({
   );
 }
 
-export function ContactInfoForm({
-  setState,
-  state,
-}: StepProps<z.infer<typeof contactInfoSchema>>) {
-  const form = useForm<z.infer<typeof contactInfoSchema>>({
-    resolver: zodResolver(contactInfoSchema),
-    defaultValues: {
-      primary_phone_number: state?.primary_phone_number ?? "",
-      contact_address: state?.contact_address ?? "",
-      contact_city: state?.contact_city ?? "",
-      contact_pincode: state?.contact_pincode ?? "",
-      contact_state: state?.contact_state ?? "",
-    },
-  });
-  const { next, prev } = useSteps();
-
-  const onSubmit = async (values: z.infer<typeof contactInfoSchema>) => {
-    await setState(values);
-    next();
-  };
-
-  return (
-    <Card className="bg-transparent border-none shadow-none">
-      <CardHeader className="text-center">
-        <CardTitle className="text-xl">Contact Information</CardTitle>
-        <CardDescription>
-          {
-            "Give a proper valid information so there will be no problem to subscribers who may want’s to contact you"
-          }
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="flex flex-col gap-6">
-              <FormField
-                control={form.control}
-                name="primary_phone_number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Primary Phone Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="+91" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="contact_address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Address</FormLabel>
-                    <FormControl>
-                      <Input placeholder="#123, 1st street ...." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="contact_pincode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pincode</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="contact_city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>City</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="contact_state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>State</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <Button className="w-full" isLoading={form.formState.isSubmitting}>
-              Next <ArrowRightIcon />
-            </Button>
-            <Button
-              type="button"
-              onClick={prev}
-              variant={"outline"}
-              className="w-full"
-            >
-              <ArrowLeftIcon /> Back
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
-  );
-}
-
 export function OrgInfoForm({
   setState,
   state,
@@ -242,11 +128,7 @@ export function OrgInfoForm({
   const form = useForm<z.infer<typeof orgInfoSchema>>({
     resolver: zodResolver(orgInfoSchema),
     defaultValues: {
-      company_address: state?.company_address ?? "",
-      company_city: state?.company_city ?? "",
-      company_fullname: state?.company_fullname ?? "",
-      company_pincode: state?.company_pincode ?? "",
-      company_state: state?.company_state ?? "",
+      orgName: state?.orgName ?? "",
     },
   });
   const { next, prev } = useSteps();
@@ -270,12 +152,15 @@ export function OrgInfoForm({
             <div className="flex flex-col gap-6">
               <FormField
                 control={form.control}
-                name="company_fullname"
+                name="orgName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Company Full Name</FormLabel>
+                    <FormLabel>Chit Fund House Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Lakshmi Chit Fund House" {...field} />
+                      <Input
+                        placeholder="eg. Lakshmi Chit Fund House"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                     <FormDescription>
@@ -284,23 +169,163 @@ export function OrgInfoForm({
                   </FormItem>
                 )}
               />
+            </div>
+            <Button className="w-full" isLoading={form.formState.isSubmitting}>
+              Next <ArrowRightIcon />
+            </Button>
+            <Button
+              type="button"
+              onClick={prev}
+              variant={"outline"}
+              className="w-full"
+            >
+              <ArrowLeftIcon /> Back
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ContactInfoForm({
+  setState,
+  state,
+}: StepProps<z.infer<typeof contactInfoSchema>>) {
+  const form = useForm<z.infer<typeof contactInfoSchema>>({
+    resolver: zodResolver(contactInfoSchema),
+    defaultValues: {
+      primaryPhoneNumber: state?.primaryPhoneNumber ?? "",
+      secondaryPhoneNumber: state?.secondaryPhoneNumber ?? "",
+    },
+  });
+  const { next, prev } = useSteps();
+
+  const onSubmit = async (values: z.infer<typeof contactInfoSchema>) => {
+    await setState(values);
+    next();
+  };
+
+  return (
+    <Card className="bg-transparent border-none shadow-none">
+      <CardHeader className="text-center">
+        <CardTitle className="text-xl">Company Contact Information</CardTitle>
+        <CardDescription>
+          {
+            "Give a proper valid information so there will be no problem to subscribers who may want’s to contact you"
+          }
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <div className="flex flex-col gap-6">
               <FormField
                 control={form.control}
-                name="company_address"
+                name="primaryPhoneNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Company Address</FormLabel>
+                    <FormLabel>Primary Phone Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="eg. 9930390403" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    <FormDescription>
+                      Chit fund house contact number
+                    </FormDescription>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="secondaryPhoneNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{"Secondary Phone Number (optional)"}</FormLabel>
+                    <FormControl>
+                      <Input placeholder="eg. 9930390403" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    <FormDescription>
+                      Chit fund house secondary contact number, although it's
+                      optional but it's recommended
+                    </FormDescription>
+                  </FormItem>
+                )}
+              />
+            </div>
+            <Button className="w-full" isLoading={form.formState.isSubmitting}>
+              Next <ArrowRightIcon />
+            </Button>
+            <Button
+              type="button"
+              onClick={prev}
+              variant={"outline"}
+              className="w-full"
+            >
+              <ArrowLeftIcon /> Back
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function AddressInfoForm({
+  setState,
+  state,
+}: StepProps<z.infer<typeof addressInfoSchema>>) {
+  const form = useForm<z.infer<typeof addressInfoSchema>>({
+    resolver: zodResolver(addressInfoSchema),
+    defaultValues: {
+      addressLine: state?.addressLine ?? "",
+      city: state?.city ?? "",
+      pincode: state?.pincode ?? "",
+      state: state?.state ?? "",
+    },
+  });
+  const { next, prev } = useSteps();
+
+  const onSubmit = async (values: z.infer<typeof addressInfoSchema>) => {
+    await setState(values);
+    next();
+  };
+
+  return (
+    <Card className="bg-transparent border-none shadow-none">
+      <CardHeader className="text-center">
+        <CardTitle className="text-xl">Company Address Info</CardTitle>
+        <CardDescription>
+          {
+            "Give a proper valid information so there will be no problem to reach out your chit fund house indeed"
+          }
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <div className="flex flex-col gap-6">
+              <FormField
+                control={form.control}
+                name="addressLine"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
                     <FormControl>
                       <Input placeholder="#123, 1st street ...." {...field} />
                     </FormControl>
                     <FormMessage />
+                    <FormDescription>
+                      Your chit fund house address
+                    </FormDescription>
                   </FormItem>
                 )}
               />
 
               <FormField
                 control={form.control}
-                name="company_pincode"
+                name="pincode"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Pincode</FormLabel>
@@ -314,7 +339,7 @@ export function OrgInfoForm({
 
               <FormField
                 control={form.control}
-                name="company_city"
+                name="city"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>City</FormLabel>
@@ -328,7 +353,7 @@ export function OrgInfoForm({
 
               <FormField
                 control={form.control}
-                name="company_state"
+                name="state"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>State</FormLabel>
@@ -365,14 +390,16 @@ export function BankInfoForm({
   const form = useForm<z.infer<typeof bankInfoSchema>>({
     resolver: zodResolver(bankInfoSchema),
     defaultValues: {
-      account_holder_name: state?.account_holder_name ?? "",
-      account_number: state?.account_number ?? "",
-      bank_address_pincode: state?.bank_address_pincode ?? "",
-      bank_city: state?.bank_city ?? "",
-      bank_state: state?.bank_state ?? "",
-      branch_name: state?.branch_name ?? "",
-      confirm_account_number: state?.confirm_account_number ?? "",
-      ifsc_code: state?.ifsc_code ?? "",
+      accountHolderName: state?.accountHolderName ?? "",
+      accountNumber: state?.accountNumber ?? "",
+      pincode: state?.pincode ?? "",
+      city: state?.city ?? "",
+      state: state?.state ?? "",
+      branchName: state?.branchName ?? "",
+      confirmAccountNumber: state?.confirmAccountNumber ?? "",
+      ifscCode: state?.ifscCode ?? "",
+      upiId: state?.upiId ?? "",
+      accountType: state?.accountType ?? "savings",
     },
   });
   const { next, prev } = useSteps();
@@ -399,7 +426,7 @@ export function BankInfoForm({
             <div className="flex flex-col gap-6">
               <FormField
                 control={form.control}
-                name="account_number"
+                name="accountNumber"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Account Number</FormLabel>
@@ -412,7 +439,7 @@ export function BankInfoForm({
               />
               <FormField
                 control={form.control}
-                name="confirm_account_number"
+                name="confirmAccountNumber"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Confirm Account Number</FormLabel>
@@ -426,7 +453,7 @@ export function BankInfoForm({
 
               <FormField
                 control={form.control}
-                name="account_holder_name"
+                name="accountHolderName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Account Holder Name</FormLabel>
@@ -440,7 +467,32 @@ export function BankInfoForm({
 
               <FormField
                 control={form.control}
-                name="branch_name"
+                name="accountType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Account Type</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder={"Select..."} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="savings">Savings</SelectItem>
+                          <SelectItem value="current">Current</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="branchName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Branch Name</FormLabel>
@@ -454,7 +506,7 @@ export function BankInfoForm({
 
               <FormField
                 control={form.control}
-                name="ifsc_code"
+                name="ifscCode"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>IFSC Code</FormLabel>
@@ -465,9 +517,25 @@ export function BankInfoForm({
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
-                name="bank_address_pincode"
+                name="upiId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>UPI Id</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    <FormDescription>To accept online payment</FormDescription>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="pincode"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Pincode</FormLabel>
@@ -481,7 +549,7 @@ export function BankInfoForm({
 
               <FormField
                 control={form.control}
-                name="bank_city"
+                name="city"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>City</FormLabel>
@@ -495,7 +563,7 @@ export function BankInfoForm({
 
               <FormField
                 control={form.control}
-                name="bank_state"
+                name="state"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>State</FormLabel>
@@ -532,9 +600,9 @@ export function DocumentsForm({
   const form = useForm<z.infer<typeof documentsSchema>>({
     resolver: zodResolver(documentsSchema),
     defaultValues: {
-      aadhar_card_back_url: state?.aadhar_card_back_url ?? "",
-      aadhar_card_front_url: state?.aadhar_card_front_url ?? "",
-      registeration_certificate_url: state?.registeration_certificate_url ?? "",
+      aadharBackFileKey: state?.aadharBackFileKey ?? "",
+      aadharFrontFileKey: state?.aadharFrontFileKey ?? "",
+      orgCertificateKey: state?.orgCertificateKey ?? "",
     },
   });
   const { next, prev } = useSteps();
@@ -559,17 +627,19 @@ export function DocumentsForm({
             <div className="flex flex-col gap-6">
               <FormField
                 control={form.control}
-                name="registeration_certificate_url"
+                name="orgCertificateKey"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Registration Certificate</FormLabel>
+                    <FormLabel>
+                      Chit Fund House Registration Certificate
+                    </FormLabel>
                     <FormControl>
                       <Uploader
                         fileKey={field.value}
                         endpoint={"documentsUploader"}
                         input="registeration_certificate_url"
                         onUploadError={(e) => {
-                          form.setError("registeration_certificate_url", {
+                          form.setError("orgCertificateKey", {
                             message: e.message,
                           });
                         }}
@@ -585,7 +655,7 @@ export function DocumentsForm({
 
               <FormField
                 control={form.control}
-                name="aadhar_card_front_url"
+                name="aadharFrontFileKey"
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel>Adhar Card Front</FormLabel>
@@ -595,7 +665,7 @@ export function DocumentsForm({
                         input="aadhar_card_front_url"
                         endpoint={"documentsUploader"}
                         onUploadError={(e) => {
-                          form.setError("aadhar_card_front_url", {
+                          form.setError("aadharFrontFileKey", {
                             message: e.message,
                           });
                         }}
@@ -611,7 +681,7 @@ export function DocumentsForm({
 
               <FormField
                 control={form.control}
-                name="aadhar_card_back_url"
+                name="aadharBackFileKey"
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel>Aadhar Card Back</FormLabel>
@@ -621,7 +691,7 @@ export function DocumentsForm({
                         input="aadhar_card_back_url"
                         endpoint={"documentsUploader"}
                         onUploadError={(e) => {
-                          form.setError("aadhar_card_back_url", {
+                          form.setError("aadharBackFileKey", {
                             message: e.message,
                           });
                         }}
