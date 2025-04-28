@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { selectionAsync } from "expo-haptics";
 
 const formSchema = subscriberPersonalInfoSchema.and(nomineeInfoSchema);
 
@@ -187,7 +188,10 @@ export default function PNDetails() {
                     defaultValue={relationships.find(
                       (v) => v.value === field.value
                     )}
-                    onValueChange={(option) => field.onChange(option?.value)}
+                    onValueChange={(option) => {
+                      selectionAsync();
+                      field.onChange(option?.value);
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue

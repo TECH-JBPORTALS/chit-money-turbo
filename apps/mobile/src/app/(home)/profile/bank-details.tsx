@@ -18,6 +18,7 @@ import { subscriberBankInfoSchema } from "@cmt/validators";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryClient, trpc } from "~/utils/api";
 import { SpinnerView } from "~/components/spinner-view";
+import { selectionAsync } from "expo-haptics";
 import {
   Select,
   SelectContent,
@@ -148,7 +149,10 @@ export default function BankDetails() {
                     defaultValue={accountTypes.find(
                       (v) => v.value === field.value
                     )}
-                    onValueChange={(option) => field.onChange(option?.value)}
+                    onValueChange={(option) => {
+                      selectionAsync();
+                      field.onChange(option?.value);
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue
