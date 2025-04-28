@@ -27,7 +27,7 @@ import { batchSchema } from "@cmt/validators";
 import { useTRPC } from "@/trpc/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { batchInsertSchema } from "@cmt/db/schemas/public";
+import { batchInsertSchema } from "@cmt/db/schema";
 
 export default function CreateBatchDialog({
   children,

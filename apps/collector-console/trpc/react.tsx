@@ -17,6 +17,7 @@ import { env } from "@/env";
 import { createQueryClient } from "./query-client";
 
 let clientQueryClientSingleton: QueryClient | undefined = undefined;
+
 const getQueryClient = () => {
   if (typeof window === "undefined") {
     // Server: always make a new query client

@@ -27,7 +27,7 @@ export const bankInfoSchema = collectorsSchema.bankAccountInsertSchema
   .and(z.object({ confirmAccountNumber: z.string().min(1) }))
   .refine((s) => s.accountNumber === s.confirmAccountNumber, {
     message: "Confirm account number not matched with original account number ",
-    path: ["confirm_account_number"],
+    path: ["confirmAccountNumber"],
   });
 
 export const documentsSchema = collectorsSchema.collectorInsertSchema.pick({

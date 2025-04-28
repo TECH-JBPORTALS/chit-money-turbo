@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@cmt/ui/components/form";
 import {
+  addressInfoSchema,
   bankInfoSchema,
   contactInfoSchema,
   documentsSchema,
@@ -23,16 +24,57 @@ import {
 } from "@cmt/validators";
 import Uploader from "../uploader";
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
-import { Building2Icon } from "lucide-react";
+import { Building2Icon, Loader2Icon } from "lucide-react";
+import { useTRPC } from "@/trpc/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Textarea } from "@cmt/ui/components/textarea";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export function PersonalInfoForm() {
+  const client = useQueryClient();
+  const trpc = useTRPC();
+  const router = useRouter();
+
+  const { mutateAsync: updatePersonalDetails } = useMutation(
+    trpc.collectors.updatePersonalDetails.mutationOptions({
+      async onSuccess(data) {
+        toast.success("Updated sucessfully");
+        router.refresh();
+        await client.invalidateQueries(
+          trpc.collectors.getPersonalInfo.queryOptions()
+        );
+      },
+    })
+  );
+
   const form = useForm<z.infer<typeof personalInfoSchema>>({
     resolver: zodResolver(personalInfoSchema),
+    defaultValues: async () => {
+      const data = await client.fetchQuery(
+        trpc.collectors.getPersonalInfo.queryOptions()
+      );
+      return {
+        dateOfBirth: data.dateOfBirth ?? "",
+        firstName: data.firstName ?? "",
+        lastName: data.lastName ?? "",
+      };
+    },
   });
 
   const onSubmit = async (values: z.infer<typeof personalInfoSchema>) => {
-    console.log(values);
+    await updatePersonalDetails(values);
   };
+
+  if (form.formState.isLoading)
+    return (
+      <div className="h-full w-full py-10 flex items-center justify-center">
+        <Loader2Icon
+          strokeWidth={1.25}
+          className="size-11 animate-spin text-foreground/70"
+        />
+      </div>
+    );
 
   return (
     <Form {...form}>
@@ -91,14 +133,55 @@ export function PersonalInfoForm() {
   );
 }
 
+const contactAddressSchema = contactInfoSchema.and(addressInfoSchema);
+
 export function ContactInfoForm() {
-  const form = useForm<z.infer<typeof contactInfoSchema>>({
-    resolver: zodResolver(contactInfoSchema),
+  const client = useQueryClient();
+  const trpc = useTRPC();
+  const router = useRouter();
+
+  const { mutateAsync: updateContactAddress } = useMutation(
+    trpc.collectors.updateContactAddress.mutationOptions({
+      async onSuccess(data) {
+        toast.success("Updated sucessfully");
+        router.refresh();
+        await client.invalidateQueries(
+          trpc.collectors.getContactAddress.queryOptions()
+        );
+      },
+    })
+  );
+
+  const form = useForm<z.infer<typeof contactAddressSchema>>({
+    resolver: zodResolver(contactAddressSchema),
+    defaultValues: async () => {
+      const data = await client.fetchQuery(
+        trpc.collectors.getContactAddress.queryOptions()
+      );
+      return {
+        primaryPhoneNumber: data?.primaryPhoneNumber ?? "",
+        secondaryPhoneNumber: data?.secondaryPhoneNumber ?? "",
+        addressLine: data.addressLine ?? "",
+        city: data.city ?? "",
+        pincode: data.pincode ?? "",
+        state: data.state ?? "",
+      };
+    },
   });
 
-  const onSubmit = async (values: z.infer<typeof contactInfoSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof contactAddressSchema>) => {
+    await updateContactAddress(values);
   };
+
+  if (form.formState.isLoading)
+    return (
+      <div className="h-full w-full py-10 flex items-center justify-center">
+        <Loader2Icon
+          strokeWidth={1.25}
+          className="size-11 animate-spin text-foreground/70"
+        />
+      </div>
+    );
 
   return (
     <Form {...form}>
@@ -124,16 +207,30 @@ export function ContactInfoForm() {
               <FormItem>
                 <FormLabel>Secondary Phone Number</FormLabel>
                 <FormControl>
-                  <Input placeholder="#123, 1st street ...." {...field} />
+                  <Input {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          {/* <FormField
+          <FormField
             control={form.control}
-            name="contact_pincode"
+            name="addressLine"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Address Line</FormLabel>
+                <FormControl>
+                  <Textarea {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="pincode"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Pincode</FormLabel>
@@ -147,7 +244,7 @@ export function ContactInfoForm() {
 
           <FormField
             control={form.control}
-            name="contact_city"
+            name="city"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>City</FormLabel>
@@ -161,7 +258,7 @@ export function ContactInfoForm() {
 
           <FormField
             control={form.control}
-            name="contact_state"
+            name="state"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>State</FormLabel>
@@ -171,7 +268,7 @@ export function ContactInfoForm() {
                 <FormMessage />
               </FormItem>
             )}
-          /> */}
+          />
         </div>
         <Button
           className="w-fit"
@@ -192,19 +289,53 @@ const orgInfoSchemaWithLogo = orgInfoSchema.merge(
 );
 
 export function OrgInfoForm() {
-  const form = useForm<z.infer<typeof orgInfoSchemaWithLogo>>({
-    resolver: zodResolver(orgInfoSchemaWithLogo),
+  const client = useQueryClient();
+  const trpc = useTRPC();
+  const router = useRouter();
+
+  const { mutateAsync: updateOrg } = useMutation(
+    trpc.collectors.updateOrg.mutationOptions({
+      async onSuccess(data) {
+        toast.success("Updated sucessfully");
+        router.refresh();
+        await client.invalidateQueries(
+          trpc.collectors.getOrgInfo.queryOptions()
+        );
+      },
+    })
+  );
+
+  const form = useForm<z.infer<typeof orgInfoSchema>>({
+    resolver: zodResolver(orgInfoSchema),
+    defaultValues: async () => {
+      const data = await client.fetchQuery(
+        trpc.collectors.getOrgInfo.queryOptions()
+      );
+      return {
+        orgName: data?.orgName ?? "",
+      };
+    },
   });
 
   const onSubmit = async (values: z.infer<typeof orgInfoSchema>) => {
-    console.log(values);
+    await updateOrg(values);
   };
+
+  if (form.formState.isLoading)
+    return (
+      <div className="h-full w-full py-10 flex items-center justify-center">
+        <Loader2Icon
+          strokeWidth={1.25}
+          className="size-11 animate-spin text-foreground/70"
+        />
+      </div>
+    );
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="flex flex-col gap-6">
-          <FormField
+          {/* <FormField
             control={form.control}
             name="company_logo_url"
             render={({ field }) => (
@@ -229,7 +360,7 @@ export function OrgInfoForm() {
                 </FormDescription>
               </FormItem>
             )}
-          />
+          /> */}
 
           <FormField
             control={form.control}
@@ -238,7 +369,7 @@ export function OrgInfoForm() {
               <FormItem>
                 <FormLabel>Company Full Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Lakshmi Chit Fund House" {...field} />
+                  <Input {...field} />
                 </FormControl>
                 <FormMessage />
                 <FormDescription>
@@ -247,61 +378,6 @@ export function OrgInfoForm() {
               </FormItem>
             )}
           />
-          {/* <FormField
-            control={form.control}
-            name=""
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Company Address</FormLabel>
-                <FormControl>
-                  <Input placeholder="#123, 1st street ...." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="company_pincode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Pincode</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="company_city"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>City</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="st"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>State</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
         </div>
         <Button
           className="w-fit"
@@ -316,13 +392,56 @@ export function OrgInfoForm() {
 }
 
 export function BankInfoForm() {
+  const client = useQueryClient();
+  const trpc = useTRPC();
+  const router = useRouter();
+
+  const { mutateAsync: updateBankAccount } = useMutation(
+    trpc.collectors.updateBankAccount.mutationOptions({
+      async onSuccess(data) {
+        toast.success("Updated sucessfully");
+        router.refresh();
+        await client.invalidateQueries(
+          trpc.collectors.getBankAccount.queryOptions()
+        );
+      },
+    })
+  );
+
   const form = useForm<z.infer<typeof bankInfoSchema>>({
     resolver: zodResolver(bankInfoSchema),
+    defaultValues: async () => {
+      const data = await client.fetchQuery(
+        trpc.collectors.getBankAccount.queryOptions()
+      );
+      return {
+        accountHolderName: data?.accountHolderName ?? "",
+        accountNumber: data?.accountNumber ?? "",
+        accountType: data?.accountType ?? "",
+        branchName: data?.branchName ?? "",
+        city: data?.city ?? "",
+        ifscCode: data?.ifscCode ?? "",
+        pincode: data?.pincode ?? "",
+        state: data?.state ?? "",
+        upiId: data?.upiId ?? "",
+        confirmAccountNumber: data?.accountNumber ?? "",
+      };
+    },
   });
 
   const onSubmit = async (values: z.infer<typeof bankInfoSchema>) => {
-    console.log(values);
+    await updateBankAccount(values);
   };
+
+  if (form.formState.isLoading)
+    return (
+      <div className="h-full w-full py-10 flex items-center justify-center">
+        <Loader2Icon
+          strokeWidth={1.25}
+          className="size-11 animate-spin text-foreground/70"
+        />
+      </div>
+    );
 
   return (
     <Form {...form}>
@@ -348,7 +467,7 @@ export function BankInfoForm() {
               <FormItem>
                 <FormLabel>Confirm Account Number</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input type="password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
