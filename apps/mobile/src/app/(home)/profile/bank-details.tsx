@@ -2,7 +2,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { bankInfoSchema } from "~/lib/validators";
 import { z } from "zod";
 import { Input } from "~/components/ui/input";
 import {
@@ -15,24 +14,39 @@ import {
 } from "~/components/ui/form";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
+import { subscriberBankInfoSchema } from "@cmt/validators";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryClient, trpc } from "~/utils/api";
+import { SpinnerView } from "~/components/spinner-view";
 
 export default function BankDetails() {
-  const form = useForm<z.infer<typeof bankInfoSchema>>({
-    resolver: zodResolver(bankInfoSchema),
-    defaultValues: {
-      account_number: "",
-      confirm_account_number: "",
-      account_holder_name: "",
-      ifsc_code: "",
-      branch_name: "",
-      upi_id: "",
-      account_type: "",
+  const client = useQueryClient(queryClient);
+  const form = useForm<z.infer<typeof subscriberBankInfoSchema>>({
+    resolver: zodResolver(subscriberBankInfoSchema),
+    defaultValues: async () => {
+      const data = await client.fetchQuery(
+        trpc.subscribers.getBankAccount.queryOptions()
+      );
+
+      return {
+        accountHolderName: data?.accountHolderName ?? "",
+        accountNumber: data?.accountNumber ?? "",
+        accountType: data?.accountType ?? "",
+        branchName: data?.branchName ?? "",
+        city: data?.city ?? "",
+        ifscCode: data?.ifscCode ?? "",
+        pincode: data?.pincode ?? "",
+        state: data?.state ?? "",
+        upiId: data?.upiId ?? "",
+      };
     },
   });
 
-  async function onSubmit(values: z.infer<typeof bankInfoSchema>) {
+  async function onSubmit(values: z.infer<typeof subscriberBankInfoSchema>) {
     console.log(values);
   }
+
+  if (form.formState.isLoading) return <SpinnerView />;
 
   return (
     <ScrollView
@@ -44,7 +58,7 @@ export default function BankDetails() {
         <Form {...form}>
           <FormField
             control={form.control}
-            name="account_number"
+            name="accountNumber"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Account Number</FormLabel>
@@ -58,21 +72,7 @@ export default function BankDetails() {
 
           <FormField
             control={form.control}
-            name="confirm_account_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirm Account Number</FormLabel>
-                <FormControl>
-                  <Input {...field} onChangeText={field.onChange} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="account_holder_name"
+            name="accountHolderName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Account Holder Name</FormLabel>
@@ -86,7 +86,7 @@ export default function BankDetails() {
 
           <FormField
             control={form.control}
-            name="branch_name"
+            name="branchName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Branch Name</FormLabel>
@@ -100,7 +100,7 @@ export default function BankDetails() {
 
           <FormField
             control={form.control}
-            name="ifsc_code"
+            name="ifscCode"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>IFSC Code</FormLabel>
@@ -114,7 +114,7 @@ export default function BankDetails() {
 
           <FormField
             control={form.control}
-            name="upi_id"
+            name="upiId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>UPI Id</FormLabel>
@@ -128,7 +128,7 @@ export default function BankDetails() {
 
           <FormField
             control={form.control}
-            name="account_type"
+            name="accountType"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Account Type</FormLabel>

@@ -77,4 +77,11 @@ export const subscribersRouter = {
       ...contact,
     };
   }),
+  getBankAccount: protectedProcedure.query(async ({ ctx }) => {
+    const bankAccount = await ctx.subscribersDb.query.bankAccounts.findFirst({
+      where: eq(bankAccounts.userId, ctx.session.userId),
+    });
+
+    return bankAccount;
+  }),
 };
