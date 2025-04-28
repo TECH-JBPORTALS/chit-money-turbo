@@ -6,7 +6,9 @@ export default function Page() {
     <>
       <div>
         <div className="text-lg font-medium">Documents</div>
-        <p className="text-sm text-muted-foreground">Update your documents.</p>
+        <p className="text-sm text-muted-foreground">
+          Upload your documents & click on update details to save the details.
+        </p>
       </div>
       <Separator />
       <DocumentsForm />

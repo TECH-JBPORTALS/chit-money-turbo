@@ -14,13 +14,8 @@ export default function Uploader({
 }) {
   if (fileKey)
     return (
-      <div className="w-full group overflow-hidden rounded-md border bg-card object-contain relative h-60">
-        <Image
-          src={getUTFile(fileKey)}
-          fill
-          alt={fileKey}
-          objectFit="contain"
-        />
+      <div className="w-full group bg-muted/10 border overflow-hidden rounded-md object-contain relative h-72 aspect-video">
+        <Image src={getUTFile(fileKey)} fill alt={fileKey} objectFit="fill" />
         <div
           data-slot="get"
           className={cn(
@@ -35,14 +30,14 @@ export default function Uploader({
               button: ({ ready, isUploading }) => {
                 if (ready && isUploading)
                   return (
-                    <div className="flex gap-2 text-sm z-40 items-center">
+                    <div className="flex  px-4 gap-2 text-sm z-40 items-center">
                       <RotateCwIcon className="size-4 animate-spin" />
                       Uploading...
                     </div>
                   );
                 else if (ready)
                   return (
-                    <div className="flex gap-2 text-sm items-center">
+                    <div className="flex gap-2 px-4 text-sm items-center">
                       <RotateCwIcon className="size-4" />
                       Re-Upload
                     </div>
@@ -84,7 +79,7 @@ export default function Uploader({
           color: "var(--foreground)",
         },
       }}
-      className="ut-button:bg-accent h-60 ut-button:text-accent-foreground ut-button:ut-uploading:bg-primary/40 ut-button:px-6 ut-button:ut-uploading:after:bg-primary ut-allowed-content:text-muted-foreground"
+      className="ut-button:bg-accent h-72 aspect-video ut-button:text-accent-foreground ut-button:ut-uploading:bg-primary/40 ut-button:px-6 ut-button:ut-uploading:after:bg-primary ut-allowed-content:text-muted-foreground"
       config={{ appendOnPaste: true, mode: "auto" }}
     />
   );

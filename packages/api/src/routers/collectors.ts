@@ -4,6 +4,7 @@ import {
   addressInfoSchema,
   bankInfoSchema,
   contactInfoSchema,
+  documentsSchema,
   onboardingSchema,
   orgInfoSchema,
   personalInfoSchema,
@@ -70,6 +71,19 @@ export const collectorsRouter = {
     return orgInfo;
   }),
 
+  getDocuments: protectedProcedure.query(async ({ ctx }) => {
+    const documents = await ctx.collectorsDb.query.users.findFirst({
+      columns: {
+        aadharBackFileKey: true,
+        aadharFrontFileKey: true,
+        orgCertificateKey: true,
+      },
+      where: eq(users.id, ctx.session.userId),
+    });
+
+    return documents;
+  }),
+
   getPersonalInfo: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.clerk.users.getUser(ctx.session.userId);
     const collector = await ctx.collectorsDb.query.users.findFirst({
@@ -118,6 +132,15 @@ export const collectorsRouter = {
 
   updateOrg: protectedProcedure
     .input(orgInfoSchema)
+    .mutation(async ({ ctx, input }) => {
+      await ctx.collectorsDb
+        .update(users)
+        .set(input)
+        .where(eq(users.id, ctx.session.userId));
+    }),
+
+  updateDocuments: protectedProcedure
+    .input(documentsSchema)
     .mutation(async ({ ctx, input }) => {
       await ctx.collectorsDb
         .update(users)

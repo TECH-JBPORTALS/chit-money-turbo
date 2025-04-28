@@ -570,13 +570,49 @@ export function BankInfoForm() {
 }
 
 export function DocumentsForm() {
+  const client = useQueryClient();
+  const trpc = useTRPC();
+  const router = useRouter();
+
+  const { mutateAsync: updateDocuments } = useMutation(
+    trpc.collectors.updateDocuments.mutationOptions({
+      async onSuccess(data) {
+        toast.success("Updated sucessfully");
+        router.refresh();
+        await client.invalidateQueries(
+          trpc.collectors.getDocuments.queryOptions()
+        );
+      },
+    })
+  );
+
   const form = useForm<z.infer<typeof documentsSchema>>({
     resolver: zodResolver(documentsSchema),
+    defaultValues: async () => {
+      const data = await client.fetchQuery(
+        trpc.collectors.getDocuments.queryOptions()
+      );
+      return {
+        aadharBackFileKey: data?.aadharBackFileKey ?? "",
+        aadharFrontFileKey: data?.aadharFrontFileKey ?? "",
+        orgCertificateKey: data?.orgCertificateKey ?? "",
+      };
+    },
   });
 
   const onSubmit = async (values: z.infer<typeof documentsSchema>) => {
-    console.log(values);
+    await updateDocuments(values);
   };
+
+  if (form.formState.isLoading)
+    return (
+      <div className="h-full w-full py-10 flex items-center justify-center">
+        <Loader2Icon
+          strokeWidth={1.25}
+          className="size-11 animate-spin text-foreground/70"
+        />
+      </div>
+    );
 
   return (
     <Form {...form}>
