@@ -24,8 +24,28 @@ import {
 } from "@cmt/validators";
 import { queryClient, trpc } from "~/utils/api";
 import { SpinnerView } from "~/components/spinner-view";
+import { DatePicker } from "~/components/ui/date-picker";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const formSchema = subscriberPersonalInfoSchema.and(nomineeInfoSchema);
+
+const relationships = [
+  { value: "Mother", label: "Mother" },
+  { value: "Father", label: "Father" },
+  { value: "Sister", label: "Sister" },
+  { value: "Brother", label: "Brother" },
+  { value: "Son", label: "Son" },
+  { value: "Daughter", label: "Daughter" },
+];
 
 export default function PNDetails() {
   const client = useQueryClient(queryClient);
@@ -46,6 +66,15 @@ export default function PNDetails() {
       };
     },
   });
+
+  const insets = useSafeAreaInsets();
+
+  const contentInsets = {
+    top: insets.top,
+    bottom: insets.bottom + 32,
+    left: 12,
+    right: 12,
+  };
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     console.log(data);
@@ -108,9 +137,11 @@ export default function PNDetails() {
               <FormItem>
                 <FormLabel>Date Of Birth</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    onChangeText={(value) => field.onChange(value)}
+                  <DatePicker
+                    value={new Date(field.value)}
+                    onChange={(e, date) => {
+                      field.onChange(date?.toDateString());
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -152,10 +183,38 @@ export default function PNDetails() {
               <FormItem>
                 <FormLabel>Nominee Relationship</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    onChangeText={(value) => field.onChange(value)}
-                  />
+                  <Select
+                    defaultValue={relationships.find(
+                      (v) => v.value === field.value
+                    )}
+                    onValueChange={(option) => field.onChange(option?.value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        className="text-foreground text-sm native:text-lg"
+                        placeholder="Select"
+                      />
+                    </SelectTrigger>
+                    <SelectContent
+                      align="center"
+                      insets={contentInsets}
+                      className="w-full"
+                    >
+                      <SelectGroup>
+                        <SelectLabel>Select Relationship</SelectLabel>
+
+                        {relationships.map((option) => (
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            label={option.label}
+                          >
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>

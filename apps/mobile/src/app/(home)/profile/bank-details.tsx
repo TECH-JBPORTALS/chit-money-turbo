@@ -18,6 +18,22 @@ import { subscriberBankInfoSchema } from "@cmt/validators";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryClient, trpc } from "~/utils/api";
 import { SpinnerView } from "~/components/spinner-view";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Large } from "~/components/ui/typography";
+
+const accountTypes = [
+  { label: "Savings", value: "savings" },
+  { label: "Current", value: "current" },
+];
 
 export default function BankDetails() {
   const client = useQueryClient(queryClient);
@@ -41,6 +57,15 @@ export default function BankDetails() {
       };
     },
   });
+
+  const insets = useSafeAreaInsets();
+
+  const contentInsets = {
+    top: insets.top,
+    bottom: insets.bottom + 32,
+    left: 12,
+    right: 12,
+  };
 
   async function onSubmit(values: z.infer<typeof subscriberBankInfoSchema>) {
     console.log(values);
@@ -86,20 +111,6 @@ export default function BankDetails() {
 
           <FormField
             control={form.control}
-            name="branchName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Branch Name</FormLabel>
-                <FormControl>
-                  <Input {...field} onChangeText={field.onChange} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="ifscCode"
             render={({ field }) => (
               <FormItem>
@@ -132,6 +143,95 @@ export default function BankDetails() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Account Type</FormLabel>
+                <FormControl>
+                  <Select
+                    defaultValue={accountTypes.find(
+                      (v) => v.value === field.value
+                    )}
+                    onValueChange={(option) => field.onChange(option?.value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        className="text-foreground text-sm native:text-lg"
+                        placeholder="Select"
+                      />
+                    </SelectTrigger>
+                    <SelectContent
+                      align="center"
+                      insets={contentInsets}
+                      className="w-full"
+                    >
+                      <SelectGroup>
+                        <SelectLabel>Select Account Type</SelectLabel>
+
+                        {accountTypes.map((option) => (
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            label={option.label}
+                          >
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Large>Your Bank Address</Large>
+
+          <FormField
+            control={form.control}
+            name="branchName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Branch Name</FormLabel>
+                <FormControl>
+                  <Input {...field} onChangeText={field.onChange} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="city"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>City</FormLabel>
+                <FormControl>
+                  <Input {...field} onChangeText={field.onChange} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="state"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>City</FormLabel>
+                <FormControl>
+                  <Input {...field} onChangeText={field.onChange} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="pincode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>City</FormLabel>
                 <FormControl>
                   <Input {...field} onChangeText={field.onChange} />
                 </FormControl>
