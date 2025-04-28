@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
@@ -35,7 +35,12 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { selectionAsync } from "expo-haptics";
+import {
+  notificationAsync,
+  NotificationFeedbackType,
+  selectionAsync,
+} from "expo-haptics";
+import { toast } from "sonner-native";
 
 const formSchema = subscriberPersonalInfoSchema.and(nomineeInfoSchema);
 
@@ -50,6 +55,19 @@ const relationships = [
 
 export default function PNDetails() {
   const client = useQueryClient(queryClient);
+  const { mutateAsync: updatePersonalDetails } = useMutation(
+    trpc.subscribers.updatePersonalDetails.mutationOptions({
+      async onSuccess(data) {
+        await notificationAsync(NotificationFeedbackType.Success);
+        toast.success("Updated successfully");
+        await client.invalidateQueries(trpc.subscribers.pathFilter());
+      },
+      async onError(error) {
+        await notificationAsync(NotificationFeedbackType.Error);
+        toast.error(error.message);
+      },
+    })
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -77,8 +95,8 @@ export default function PNDetails() {
     right: 12,
   };
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data);
+  async function onSubmit(input: z.infer<typeof formSchema>) {
+    await updatePersonalDetails(input);
   }
 
   if (form.formState.isLoading) return <SpinnerView />;

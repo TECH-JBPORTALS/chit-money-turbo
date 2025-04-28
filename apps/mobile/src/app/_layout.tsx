@@ -36,6 +36,7 @@ import { PortalHost } from "@rn-primitives/portal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "~/utils/api";
+import { Toaster } from "sonner-native";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -77,6 +78,7 @@ export default function RootLayout() {
         <GestureHandlerRootView>
           <Outlet />
           <PortalHost />
+          <Toaster />
         </GestureHandlerRootView>
       </QueryClientProvider>
     </ClerkProvider>

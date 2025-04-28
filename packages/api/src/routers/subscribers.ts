@@ -1,12 +1,16 @@
 import { subscribersSchema } from "@cmt/db/schema";
 import { protectedProcedure } from "../trpc";
-import { subscriberOnboardingSchema } from "@cmt/validators";
+import {
+  subscriberOnboardingSchema,
+  subscriberPersonalInfoSchema,
+} from "@cmt/validators";
 import { TRPCError } from "@trpc/server";
 import { customAlphabet } from "nanoid";
 import { clerkClient } from "@clerk/nextjs/server";
 import { eq } from "@cmt/db";
 
-const { users, bankAccounts, contacts, addresses } = subscribersSchema;
+const { users, bankAccounts, contacts, addresses, subscriberUpdateSchema } =
+  subscribersSchema;
 
 export const subscribersRouter = {
   createProfile: protectedProcedure
@@ -62,6 +66,8 @@ export const subscribersRouter = {
       ...subscriber,
       firstName: user.firstName,
       lastName: user.lastName,
+      imageUrl: user.imageUrl,
+      primaryEmailAddress: user.primaryEmailAddress,
     };
   }),
   getContactAddress: protectedProcedure.query(async ({ ctx }) => {
@@ -84,4 +90,17 @@ export const subscribersRouter = {
 
     return bankAccount;
   }),
+  updatePersonalDetails: protectedProcedure
+    .input(subscriberPersonalInfoSchema)
+    .mutation(async ({ ctx, input }) => {
+      await ctx.clerk.users.updateUser(ctx.session.userId, {
+        firstName: input.firstName,
+        lastName: input.lastName,
+      });
+
+      await ctx.subscribersDb
+        .update(users)
+        .set(input)
+        .where(eq(users.id, ctx.session.userId));
+    }),
 };

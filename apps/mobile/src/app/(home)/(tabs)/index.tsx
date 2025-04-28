@@ -13,16 +13,22 @@ import {
 } from "~/components/ui/card";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { useUser } from "@clerk/clerk-expo";
+import { useQuery } from "@tanstack/react-query";
+import { trpc } from "~/utils/api";
+import { SpinnerView } from "~/components/spinner-view";
 const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
 
 export default function Page() {
-  const { user } = useUser();
+  const { data, isLoading } = useQuery(
+    trpc.subscribers.getPersonalDetails.queryOptions()
+  );
+
+  if (isLoading) return <SpinnerView />;
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
       <LinearBlurView>
-        <H2>Hey, {user?.firstName} 🙏</H2>
+        <H2>Hey, {data?.firstName} 🙏</H2>
 
         {/** Credit Score */}
         <View className="gap-4">

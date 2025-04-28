@@ -12,8 +12,11 @@ import { User } from "~/lib/icons/User";
 import { Files } from "~/lib/icons/Files";
 import { Contact } from "~/lib/icons/Contact";
 import { LogOut } from "~/lib/icons/LogOut";
-import { useAuth, useUser } from "@clerk/clerk-expo";
+import { useAuth } from "@clerk/clerk-expo";
 import { Link } from "expo-router";
+import { SpinnerView } from "~/components/spinner-view";
+import { useQuery } from "@tanstack/react-query";
+import { trpc } from "~/utils/api";
 
 const items = [
   {
@@ -46,13 +49,17 @@ const items = [
 export default function Profile() {
   const { signOut } = useAuth();
   const [isSigningOut, setIsSingingOut] = useState(false);
-  const { user } = useUser();
+  const { data, isLoading } = useQuery(
+    trpc.subscribers.getPersonalDetails.queryOptions()
+  );
 
   async function onSignout() {
     setIsSingingOut(true);
     await signOut();
     setIsSingingOut(false);
   }
+
+  if (isLoading) return <SpinnerView />;
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
@@ -62,16 +69,16 @@ export default function Profile() {
         {/** Profile Pic & Details */}
         <View className="flex-row gap-3.5 items-center">
           <Avatar alt="Your Profile Pic" className="size-16">
-            <AvatarImage source={{ uri: user?.imageUrl }} />
+            <AvatarImage source={{ uri: data?.imageUrl }} />
             <AvatarFallback>
-              <Text>{user?.firstName?.charAt(0).toUpperCase()}</Text>
+              <Text>{data?.firstName?.charAt(0).toUpperCase()}</Text>
             </AvatarFallback>
           </Avatar>
           <View className="gap-1">
             <Large>
-              {user?.firstName} {user?.lastName}
+              {data?.firstName} {data?.lastName}
             </Large>
-            <Muted>{user?.primaryEmailAddress?.emailAddress}</Muted>
+            <Muted>{data?.primaryEmailAddress?.emailAddress}</Muted>
           </View>
         </View>
 

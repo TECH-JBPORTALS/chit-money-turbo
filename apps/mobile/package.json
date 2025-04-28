@@ -82,6 +82,7 @@
     "react-native-svg": "15.8.0",
     "react-native-ui-datepicker": "^3.1.2",
     "react-native-web": "~0.19.13",
+    "sonner-native": "^0.19.0",
     "tailwind-merge": "^3.0.1",
     "tailwindcss": "catalog:tailwind3",
     "tailwindcss-animate": "^1.0.7",
