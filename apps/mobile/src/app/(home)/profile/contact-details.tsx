@@ -53,7 +53,6 @@ export default function ContactDetails() {
       async onSuccess(data) {
         await notificationAsync(NotificationFeedbackType.Success);
         toast.success("Updated successfully");
-        form.reset();
         client.invalidateQueries(trpc.subscribers.pathFilter());
       },
       async onError(error) {

@@ -4,6 +4,7 @@ import {
   subscriberAddressInfoSchema,
   subscriberBankInfoSchema,
   subscriberContactInfoSchema,
+  subscriberDocumentsSchema,
   subscriberOnboardingSchema,
   subscriberPersonalInfoSchema,
 } from "@cmt/validators";
@@ -73,6 +74,20 @@ export const subscribersRouter = {
       primaryEmailAddress: user.primaryEmailAddress,
     };
   }),
+
+  getDocuments: protectedProcedure.query(async ({ ctx }) => {
+    const documents = await ctx.subscribersDb.query.users.findFirst({
+      columns: {
+        panCardNumber: true,
+        aadharBackFileKey: true,
+        aadharFrontFileKey: true,
+      },
+      where: eq(users.id, ctx.session.userId),
+    });
+
+    return documents;
+  }),
+
   getContactAddress: protectedProcedure.query(async ({ ctx }) => {
     const address = await ctx.subscribersDb.query.addresses.findFirst({
       where: eq(addresses.userId, ctx.session.userId),
@@ -86,6 +101,7 @@ export const subscribersRouter = {
       ...contact,
     };
   }),
+
   getBankAccount: protectedProcedure.query(async ({ ctx }) => {
     const bankAccount = await ctx.subscribersDb.query.bankAccounts.findFirst({
       where: eq(bankAccounts.userId, ctx.session.userId),
@@ -93,6 +109,7 @@ export const subscribersRouter = {
 
     return bankAccount;
   }),
+
   updatePersonalDetails: protectedProcedure
     .input(subscriberPersonalInfoSchema)
     .mutation(async ({ ctx, input }) => {
@@ -101,6 +118,15 @@ export const subscribersRouter = {
         lastName: input.lastName,
       });
 
+      await ctx.subscribersDb
+        .update(users)
+        .set(input)
+        .where(eq(users.id, ctx.session.userId));
+    }),
+
+  updateDocuments: protectedProcedure
+    .input(subscriberDocumentsSchema)
+    .mutation(async ({ ctx, input }) => {
       await ctx.subscribersDb
         .update(users)
         .set(input)
