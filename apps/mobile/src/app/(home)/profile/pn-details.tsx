@@ -34,7 +34,7 @@ export default function PNDetails() {
     resolver: zodResolver(formSchema),
     defaultValues: async () => {
       const data = await client.fetchQuery(
-        trpc.subscribers.getPersonalDetails.queryOptions(undefined)
+        trpc.subscribers.getPersonalDetails.queryOptions()
       );
 
       return {

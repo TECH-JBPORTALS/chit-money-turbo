@@ -19,18 +19,37 @@ import {
   subscriberAddressInfoSchema,
   subscriberContactInfoSchema,
 } from "@cmt/validators";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryClient, trpc } from "~/utils/api";
+import { SpinnerView } from "~/components/spinner-view";
 
 const formSchema = subscriberContactInfoSchema.and(subscriberAddressInfoSchema);
 
 export default function ContactDetails() {
+  const client = useQueryClient(queryClient);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {},
+    defaultValues: async () => {
+      const data = await client.fetchQuery(
+        trpc.subscribers.getContactAddress.queryOptions()
+      );
+
+      return {
+        primaryPhoneNumber: data.primaryPhoneNumber ?? "",
+        secondaryPhoneNumber: data.secondaryPhoneNumber ?? "",
+        addressLine: data.addressLine ?? "",
+        city: data.city ?? "",
+        state: data.state ?? "",
+        pincode: data.pincode ?? "",
+      };
+    },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
   }
+
+  if (form.formState.isLoading) return <SpinnerView />;
 
   return (
     <ScrollView

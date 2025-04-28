@@ -64,4 +64,17 @@ export const subscribersRouter = {
       lastName: user.lastName,
     };
   }),
+  getContactAddress: protectedProcedure.query(async ({ ctx }) => {
+    const address = await ctx.subscribersDb.query.addresses.findFirst({
+      where: eq(addresses.userId, ctx.session.userId),
+    });
+    const contact = await ctx.subscribersDb.query.contacts.findFirst({
+      where: eq(contacts.userId, ctx.session.userId),
+    });
+
+    return {
+      ...address,
+      ...contact,
+    };
+  }),
 };
