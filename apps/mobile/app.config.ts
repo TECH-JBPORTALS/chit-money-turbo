@@ -1,6 +1,6 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
-export default ({ config }: ConfigContext) => {   
+export default ({ config }: ConfigContext) => {
   const { name, scheme, adaptiveIcon } = getConfig();
 
   return {
@@ -23,7 +23,6 @@ export default ({ config }: ConfigContext) => {
         dark: "./assets/icons/ios-dark-icon.png",
         tinted: "./assets/icons/ios-tinted-icon.png",
       },
-    
     },
     extra: {
       eas: {
@@ -34,7 +33,7 @@ export default ({ config }: ConfigContext) => {
       adaptiveIcon: {
         foregroundImage: adaptiveIcon,
         monochromeImage: adaptiveIcon,
-        backgroundColor: "#ffffff"
+        backgroundColor: "#ffffff",
       },
       package: scheme,
     },
@@ -57,23 +56,28 @@ export default ({ config }: ConfigContext) => {
       ],
       "expo-font",
       ["expo-dev-client", { launchMode: "most-recent" }],
-      ["expo-splash-screen", {
-        image: "./assets/icons/splash-icon-light.png",
-        resizeMode: "contain",
-        imageWidth:200,
-        backgroundColor: "#ffffff",
-        dark: {
-          image: "./assets/icons/splash-icon-dark.png",
-          backgroundColor: "#020806",
-        }
-      }],
+      [
+        "expo-splash-screen",
+        {
+          image: "./assets/icons/splash-icon-light.png",
+          resizeMode: "contain",
+          imageWidth: 200,
+          backgroundColor: "#ffffff",
+          dark: {
+            image: "./assets/icons/splash-icon-dark.png",
+            backgroundColor: "#020806",
+          },
+        },
+      ],
     ],
+    experiments: {
+      tsconfigPaths: true,
+      typedRoutes: true,
+    },
   } satisfies ExpoConfig;
 };
 
-
 function getConfig() {
-  
   switch (process.env.APP_ENV) {
     case "development":
       return {
@@ -101,4 +105,3 @@ function getConfig() {
       };
   }
 }
-

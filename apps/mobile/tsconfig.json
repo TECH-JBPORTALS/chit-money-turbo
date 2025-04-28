@@ -1,28 +1,22 @@
 {
-  "extends": "@cmt/typescript-config/base.json",
+  "extends": ["@cmt/typescript-config/base.json"],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"]
     },
-    "jsx": "preserve",
+    "jsx": "react-native",
     "types": ["nativewind/types"],
     "checkJs": false,
-    "moduleSuffixes": [".ios", ".android", ".native", ""],
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "moduleSuffixes": [".ios", ".android", ".native", ""]
   },
   "include": [
-    "*.js",
-    "*.ts",
-    "api/index.ts",
-    "nativewind-env.d.ts",
     "src",
-    "types/globals.d.ts",
-    ".next/types/**/*.ts"
+    "*.ts",
+    "*.js",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "nativewind-env.d.ts"
   ],
   "exclude": ["node_modules"]
 }
