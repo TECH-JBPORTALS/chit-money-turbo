@@ -15,10 +15,14 @@ import {
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { subscriberBankInfoSchema } from "@cmt/validators";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryClient, trpc } from "~/utils/api";
 import { SpinnerView } from "~/components/spinner-view";
-import { selectionAsync } from "expo-haptics";
+import {
+  notificationAsync,
+  NotificationFeedbackType,
+  selectionAsync,
+} from "expo-haptics";
 import {
   Select,
   SelectContent,
@@ -30,6 +34,7 @@ import {
 } from "~/components/ui/select";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Large } from "~/components/ui/typography";
+import { toast } from "sonner-native";
 
 const accountTypes = [
   { label: "Savings", value: "savings" },
@@ -38,6 +43,21 @@ const accountTypes = [
 
 export default function BankDetails() {
   const client = useQueryClient(queryClient);
+
+  const { mutateAsync: updateBankAccount } = useMutation(
+    trpc.subscribers.updateBankAccount.mutationOptions({
+      async onSuccess(data) {
+        await notificationAsync(NotificationFeedbackType.Success);
+        toast.success("Updated successfully");
+        client.invalidateQueries(trpc.subscribers.pathFilter());
+      },
+      async onError(error) {
+        await notificationAsync(NotificationFeedbackType.Error);
+        toast.error(error.message);
+      },
+    })
+  );
+
   const form = useForm<z.infer<typeof subscriberBankInfoSchema>>({
     resolver: zodResolver(subscriberBankInfoSchema),
     defaultValues: async () => {
@@ -69,7 +89,7 @@ export default function BankDetails() {
   };
 
   async function onSubmit(values: z.infer<typeof subscriberBankInfoSchema>) {
-    console.log(values);
+    await updateBankAccount(values);
   }
 
   if (form.formState.isLoading) return <SpinnerView />;
@@ -79,6 +99,7 @@ export default function BankDetails() {
       showsVerticalScrollIndicator={false}
       automaticallyAdjustKeyboardInsets
       keyboardDismissMode="none"
+      keyboardShouldPersistTaps
     >
       <View className="px-4 flex-1 py-6 gap-6">
         <Form {...form}>

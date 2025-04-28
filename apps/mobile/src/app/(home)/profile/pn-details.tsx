@@ -60,7 +60,7 @@ export default function PNDetails() {
       async onSuccess(data) {
         await notificationAsync(NotificationFeedbackType.Success);
         toast.success("Updated successfully");
-        await client.invalidateQueries(trpc.subscribers.pathFilter());
+        client.invalidateQueries(trpc.subscribers.pathFilter());
       },
       async onError(error) {
         await notificationAsync(NotificationFeedbackType.Error);

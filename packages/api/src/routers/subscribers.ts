@@ -1,6 +1,9 @@
 import { subscribersSchema } from "@cmt/db/schema";
 import { protectedProcedure } from "../trpc";
 import {
+  subscriberAddressInfoSchema,
+  subscriberBankInfoSchema,
+  subscriberContactInfoSchema,
   subscriberOnboardingSchema,
   subscriberPersonalInfoSchema,
 } from "@cmt/validators";
@@ -103,4 +106,25 @@ export const subscribersRouter = {
         .set(input)
         .where(eq(users.id, ctx.session.userId));
     }),
+  updateContactAddress: protectedProcedure
+    .input(subscriberContactInfoSchema.and(subscriberAddressInfoSchema))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.subscribersDb
+        .update(addresses)
+        .set(input)
+        .where(eq(addresses.userId, ctx.session.userId));
+
+      await ctx.subscribersDb
+        .update(contacts)
+        .set(input)
+        .where(eq(contacts.userId, ctx.session.userId));
+    }),
+  updateBankAccount: protectedProcedure
+    .input(subscriberBankInfoSchema)
+    .mutation(async ({ ctx, input }) =>
+      ctx.subscribersDb
+        .update(bankAccounts)
+        .set(input)
+        .where(eq(bankAccounts.userId, ctx.session.userId))
+    ),
 };

@@ -19,14 +19,17 @@ import {
   subscriberAddressInfoSchema,
   subscriberContactInfoSchema,
 } from "@cmt/validators";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryClient, trpc } from "~/utils/api";
 import { SpinnerView } from "~/components/spinner-view";
+import { notificationAsync, NotificationFeedbackType } from "expo-haptics";
+import { toast } from "sonner-native";
 
 const formSchema = subscriberContactInfoSchema.and(subscriberAddressInfoSchema);
 
 export default function ContactDetails() {
   const client = useQueryClient(queryClient);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: async () => {
@@ -45,8 +48,23 @@ export default function ContactDetails() {
     },
   });
 
+  const { mutateAsync: updateContactAddress } = useMutation(
+    trpc.subscribers.updateContactAddress.mutationOptions({
+      async onSuccess(data) {
+        await notificationAsync(NotificationFeedbackType.Success);
+        toast.success("Updated successfully");
+        form.reset();
+        client.invalidateQueries(trpc.subscribers.pathFilter());
+      },
+      async onError(error) {
+        await notificationAsync(NotificationFeedbackType.Error);
+        toast.error(error.message);
+      },
+    })
+  );
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    await updateContactAddress(values);
   }
 
   if (form.formState.isLoading) return <SpinnerView />;
@@ -56,6 +74,7 @@ export default function ContactDetails() {
       showsVerticalScrollIndicator={false}
       automaticallyAdjustKeyboardInsets
       keyboardDismissMode="none"
+      keyboardShouldPersistTaps
     >
       <View className="px-4 flex-1 py-6 gap-6">
         <Form {...form}>
