@@ -1,14 +1,11 @@
-import {
-  addresses,
-  bankAccounts,
-  contacts,
-  users,
-} from "@cmt/db/schemas/collectors";
+import { collectorsSchema } from "@cmt/db/schema";
 import { protectedProcedure } from "../trpc";
 import { onboardingSchema } from "@cmt/validators";
 import { TRPCError } from "@trpc/server";
 import { eq } from "@cmt/db";
 import { clerkClient } from "@clerk/nextjs/server";
+
+const { addresses, bankAccounts, contacts, users } = collectorsSchema;
 
 export const collectorsRouter = {
   createProfile: protectedProcedure

@@ -11,13 +11,17 @@ import Animated, {
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-const Spinner = ({ size = 50, color = "#ffffff" }) => {
+const Spinner = ({ size = 50, color = "#ffffff", opacity = 0.6 }) => {
   const rotation = useSharedValue(360);
 
   useEffect(() => {
     rotation.value = withRepeat(
-      withTiming(-360, { duration: 2000, easing: Easing.linear }),
-      -1
+      withTiming(-360, {
+        duration: 5000,
+        easing: Easing.linear,
+      }),
+      -1,
+      true
     );
   }, []);
 
@@ -33,7 +37,8 @@ const Spinner = ({ size = 50, color = "#ffffff" }) => {
           cy="25"
           r="20"
           stroke={color}
-          strokeWidth="5"
+          opacity={opacity}
+          strokeWidth="2"
           fill="none"
           strokeDasharray="100"
           strokeLinecap="round"

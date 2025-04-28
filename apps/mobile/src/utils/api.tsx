@@ -10,9 +10,7 @@ import { getClerkInstance } from "@clerk/clerk-expo";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {
-      // ...
-    },
+    queries: { staleTime: 30 * 1000 },
   },
 });
 

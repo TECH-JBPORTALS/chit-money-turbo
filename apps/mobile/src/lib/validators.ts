@@ -1,8 +1,9 @@
 import { z } from "zod";
 
 export const personalInfoSchema = z.object({
-  full_name: z.string().trim().min(2, "Enter valid name"),
-  date_of_birth: z.string().trim().min(2, "Enter valid date of birth"),
+  firstName: z.string().trim().min(2, "Enter valid name"),
+  lastName: z.string().trim().min(2, "Enter valid name"),
+  dateOfBirth: z.string().trim().min(2, "Enter valid date of birth"),
 });
 
 export const contactInfoSchema = z.object({

@@ -1,14 +1,12 @@
-import {
-  users,
-  bankAccounts,
-  contacts,
-  addresses,
-} from "@cmt/db/schemas/subscribers";
+import { subscribersSchema } from "@cmt/db/schema";
 import { protectedProcedure } from "../trpc";
 import { subscriberOnboardingSchema } from "@cmt/validators";
 import { TRPCError } from "@trpc/server";
 import { customAlphabet } from "nanoid";
 import { clerkClient } from "@clerk/nextjs/server";
+import { eq } from "@cmt/db";
+
+const { users, bankAccounts, contacts, addresses } = subscribersSchema;
 
 export const subscribersRouter = {
   createProfile: protectedProcedure
@@ -52,4 +50,18 @@ export const subscribersRouter = {
         return subscriber;
       })
     ),
+
+  getPersonalDetails: protectedProcedure.query(async ({ ctx }) => {
+    const client = await clerkClient();
+    const user = await client.users.getUser(ctx.session.userId);
+    const subscriber = await ctx.subscribersDb.query.users.findFirst({
+      where: eq(users.id, ctx.session.userId),
+    });
+
+    return {
+      ...subscriber,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    };
+  }),
 };

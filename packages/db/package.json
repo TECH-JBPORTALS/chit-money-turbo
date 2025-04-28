@@ -12,17 +12,9 @@
       "types": "./dist/client.d.ts",
       "default": "./src/client.ts"
     },
-    "./schemas/public": {
-      "types": "./dist/schemas/index.d.ts",
-      "default": "./src/schemas/index.ts"
-    },
-    "./schemas/collectors": {
-      "types": "./dist/schemas/collectors/index.d.ts",
-      "default": "./src/schemas/collectors/index.ts"
-    },
-    "./schemas/subscribers": {
-      "types": "./dist/schemas/subscribers/index.d.ts",
-      "default": "./src/schemas/subscribers/index.ts"
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "default": "./src/schema.ts"
     }
   },
   "scripts": {

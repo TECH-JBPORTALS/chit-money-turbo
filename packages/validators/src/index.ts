@@ -1,6 +1,6 @@
-import * as publicSchema from "@cmt/db/schemas/public";
-import * as collectorsSchema from "@cmt/db/schemas/collectors";
-import * as subscribersSchema from "@cmt/db/schemas/subscribers";
+import * as publicSchema from "@cmt/db/schema";
+import { collectorsSchema } from "@cmt/db/schema";
+import { subscribersSchema } from "@cmt/db/schema";
 import { z } from "zod";
 
 export const personalInfoSchema = collectorsSchema.collectorInsertSchema

@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
@@ -17,31 +18,40 @@ import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
 import { Text } from "~/components/ui/text";
 import { Large } from "~/components/ui/typography";
-import { nomineeInfoSchema, personalInfoSchema } from "~/lib/validators";
+import {
+  nomineeInfoSchema,
+  subscriberPersonalInfoSchema,
+} from "@cmt/validators";
+import { queryClient, trpc } from "~/utils/api";
+import { SpinnerView } from "~/components/spinner-view";
 
-const formSchema = z.object({
-  personalInfo: personalInfoSchema,
-  nomineeInfo: nomineeInfoSchema,
-});
+const formSchema = subscriberPersonalInfoSchema.and(nomineeInfoSchema);
 
 export default function PNDetails() {
+  const client = useQueryClient(queryClient);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      personalInfo: {
-        full_name: "",
-        date_of_birth: "",
-      },
-      nomineeInfo: {
-        full_name: "",
-        relationship: "",
-      },
+    defaultValues: async () => {
+      const data = await client.fetchQuery(
+        trpc.subscribers.getPersonalDetails.queryOptions(undefined)
+      );
+
+      return {
+        firstName: data?.firstName ?? "",
+        lastName: data?.lastName ?? "",
+        dateOfBirth: data?.dateOfBirth ?? "",
+        nomineeName: data?.nomineeName ?? "",
+        nomineeRelationship: data?.nomineeRelationship ?? "",
+      };
     },
   });
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     console.log(data);
   }
+
+  if (form.formState.isLoading) return <SpinnerView />;
 
   return (
     <ScrollView
@@ -53,10 +63,10 @@ export default function PNDetails() {
         <Form {...form}>
           <FormField
             control={form.control}
-            name="personalInfo.full_name"
+            name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Full Name</FormLabel>
+                <FormLabel>First Name</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -73,7 +83,27 @@ export default function PNDetails() {
 
           <FormField
             control={form.control}
-            name="personalInfo.date_of_birth"
+            name="lastName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>First Name</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChangeText={(value) => field.onChange(value)}
+                  />
+                </FormControl>
+                <FormMessage />
+                <FormDescription>
+                  {"It's only uses for display and record purpose"}
+                </FormDescription>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="dateOfBirth"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Date Of Birth</FormLabel>
@@ -97,7 +127,7 @@ export default function PNDetails() {
 
           <FormField
             control={form.control}
-            name="nomineeInfo.full_name"
+            name="nomineeName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Nominee Full Name</FormLabel>
@@ -117,7 +147,7 @@ export default function PNDetails() {
 
           <FormField
             control={form.control}
-            name="nomineeInfo.relationship"
+            name="nomineeRelationship"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Nominee Relationship</FormLabel>

@@ -1,4 +1,4 @@
-import { batches, batchInsertSchema } from "@cmt/db/schemas/public";
+import { batches, batchInsertSchema } from "@cmt/db/schema";
 import { eq } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { addMonths } from "date-fns";

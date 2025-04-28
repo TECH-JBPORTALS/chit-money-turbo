@@ -14,29 +14,18 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
-import { contactInfoSchema, addressInfoSchema } from "~/lib/validators";
 import { ScrollView } from "react-native-gesture-handler";
+import {
+  subscriberAddressInfoSchema,
+  subscriberContactInfoSchema,
+} from "@cmt/validators";
 
-const formSchema = z.object({
-  contactInfo: contactInfoSchema,
-  addressInfo: addressInfoSchema,
-});
+const formSchema = subscriberContactInfoSchema.and(subscriberAddressInfoSchema);
 
 export default function ContactDetails() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      contactInfo: {
-        primary_phone_number: "",
-        alternative_phone_number: "",
-      },
-      addressInfo: {
-        complete_address: "",
-        pincode: "",
-        city: "",
-        state: "",
-      },
-    },
+    defaultValues: {},
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -53,7 +42,7 @@ export default function ContactDetails() {
         <Form {...form}>
           <FormField
             control={form.control}
-            name="contactInfo.primary_phone_number"
+            name="primaryPhoneNumber"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Primary Phone Number</FormLabel>
@@ -74,7 +63,7 @@ export default function ContactDetails() {
           />
           <FormField
             control={form.control}
-            name="contactInfo.alternative_phone_number"
+            name="secondaryPhoneNumber"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Alternative Phone Number</FormLabel>
@@ -96,7 +85,7 @@ export default function ContactDetails() {
 
           <FormField
             control={form.control}
-            name="addressInfo.complete_address"
+            name="addressLine"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Complete Address</FormLabel>
@@ -110,7 +99,7 @@ export default function ContactDetails() {
 
           <FormField
             control={form.control}
-            name="addressInfo.city"
+            name="city"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>City</FormLabel>
@@ -124,7 +113,7 @@ export default function ContactDetails() {
 
           <FormField
             control={form.control}
-            name="addressInfo.state"
+            name="state"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>State</FormLabel>
@@ -138,7 +127,7 @@ export default function ContactDetails() {
 
           <FormField
             control={form.control}
-            name="addressInfo.pincode"
+            name="pincode"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Pincode</FormLabel>

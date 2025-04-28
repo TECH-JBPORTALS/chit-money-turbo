@@ -2,8 +2,16 @@ import { ulid } from "ulid";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { users } from "../schemas/collectors/users";
 import { pgEnum, pgTable } from "drizzle-orm/pg-core";
+import * as colSchema from "./col.schema";
+import * as subSchema from "./sub.schema";
+
+/************************************* Exports ***************************************/
+
+export const collectorsSchema = colSchema;
+export const subscribersSchema = subSchema;
+
+/************************************* Batches ***************************************/
 
 export const batchTypeEnum = pgEnum("batch_type_enum", ["interest", "auction"]);
 export const batchStatusEnum = pgEnum("batch_status_enum", [
@@ -16,7 +24,7 @@ export const batches = pgTable("batches", (t) => ({
     .text()
     .$defaultFn(() => `batch_${ulid()}`)
     .primaryKey(),
-  collectorId: t.text().references(() => users.id, {
+  collectorId: t.text().references(() => colSchema.users.id, {
     onDelete: "cascade",
     onUpdate: "cascade",
   }),
@@ -35,9 +43,9 @@ export const batches = pgTable("batches", (t) => ({
 
 // Relations
 export const batchRelations = relations(batches, ({ one }) => ({
-  collector: one(users, {
+  collector: one(colSchema.users, {
     fields: [batches.collectorId],
-    references: [users.id],
+    references: [colSchema.users.id],
   }),
 }));
 
