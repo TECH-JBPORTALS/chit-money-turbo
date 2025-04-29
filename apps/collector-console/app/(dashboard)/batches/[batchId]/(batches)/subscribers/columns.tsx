@@ -69,7 +69,7 @@ export const columns: ColumnDef<Subscriber>[] = [
     cell(props) {
       return (
         <div className="text-right font-bold">
-          {props.row.original.commissionRate}%
+          {props.row.original.commissionRate.toPrecision(2)}%
         </div>
       );
     },

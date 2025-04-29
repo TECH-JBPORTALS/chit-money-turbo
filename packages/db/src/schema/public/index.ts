@@ -22,7 +22,9 @@ export const batches = pgTable("batches", (t) => ({
   endsOn: t.date().notNull(),
   scheme: t.integer().notNull(),
   fundAmount: t.numeric().notNull(),
-  defaultCommissionRate: t.numeric().notNull(),
+  defaultCommissionRate: t
+    .numeric({ precision: 3, scale: 1, mode: "number" })
+    .notNull(),
   batchStatus: batchStatusEnum("batch_status").default("active").notNull(),
   updatedAt: t.timestamp().$onUpdate(() => new Date()),
   createdAt: t.timestamp().defaultNow().notNull(),
@@ -51,7 +53,9 @@ export const subscribersToBatches = pgTable(
     /** Should be a unique ID within the single batch */
     chitId: t.text().notNull(),
 
-    commissionRate: t.numeric().notNull(),
+    commissionRate: t
+      .numeric({ precision: 3, scale: 1, mode: "number" })
+      .notNull(),
 
     /** Determines weather subscriber's chit is freezed within the batch */
     isFreezed: t.boolean().default(false),

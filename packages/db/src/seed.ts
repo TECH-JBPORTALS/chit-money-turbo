@@ -105,7 +105,7 @@ async function main() {
     for (let index = 0; index < 5; index++) {
       await db.insert(schema.batches).values({
         name: `${f.company.buzzNoun().toLocaleUpperCase()} ${f.date.between({ from: Date.now(), to: "2030-01-01" }).getFullYear()}`,
-        defaultCommissionRate: f.number.float({ min: 2, max: 8 }).toString(),
+        defaultCommissionRate: f.number.float({ min: 2, max: 8 }),
         dueOn: f.helpers.arrayElement([10, 1, 5, 20]).toString(),
         startsOn: startsOn.toDateString(),
         endsOn: endsOn.toDateString(),
