@@ -72,7 +72,7 @@ export const batchesRouter = {
             subscriber: true,
           },
           limit: pageSize,
-          offset,
+          offset: !query ? offset : undefined,
           orderBy: (t, { desc }) => [desc(t.createdAt)],
         }),
         ctx.db

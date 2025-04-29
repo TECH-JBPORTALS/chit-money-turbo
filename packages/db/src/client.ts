@@ -10,6 +10,7 @@ import * as publicRelations from "./schema/public/relations";
 
 const client = new Pool({
   connectionString: process.env.DATABASE_URL!,
+  max: process.env.SEED_MODE ? 1 : undefined,
 });
 
 const schema = {
