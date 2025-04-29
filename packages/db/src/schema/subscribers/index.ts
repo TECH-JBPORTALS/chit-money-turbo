@@ -1,6 +1,6 @@
 import { ulid } from "ulid";
 import { accountTypeEnum } from "../enums";
-import { subscribersSchema } from "../utils";
+import { subscribersSchema } from "../table.helpers";
 
 /************************************* Users ****************************************/
 

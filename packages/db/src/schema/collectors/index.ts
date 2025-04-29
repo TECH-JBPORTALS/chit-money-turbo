@@ -1,5 +1,5 @@
 import { ulid } from "ulid";
-import { collectorsSchema } from "../utils";
+import { collectorsSchema } from "../table.helpers";
 import { accountTypeEnum } from "../enums";
 
 /************************************* Users ****************************************/
