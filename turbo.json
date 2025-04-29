@@ -21,6 +21,9 @@
       "cache": false,
       "interactive": true
     },
+    "seed": {
+      "cache": false
+    },
     "clean": {
       "cache": false
     },

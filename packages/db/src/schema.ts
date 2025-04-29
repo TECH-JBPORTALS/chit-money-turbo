@@ -2,7 +2,7 @@ import { ulid } from "ulid";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { pgEnum, pgTable } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, unique } from "drizzle-orm/pg-core";
 import * as colSchema from "./col.schema";
 import * as subSchema from "./sub.schema";
 
@@ -69,4 +69,87 @@ export const batchUpdateSchema = createInsertSchema(batches)
   })
   .and(
     z.object({ batchId: z.string().min(1, "batchId is required for updation") })
+  );
+
+/************************************* Subscribers-To-Batches ***************************************/
+
+export const subscribersToBatches = pgTable(
+  "subscribers_to_batches",
+  (t) => ({
+    id: t
+      .text()
+      .$defaultFn(() => `batch_${ulid()}`)
+      .primaryKey(),
+    batchId: t
+      .text()
+      .references(() => batches.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      })
+      .notNull(),
+    subscriberId: t
+      .text()
+      .references(() => subSchema.users.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      })
+      .notNull(),
+
+    /** Should be a unique ID within the single batch */
+    chitId: t.text().notNull(),
+
+    /** Determines weather subscriber's chit is freezed within the batch */
+    isFreezed: t.boolean().default(false),
+    freezedAt: t.timestamp(),
+
+    updatedAt: t.timestamp().$onUpdate(() => new Date()),
+    createdAt: t.timestamp().defaultNow(),
+  }),
+  (self) => [
+    unique("chitId_unique_batch")
+      .on(self.chitId, self.batchId)
+      .nullsNotDistinct(),
+  ]
+);
+
+// Relations
+export const subscribersToBatchRelations = relations(
+  subscribersToBatches,
+  ({ one }) => ({
+    batch: one(batches, {
+      fields: [subscribersToBatches.batchId],
+      references: [batches.id],
+    }),
+    subscriber: one(colSchema.users, {
+      fields: [subscribersToBatches.subscriberId],
+      references: [subSchema.users.id],
+    }),
+  })
+);
+
+// Validation Schemas
+export const subscribersToBatchInsertSchema = createInsertSchema(
+  subscribersToBatches
+).omit({
+  id: true,
+  updatedAt: true,
+  createdAt: true,
+});
+
+export const subscribersToBatchUpdateSchema = createInsertSchema(
+  subscribersToBatches
+)
+  .omit({
+    id: true,
+    chitId: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .and(
+    z.object({
+      /** Single unique id of junction table 'subscribersToBatches' */
+      subscriberToBatchId: z
+        .string()
+        .min(1, "subscriberToBatchId is required for updation"),
+    })
   );
