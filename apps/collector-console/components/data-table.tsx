@@ -19,24 +19,43 @@ import {
   TableRow,
 } from "@cmt/ui/components/table";
 import { DataTablePagination } from "./datatable-pagination";
+import { useState } from "react";
+import { parseAsInteger, useQueryState, useQueryStates } from "nuqs";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onPaginationChange?: OnChangeFn<PaginationState>;
+  pageSize?: number;
+  pageIndex?: number;
+  total?: number;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  onPaginationChange,
+  pageSize,
+  pageIndex,
+  total = 0,
 }: DataTableProps<TData, TValue>) {
+  const [pagination, setPaginationState] = useQueryStates(
+    {
+      pageIndex: parseAsInteger.withDefault(pageIndex ?? 0),
+      pageSize: parseAsInteger.withDefault(pageSize ?? 10),
+    },
+    { clearOnDefault: true }
+  );
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onPaginationChange,
+    onPaginationChange: setPaginationState,
+    manualPagination: true,
+    state: {
+      pagination,
+    },
+    pageCount: Math.ceil(total / pagination.pageSize),
   });
 
   return (

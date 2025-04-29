@@ -2,18 +2,8 @@ import { PlusCircleIcon } from "lucide-react";
 import { Button } from "@cmt/ui/components/button";
 import AddSubscribersDialog from "@/components/dialogs/add-subscribers-dialog";
 import { DataTableClient } from "./datatable-client";
-import { HydrateClient, prefetch, trpc } from "@/trpc/server";
-import { Suspense } from "react";
-import { SpinnerPage } from "@/components/spinner-page";
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ batchId: string }>;
-}) {
-  const { batchId } = await params;
-  prefetch(trpc.batches.getSubscribersOfBatch.queryOptions({ batchId }));
-
+export default function Page() {
   return (
     <div className="flex flex-col gap-8 text-2xl h-full">
       <div className="inline-flex justify-between items-center">
@@ -32,11 +22,7 @@ export default async function Page({
           </Button>
         </AddSubscribersDialog>
       </div>
-      <HydrateClient>
-        <Suspense fallback={<SpinnerPage />}>
-          <DataTableClient />
-        </Suspense>
-      </HydrateClient>
+      <DataTableClient />
     </div>
   );
 }

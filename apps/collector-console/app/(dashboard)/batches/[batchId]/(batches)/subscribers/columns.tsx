@@ -22,7 +22,7 @@ import Link from "next/link";
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Subscriber =
-  RouterOutputs["batches"]["getSubscribersOfBatch"][number];
+  RouterOutputs["batches"]["getSubscribersOfBatch"]["items"][number];
 
 export const columns: ColumnDef<Subscriber>[] = [
   {
@@ -42,7 +42,7 @@ export const columns: ColumnDef<Subscriber>[] = [
     cell(props) {
       const row = props.row.original;
       return (
-        <div className="inline-flex gap-2">
+        <div className="inline-flex gap-2 h-12">
           <Avatar>
             <AvatarImage src={row.subscriber.imageUrl} />
             <AvatarFallback>S</AvatarFallback>

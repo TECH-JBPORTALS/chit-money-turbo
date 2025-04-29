@@ -1,10 +1,11 @@
 import { batchInsertSchema } from "@cmt/db/schema";
-import { eq } from "@cmt/db";
+import { count, eq, sql } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { addMonths } from "date-fns";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { schema } from "@cmt/db/client";
+import { getPagination, paginateInputSchema } from "../utils/paginate";
 
 export const batchesRouter = {
   // Create new batch
@@ -31,8 +32,14 @@ export const batchesRouter = {
 
   // Get subscribers within the batch
   getSubscribersOfBatch: protectedProcedure
-    .input(z.object({ batchId: z.string() }))
+    .input(paginateInputSchema.and(z.object({ batchId: z.string() })))
     .query(async ({ ctx, input }) => {
+      const { pageIndex } = input;
+      const { offset, pageSize } = getPagination(
+        input.pageIndex,
+        input.pageSize
+      );
+
       const batch = await ctx.db.query.batches.findFirst({
         where: eq(schema.batches.id, input.batchId),
       });
@@ -40,15 +47,24 @@ export const batchesRouter = {
       if (!batch)
         throw new TRPCError({ message: "Batch not found", code: "NOT_FOUND" });
 
-      const subs = await ctx.db.query.subscribersToBatches.findMany({
-        where: eq(schema.subscribersToBatches.batchId, input.batchId),
-        with: {
-          subscriber: true,
-          batch: true,
-        },
-      });
+      const [subs, total] = await Promise.all([
+        ctx.db.query.subscribersToBatches.findMany({
+          where: eq(schema.subscribersToBatches.batchId, input.batchId),
+          with: {
+            subscriber: true,
+          },
+          limit: pageSize,
+          offset,
+          orderBy: (t, { desc }) => [desc(t.createdAt)],
+        }),
+        ctx.db
+          .select({ count: count() })
+          .from(schema.subscribersToBatches)
+          .where(eq(schema.subscribersToBatches.batchId, input.batchId))
+          .then((v) => v.at(0)?.count ?? 0),
+      ]);
 
-      const mappedSubs = await Promise.all(
+      const items = await Promise.all(
         subs.map(async (sub) => {
           const user = await ctx.clerk.users.getUser(sub.subscriberId);
 
@@ -65,6 +81,6 @@ export const batchesRouter = {
         })
       );
 
-      return mappedSubs;
+      return { items, total, pageSize, pageIndex };
     }),
 };

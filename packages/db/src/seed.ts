@@ -98,7 +98,7 @@ async function main() {
     });
 
     const startsOn = f.date.future({ years: 2 });
-    const scheme = f.number.int({ min: 10, max: 20 }); // Number of months
+    const scheme = f.number.int({ min: 20, max: 30 }); // Number of months
     const endsOn = addMonths(startsOn, scheme);
 
     // Batches
@@ -125,7 +125,7 @@ async function main() {
   console.log("Collectors all set ✅\n\n");
 
   //Create subscriber
-  for (let index = 0; index < 10; index++) {
+  for (let index = 0; index < 30; index++) {
     const firstName = f.person.firstName();
     const lastName = f.person.firstName();
     const user = await clerk.users.createUser({
@@ -214,7 +214,7 @@ async function main() {
   await Promise.all(
     batches.map(async (batch) => {
       const randomSubs = f.helpers.arrayElements(subscribers, {
-        min: 1,
+        min: 20,
         max: batch.scheme,
       });
 
