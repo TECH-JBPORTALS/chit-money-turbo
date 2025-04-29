@@ -8,10 +8,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "next/navigation";
 import { DataTable } from "@/components/data-table";
 import { SpinnerPage } from "@/components/spinner-page";
+import { parseAsString, useQueryState } from "nuqs";
 
 export function DataTableClient() {
   const trpc = useTRPC();
   const searchParams = useSearchParams();
+  const query = searchParams.get("q") ?? "";
   const pageSize = searchParams.get("pageSize") ?? "10";
   const pageIndex = searchParams.get("pageIndex") ?? "0";
 
@@ -21,20 +23,18 @@ export function DataTableClient() {
       batchId,
       pageIndex: parseInt(pageIndex),
       pageSize: parseInt(pageSize),
+      query,
     })
   );
 
   if (isLoading) return <SpinnerPage />;
 
   return (
-    <React.Fragment>
-      <SearchInput placeholder="Search..." className="w-[600px]" />
-      <DataTable
-        columns={columns}
-        pageIndex={data?.pageIndex}
-        total={data?.total}
-        data={data?.items ?? []}
-      />
-    </React.Fragment>
+    <DataTable
+      columns={columns}
+      pageIndex={data?.pageIndex}
+      total={data?.total}
+      data={data?.items ?? []}
+    />
   );
 }

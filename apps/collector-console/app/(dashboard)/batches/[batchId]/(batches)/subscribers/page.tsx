@@ -2,6 +2,7 @@ import { PlusCircleIcon } from "lucide-react";
 import { Button } from "@cmt/ui/components/button";
 import AddSubscribersDialog from "@/components/dialogs/add-subscribers-dialog";
 import { DataTableClient } from "./datatable-client";
+import SearchClient from "./search-client";
 
 export default function Page() {
   return (
@@ -22,6 +23,7 @@ export default function Page() {
           </Button>
         </AddSubscribersDialog>
       </div>
+      <SearchClient />
       <DataTableClient />
     </div>
   );

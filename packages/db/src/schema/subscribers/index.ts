@@ -1,29 +1,34 @@
 import { ulid } from "ulid";
 import { accountTypeEnum } from "../enums";
 import { subscribersSchema } from "../table.helpers";
+import { index } from "drizzle-orm/pg-core";
 
 /************************************* Users ****************************************/
 
-export const subscribers = subscribersSchema.table("users", (t) => ({
-  /** Clerk userId will be used as collector ID */
-  id: t.text().primaryKey(),
+export const subscribers = subscribersSchema.table(
+  "users",
+  (t) => ({
+    /** Clerk userId will be used as collector ID */
+    id: t.text().primaryKey(),
 
-  /** Subcriber him/her - self will have unique FACE ID on the application,
+    /** Subcriber him/her - self will have unique FACE ID on the application,
      So that later collectors can refer this to add the subscribers to the batches */
-  faceId: t.text().unique().notNull(),
-  dateOfBirth: t.date().notNull(),
-  panCardNumber: t.text().unique().notNull(),
+    faceId: t.text().unique().notNull(),
+    dateOfBirth: t.date().notNull(),
+    panCardNumber: t.text().unique().notNull(),
 
-  nomineeName: t.text().notNull(),
-  nomineeRelationship: t.text().notNull(),
+    nomineeName: t.text().notNull(),
+    nomineeRelationship: t.text().notNull(),
 
-  /** Neccessary documents file keys - Uploadthing return file keys */
-  aadharFrontFileKey: t.text().notNull(),
-  aadharBackFileKey: t.text().notNull(),
+    /** Neccessary documents file keys - Uploadthing return file keys */
+    aadharFrontFileKey: t.text().notNull(),
+    aadharBackFileKey: t.text().notNull(),
 
-  updatedAt: t.timestamp().$onUpdate(() => new Date()),
-  createdAt: t.timestamp().defaultNow().notNull(),
-}));
+    updatedAt: t.timestamp().$onUpdate(() => new Date()),
+    createdAt: t.timestamp().defaultNow().notNull(),
+  }),
+  (self) => [index("subscribers_index").on(self.faceId, self.id)]
+);
 
 /************************************* Contacts ****************************************/
 

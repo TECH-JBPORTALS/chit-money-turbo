@@ -1,11 +1,12 @@
 import { batchInsertSchema } from "@cmt/db/schema";
-import { count, eq, sql } from "@cmt/db";
+import { and, count, eq, ilike, inArray, or, sql } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { addMonths } from "date-fns";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { schema } from "@cmt/db/client";
 import { getPagination, paginateInputSchema } from "../utils/paginate";
+import { getQueryUserIds } from "../utils/clerk";
 
 export const batchesRouter = {
   // Create new batch
@@ -32,13 +33,17 @@ export const batchesRouter = {
 
   // Get subscribers within the batch
   getSubscribersOfBatch: protectedProcedure
-    .input(paginateInputSchema.and(z.object({ batchId: z.string() })))
+    .input(
+      paginateInputSchema.and(
+        z.object({
+          batchId: z.string(),
+          query: z.string().optional(),
+        })
+      )
+    )
     .query(async ({ ctx, input }) => {
-      const { pageIndex } = input;
-      const { offset, pageSize } = getPagination(
-        input.pageIndex,
-        input.pageSize
-      );
+      const { pageIndex, pageSize, query } = input;
+      const { offset } = getPagination(pageIndex, pageSize);
 
       const batch = await ctx.db.query.batches.findFirst({
         where: eq(schema.batches.id, input.batchId),
@@ -47,9 +52,22 @@ export const batchesRouter = {
       if (!batch)
         throw new TRPCError({ message: "Batch not found", code: "NOT_FOUND" });
 
+      const userIds = await getQueryUserIds(ctx.clerk, query);
+
       const [subs, total] = await Promise.all([
         ctx.db.query.subscribersToBatches.findMany({
-          where: eq(schema.subscribersToBatches.batchId, input.batchId),
+          where: and(
+            eq(schema.subscribersToBatches.batchId, input.batchId),
+            query
+              ? or(
+                  inArray(
+                    schema.subscribersToBatches.subscriberId,
+                    userIds ?? []
+                  ),
+                  ilike(schema.subscribersToBatches.chitId, query)
+                )
+              : undefined
+          ),
           with: {
             subscriber: true,
           },
