@@ -3,7 +3,7 @@ import { relations } from "drizzle-orm";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import { z } from "zod";
 import { ulid } from "ulid";
-import { batches } from "./schema";
+import { batches } from ".";
 
 /************************************* Schema ***************************************/
 

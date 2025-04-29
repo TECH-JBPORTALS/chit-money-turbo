@@ -78,7 +78,7 @@ export const subscribersToBatches = pgTable(
   (t) => ({
     id: t
       .text()
-      .$defaultFn(() => `batch_${ulid()}`)
+      .$defaultFn(() => `sb_${ulid()}`)
       .primaryKey(),
     batchId: t
       .text()
@@ -97,6 +97,8 @@ export const subscribersToBatches = pgTable(
 
     /** Should be a unique ID within the single batch */
     chitId: t.text().notNull(),
+
+    commissionRate: t.numeric().notNull(),
 
     /** Determines weather subscriber's chit is freezed within the batch */
     isFreezed: t.boolean().default(false),

@@ -1,8 +1,8 @@
 import { Pool } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
 
-import * as subSchema from "./sub.schema";
-import * as colSchema from "./col.schema";
+import * as subSchema from "./schema/sub.schema";
+import * as colSchema from "./schema/col.schema";
 import * as schema from "./schema";
 
 const client = new Pool({

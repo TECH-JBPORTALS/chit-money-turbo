@@ -3,8 +3,8 @@ import { createClerkClient } from "@clerk/backend";
 import { collectorsDb, db, subscribersDb } from "./client";
 import { reset } from "drizzle-seed";
 import * as publicSchema from "@/schema";
-import * as collectorsSchema from "@/col.schema";
-import * as subscribersSchema from "@/sub.schema";
+import * as collectorsSchema from "@/schema/col.schema";
+import * as subscribersSchema from "@/schema/sub.schema";
 import { addMonths } from "date-fns";
 import { generateChitId } from "./lib";
 
@@ -231,9 +231,12 @@ async function main() {
         randomSubs.map(async (sub, index) => {
           const chitId = `CHIT${(index + 1).toString().padStart(batch.scheme.toString().length, "0")}`;
 
-          await db
-            .insert(publicSchema.subscribersToBatches)
-            .values({ subscriberId: sub.id, batchId: batch.id, chitId });
+          await db.insert(publicSchema.subscribersToBatches).values({
+            subscriberId: sub.id,
+            batchId: batch.id,
+            chitId,
+            commissionRate: batch.defaultCommissionRate,
+          });
         })
       );
     })
