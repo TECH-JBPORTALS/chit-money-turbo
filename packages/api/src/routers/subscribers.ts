@@ -1,4 +1,4 @@
-import { subscribersSchema } from "@cmt/db/schema";
+import { schema } from "@cmt/db/client";
 import { protectedProcedure } from "../trpc";
 import {
   subscriberAddressInfoSchema,
@@ -13,8 +13,12 @@ import { customAlphabet } from "nanoid";
 import { clerkClient } from "@clerk/nextjs/server";
 import { eq } from "@cmt/db";
 
-const { users, bankAccounts, contacts, addresses, subscriberUpdateSchema } =
-  subscribersSchema;
+const {
+  subscribers,
+  subscribersAddresses,
+  subscribersBankAccounts,
+  subscribersContacts,
+} = schema;
 
 export const subscribersRouter = {
   createProfile: protectedProcedure
@@ -35,7 +39,7 @@ export const subscribersRouter = {
             code: "INTERNAL_SERVER_ERROR",
           });
 
-        const subscriber = await tx.insert(users).values({
+        const subscriber = await tx.insert(subscribers).values({
           id: ctx.session.userId,
           ...input.documents,
           ...input.personalInfo,
@@ -44,15 +48,15 @@ export const subscribersRouter = {
         });
 
         await tx
-          .insert(bankAccounts)
+          .insert(subscribersBankAccounts)
           .values({ ...input.bankInfo, userId: ctx.session.userId });
 
         await tx
-          .insert(contacts)
+          .insert(subscribersContacts)
           .values({ ...input.contactInfo, userId: ctx.session.userId });
 
         await tx
-          .insert(addresses)
+          .insert(subscribersAddresses)
           .values({ ...input.addressInfo, userId: ctx.session.userId });
 
         return subscriber;
@@ -62,8 +66,8 @@ export const subscribersRouter = {
   getPersonalDetails: protectedProcedure.query(async ({ ctx }) => {
     const client = await clerkClient();
     const user = await client.users.getUser(ctx.session.userId);
-    const subscriber = await ctx.subscribersDb.query.users.findFirst({
-      where: eq(users.id, ctx.session.userId),
+    const subscriber = await ctx.db.query.subscribers.findFirst({
+      where: eq(subscribers.id, ctx.session.userId),
     });
 
     return {
@@ -76,24 +80,24 @@ export const subscribersRouter = {
   }),
 
   getDocuments: protectedProcedure.query(async ({ ctx }) => {
-    const documents = await ctx.subscribersDb.query.users.findFirst({
+    const documents = await ctx.db.query.subscribers.findFirst({
       columns: {
         panCardNumber: true,
         aadharBackFileKey: true,
         aadharFrontFileKey: true,
       },
-      where: eq(users.id, ctx.session.userId),
+      where: eq(subscribers.id, ctx.session.userId),
     });
 
     return documents;
   }),
 
   getContactAddress: protectedProcedure.query(async ({ ctx }) => {
-    const address = await ctx.subscribersDb.query.addresses.findFirst({
-      where: eq(addresses.userId, ctx.session.userId),
+    const address = await ctx.db.query.subscribersAddresses.findFirst({
+      where: eq(subscribersAddresses.userId, ctx.session.userId),
     });
-    const contact = await ctx.subscribersDb.query.contacts.findFirst({
-      where: eq(contacts.userId, ctx.session.userId),
+    const contact = await ctx.db.query.subscribersContacts.findFirst({
+      where: eq(subscribersContacts.userId, ctx.session.userId),
     });
 
     return {
@@ -103,8 +107,8 @@ export const subscribersRouter = {
   }),
 
   getBankAccount: protectedProcedure.query(async ({ ctx }) => {
-    const bankAccount = await ctx.subscribersDb.query.bankAccounts.findFirst({
-      where: eq(bankAccounts.userId, ctx.session.userId),
+    const bankAccount = await ctx.db.query.subscribersBankAccounts.findFirst({
+      where: eq(subscribersBankAccounts.userId, ctx.session.userId),
     });
 
     return bankAccount;
@@ -118,39 +122,39 @@ export const subscribersRouter = {
         lastName: input.lastName,
       });
 
-      await ctx.subscribersDb
-        .update(users)
+      await ctx.db
+        .update(subscribers)
         .set(input)
-        .where(eq(users.id, ctx.session.userId));
+        .where(eq(subscribers.id, ctx.session.userId));
     }),
 
   updateDocuments: protectedProcedure
     .input(subscriberDocumentsSchema)
     .mutation(async ({ ctx, input }) => {
-      await ctx.subscribersDb
-        .update(users)
+      await ctx.db
+        .update(subscribers)
         .set(input)
-        .where(eq(users.id, ctx.session.userId));
+        .where(eq(subscribers.id, ctx.session.userId));
     }),
   updateContactAddress: protectedProcedure
     .input(subscriberContactInfoSchema.and(subscriberAddressInfoSchema))
     .mutation(async ({ ctx, input }) => {
-      await ctx.subscribersDb
-        .update(addresses)
+      await ctx.db
+        .update(subscribersAddresses)
         .set(input)
-        .where(eq(addresses.userId, ctx.session.userId));
+        .where(eq(subscribersAddresses.userId, ctx.session.userId));
 
-      await ctx.subscribersDb
-        .update(contacts)
+      await ctx.db
+        .update(subscribersContacts)
         .set(input)
-        .where(eq(contacts.userId, ctx.session.userId));
+        .where(eq(subscribersContacts.userId, ctx.session.userId));
     }),
   updateBankAccount: protectedProcedure
     .input(subscriberBankInfoSchema)
     .mutation(async ({ ctx, input }) =>
-      ctx.subscribersDb
-        .update(bankAccounts)
+      ctx.db
+        .update(subscribersBankAccounts)
         .set(input)
-        .where(eq(bankAccounts.userId, ctx.session.userId))
+        .where(eq(subscribersBankAccounts.userId, ctx.session.userId))
     ),
 };

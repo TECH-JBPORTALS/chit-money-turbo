@@ -1,4 +1,4 @@
-import { collectorsSchema } from "@cmt/db/schema";
+import { schema } from "@cmt/db/client";
 import { protectedProcedure } from "../trpc";
 import {
   addressInfoSchema,
@@ -13,14 +13,19 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "@cmt/db";
 import { clerkClient } from "@clerk/nextjs/server";
 
-const { addresses, bankAccounts, contacts, users } = collectorsSchema;
+const {
+  collectors,
+  collectorsAddresses,
+  collectorsBankAccounts,
+  collectorsContacts,
+} = schema;
 
 export const collectorsRouter = {
   createProfile: protectedProcedure
     .input(onboardingSchema)
     .mutation(({ ctx, input }) =>
       // DB Transaction to prevent unsync data
-      ctx.collectorsDb.transaction(async (tx) => {
+      ctx.db.transaction(async (tx) => {
         const client = await clerkClient();
         const user = await client.users.updateUser(ctx.session.userId, {
           firstName: input.personalInfo.firstName,
@@ -34,7 +39,7 @@ export const collectorsRouter = {
           });
 
         const collector = await tx
-          .insert(users)
+          .insert(collectors)
           .values({
             id: ctx.session.userId,
             ...input.documents,
@@ -44,15 +49,15 @@ export const collectorsRouter = {
           .returning();
 
         await tx
-          .insert(bankAccounts)
+          .insert(collectorsBankAccounts)
           .values({ ...input.bankInfo, userId: ctx.session.userId });
 
         await tx
-          .insert(contacts)
+          .insert(collectorsContacts)
           .values({ ...input.contactInfo, userId: ctx.session.userId });
 
         await tx
-          .insert(addresses)
+          .insert(collectorsAddresses)
           .values({ ...input.addressInfo, userId: ctx.session.userId });
 
         return collector;
@@ -60,25 +65,25 @@ export const collectorsRouter = {
     ),
 
   getOrgInfo: protectedProcedure.query(async ({ ctx }) => {
-    const orgInfo = await ctx.collectorsDb.query.users.findFirst({
+    const orgInfo = await ctx.db.query.collectors.findFirst({
       columns: {
         orgName: true,
         orgCertificateKey: true,
       },
-      where: eq(users.id, ctx.session.userId),
+      where: eq(collectors.id, ctx.session.userId),
     });
 
     return orgInfo;
   }),
 
   getDocuments: protectedProcedure.query(async ({ ctx }) => {
-    const documents = await ctx.collectorsDb.query.users.findFirst({
+    const documents = await ctx.db.query.collectors.findFirst({
       columns: {
         aadharBackFileKey: true,
         aadharFrontFileKey: true,
         orgCertificateKey: true,
       },
-      where: eq(users.id, ctx.session.userId),
+      where: eq(collectors.id, ctx.session.userId),
     });
 
     return documents;
@@ -86,8 +91,8 @@ export const collectorsRouter = {
 
   getPersonalInfo: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.clerk.users.getUser(ctx.session.userId);
-    const collector = await ctx.collectorsDb.query.users.findFirst({
-      where: eq(users.id, ctx.session.userId),
+    const collector = await ctx.db.query.collectors.findFirst({
+      where: eq(collectors.id, ctx.session.userId),
     });
 
     return {
@@ -100,19 +105,19 @@ export const collectorsRouter = {
   }),
 
   getContactAddress: protectedProcedure.query(async ({ ctx }) => {
-    const contact = await ctx.collectorsDb.query.contacts.findFirst({
-      where: eq(contacts.userId, ctx.session.userId),
+    const contact = await ctx.db.query.collectorsContacts.findFirst({
+      where: eq(collectorsContacts.userId, ctx.session.userId),
     });
-    const address = await ctx.collectorsDb.query.addresses.findFirst({
-      where: eq(addresses.userId, ctx.session.userId),
+    const address = await ctx.db.query.collectorsAddresses.findFirst({
+      where: eq(collectorsAddresses.userId, ctx.session.userId),
     });
 
     return { ...contact, ...address };
   }),
 
   getBankAccount: protectedProcedure.query(({ ctx }) =>
-    ctx.collectorsDb.query.bankAccounts.findFirst({
-      where: eq(bankAccounts.userId, ctx.session.userId),
+    ctx.db.query.collectorsBankAccounts.findFirst({
+      where: eq(collectorsBankAccounts.userId, ctx.session.userId),
     })
   ),
 
@@ -124,50 +129,50 @@ export const collectorsRouter = {
         lastName: input.lastName,
       });
 
-      await ctx.collectorsDb
-        .update(users)
+      await ctx.db
+        .update(collectors)
         .set(input)
-        .where(eq(users.id, ctx.session.userId));
+        .where(eq(collectors.id, ctx.session.userId));
     }),
 
   updateOrg: protectedProcedure
     .input(orgInfoSchema)
     .mutation(async ({ ctx, input }) => {
-      await ctx.collectorsDb
-        .update(users)
+      await ctx.db
+        .update(collectors)
         .set(input)
-        .where(eq(users.id, ctx.session.userId));
+        .where(eq(collectors.id, ctx.session.userId));
     }),
 
   updateDocuments: protectedProcedure
     .input(documentsSchema)
     .mutation(async ({ ctx, input }) => {
-      await ctx.collectorsDb
-        .update(users)
+      await ctx.db
+        .update(collectors)
         .set(input)
-        .where(eq(users.id, ctx.session.userId));
+        .where(eq(collectors.id, ctx.session.userId));
     }),
 
   updateContactAddress: protectedProcedure
     .input(contactInfoSchema.and(addressInfoSchema))
     .mutation(async ({ ctx, input }) => {
-      await ctx.collectorsDb
-        .update(addresses)
+      await ctx.db
+        .update(collectorsAddresses)
         .set(input)
-        .where(eq(addresses.userId, ctx.session.userId));
+        .where(eq(collectorsAddresses.userId, ctx.session.userId));
 
-      await ctx.collectorsDb
-        .update(contacts)
+      await ctx.db
+        .update(collectorsContacts)
         .set(input)
-        .where(eq(contacts.userId, ctx.session.userId));
+        .where(eq(collectorsContacts.userId, ctx.session.userId));
     }),
 
   updateBankAccount: protectedProcedure
     .input(bankInfoSchema)
     .mutation(async ({ ctx, input }) =>
-      ctx.collectorsDb
-        .update(bankAccounts)
+      ctx.db
+        .update(collectorsBankAccounts)
         .set(input)
-        .where(eq(bankAccounts.userId, ctx.session.userId))
+        .where(eq(collectorsBankAccounts.userId, ctx.session.userId))
     ),
 };

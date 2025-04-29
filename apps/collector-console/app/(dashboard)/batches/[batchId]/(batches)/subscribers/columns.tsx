@@ -1,5 +1,6 @@
 "use client";
 
+import { RouterOutputs } from "@cmt/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Button } from "@cmt/ui/components/button";
 import {
@@ -20,14 +21,8 @@ import Link from "next/link";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
-export type Subscriber = {
-  id: string;
-  chit_id: string;
-  full_name: string;
-  commision_rate: string;
-  email: string;
-  joined_on: Date;
-};
+export type Subscriber =
+  RouterOutputs["batches"]["getSubscribersOfBatch"][number];
 
 export const columns: ColumnDef<Subscriber>[] = [
   {
@@ -36,7 +31,7 @@ export const columns: ColumnDef<Subscriber>[] = [
     cell(props) {
       return (
         <div className="text-sm text-muted-foreground">
-          {props.row.original.chit_id}
+          {props.row.original.chitId}
         </div>
       );
     },
@@ -49,14 +44,18 @@ export const columns: ColumnDef<Subscriber>[] = [
       return (
         <div className="inline-flex gap-2">
           <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" />
+            <AvatarImage src={row.subscriber.imageUrl} />
             <AvatarFallback>S</AvatarFallback>
           </Avatar>
           <div>
-            <Link className="hover:underline" href={`/s/${row.id}`}>
-              <span>{row.full_name}</span>
+            <Link className="hover:underline" href={`/s/${row.subscriberId}`}>
+              <span>
+                {row.subscriber.firstName} {row.subscriber.lastName}
+              </span>
             </Link>
-            <p className="text-muted-foreground text-sm">{row.email}</p>
+            <p className="text-muted-foreground text-sm">
+              {row.subscriber.primaryEmailAddress}
+            </p>
           </div>
         </div>
       );
@@ -70,7 +69,7 @@ export const columns: ColumnDef<Subscriber>[] = [
     cell(props) {
       return (
         <div className="text-right font-bold">
-          {props.row.original.commision_rate}
+          {props.row.original.commissionRate}%
         </div>
       );
     },
@@ -84,7 +83,7 @@ export const columns: ColumnDef<Subscriber>[] = [
       return (
         <div className="text-right">
           <time className="text-sm text-muted-foreground">
-            {formatDistanceToNowStrict(props.row.original.joined_on, {
+            {formatDistanceToNowStrict(props.row.original.createdAt, {
               addSuffix: true,
             })}
           </time>

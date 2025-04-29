@@ -1,6 +1,6 @@
 import { eq, sql } from "drizzle-orm";
 import { db } from "./client";
-import { batches, subscribersToBatches } from "./schema";
+import { batches, subscribersToBatches } from "./schema/public";
 
 export async function generateChitId(batchId: string) {
   const batch = await db.query.batches.findFirst({

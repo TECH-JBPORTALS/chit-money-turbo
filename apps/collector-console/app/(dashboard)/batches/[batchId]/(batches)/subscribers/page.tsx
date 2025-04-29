@@ -1,38 +1,19 @@
-import { DataTable } from "@/components/data-table";
 import { PlusCircleIcon } from "lucide-react";
-import { columns, Subscriber } from "./columns";
 import { Button } from "@cmt/ui/components/button";
 import AddSubscribersDialog from "@/components/dialogs/add-subscribers-dialog";
-import SearchInput from "@/components/search-input";
+import { DataTableClient } from "./datatable-client";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
+import { Suspense } from "react";
+import { SpinnerPage } from "@/components/spinner-page";
 
-const data: Subscriber[] = [
-  {
-    id: "1",
-    chit_id: "#738392J",
-    email: "jhon@gmail.com",
-    full_name: "Jhon Abraham",
-    commision_rate: "2%",
-    joined_on: new Date(2024, 2, 12),
-  },
-  {
-    id: "1",
-    chit_id: "#738392J",
-    email: "jhon@gmail.com",
-    full_name: "Jhon Abraham",
-    commision_rate: "2%",
-    joined_on: new Date(2024, 2, 12),
-  },
-  {
-    id: "1",
-    chit_id: "#738392J",
-    email: "jhon@gmail.com",
-    full_name: "Jhon Abraham",
-    commision_rate: "2%",
-    joined_on: new Date(2024, 2, 12),
-  },
-];
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ batchId: string }>;
+}) {
+  const { batchId } = await params;
+  prefetch(trpc.batches.getSubscribersOfBatch.queryOptions({ batchId }));
 
-export default function Page() {
   return (
     <div className="flex flex-col gap-8 text-2xl h-svh">
       <div className="inline-flex justify-between items-center">
@@ -51,9 +32,11 @@ export default function Page() {
           </Button>
         </AddSubscribersDialog>
       </div>
-
-      <SearchInput placeholder="Search..." className="w-[600px]" />
-      <DataTable columns={columns} data={data} />
+      <HydrateClient>
+        <Suspense fallback={<SpinnerPage />}>
+          <DataTableClient />
+        </Suspense>
+      </HydrateClient>
     </div>
   );
 }
