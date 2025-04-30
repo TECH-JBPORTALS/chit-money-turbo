@@ -20,6 +20,6 @@
 
 - [-] feta(mobile): Batches
   - [x] Listing joined batches of subscribers
-  - [ ] View subscriber batch details - mobile
+  - [x] View subscriber batch list with inifinite scroll to enable paginaton - mobile
   - [ ] View batch details subscriber
   - [ ] Filter batch details subscribr

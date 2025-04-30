@@ -20,7 +20,7 @@ export function LinearBlurView({
         className="flex-1"
       >
         <SafeAreaView
-          className={cn("flex-1 px-4 py-6 gap-6", className)}
+          className={cn("flex-1 px-4 py-1 gap-6", className)}
           {...props}
         >
           {children}

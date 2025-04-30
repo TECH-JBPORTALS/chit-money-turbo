@@ -1,5 +1,5 @@
 import { batchInsertSchema } from "@cmt/db/schema";
-import { and, count, eq, ilike, inArray, or, sql } from "@cmt/db";
+import { and, count, eq, gt, gte, ilike, inArray, lte, or, sql } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { addMonths } from "date-fns";
 import { z } from "zod";
@@ -66,7 +66,55 @@ export const batchesRouter = {
       })
     ),
 
-  // Get subscribers within the batch
+  /**
+    Get's batches of subscriber withing the subscriber context
+    Alwasys youse withing the subscriber context
+    @returns batches
+   */
+  getBatchesOfSubscriber: protectedProcedure
+    .input(
+      z
+        .object({
+          cursor: z.string().optional(),
+          limit: z.number().default(10),
+        })
+        .optional()
+    )
+    .query(async ({ ctx, input }) => {
+      const cursor = input?.cursor;
+      const limit = input?.limit ?? 10;
+
+      const items = await ctx.db.query.batches.findMany({
+        limit: limit + 1,
+        orderBy: ({ id }, { desc }) => [desc(id)],
+        // Go down we go.. go.. with cursor of decending order page
+        where: cursor ? lte(schema.batches.id, cursor) : undefined,
+        with: {
+          subscribersToBatches: {
+            where: eq(
+              schema.subscribersToBatches.subscriberId,
+              ctx.session.userId
+            ),
+          },
+          collector: true,
+        },
+      });
+
+      const nextCursor = items.pop()?.id;
+
+      return {
+        nextCursor,
+        items,
+      };
+    }),
+
+  /**
+    Get's subscriber of given batch withing the collector context
+    Alwasys youse withing the collector context
+    @param batchId unique batch ID
+    @param query search string which searches through firstName, lastName, emailAddress, chitId
+    @returns subscribers
+   */
   getSubscribersOfBatch: protectedProcedure
     .input(
       paginateInputSchema.and(
