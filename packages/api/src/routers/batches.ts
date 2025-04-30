@@ -50,6 +50,22 @@ export const batchesRouter = {
       return subToBatch.at(0);
     }),
 
+  getBatchesBySubscriber: protectedProcedure
+    .input(z.object({ subscriberId: z.string() }))
+    .query(({ ctx, input }) =>
+      ctx.db.query.batches.findMany({
+        where: eq(schema.batches.collectorId, ctx.session.userId),
+        with: {
+          subscribersToBatches: {
+            where: eq(
+              sql`${schema.subscribersToBatches.subscriberId}`,
+              input.subscriberId
+            ),
+          },
+        },
+      })
+    ),
+
   // Get subscribers within the batch
   getSubscribersOfBatch: protectedProcedure
     .input(
