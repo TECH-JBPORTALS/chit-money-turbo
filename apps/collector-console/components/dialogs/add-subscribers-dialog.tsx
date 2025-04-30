@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -18,14 +19,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@cmt/ui/components/form";
-import { Input } from "@cmt/ui/components/input";
-import { Textarea } from "@cmt/ui/components/textarea";
+import { MultiSelect } from "@cmt/ui/components/multi-select";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { InfoIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const addSubscribersSchema = z.object({
-  emails: z.string().nonempty("Required"),
+  emails: z
+    .array(z.object({ id: z.string(), text: z.string() }))
+    .min(1, "Atleast one subscriber is required move forward")
+    .default([]),
 });
 
 export default function AddSubscribersDialog({
@@ -36,7 +40,7 @@ export default function AddSubscribersDialog({
   const form = useForm<z.infer<typeof addSubscribersSchema>>({
     resolver: zodResolver(addSubscribersSchema),
     defaultValues: {
-      emails: "",
+      emails: [],
     },
   });
 
@@ -50,6 +54,10 @@ export default function AddSubscribersDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>New Subscribers</DialogTitle>
+          <DialogDescription>
+            Adding the same subscriber more than once will create multiple chits
+            for them.
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -59,17 +67,28 @@ export default function AddSubscribersDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea
+                    {/* <Textarea
                       placeholder="Search by emails, subscriber ID’s, names to create chits fot that subscriber with default commission rate of (2%)"
                       className="resize-none min-h-32"
                       {...field}
+                    /> */}
+                    <MultiSelect
+                      placeholder="Search by names, subscriber ID's and email addresses"
+                      noOptionsMessage={() => (
+                        <div className="flex flex-col items-center gap-1 py-4">
+                          <InfoIcon
+                            strokeWidth={1.25}
+                            className="size-10 text-muted-foreground"
+                          />
+                          <span className="text-sm">No people</span>
+                          <p className="text-xs text-muted-foreground">
+                            There is nobody found
+                          </p>
+                        </div>
+                      )}
                     />
                   </FormControl>
                   <FormMessage />
-                  <FormDescription>
-                    Adding the same subscriber more than once will create
-                    multiple chits for them.
-                  </FormDescription>
                 </FormItem>
               )}
             />
@@ -79,7 +98,7 @@ export default function AddSubscribersDialog({
                   Cancel
                 </Button>
               </DialogClose>
-              <Button size={"lg"}>Create</Button>
+              <Button size={"lg"}>Add</Button>
             </DialogFooter>
           </form>
         </Form>
