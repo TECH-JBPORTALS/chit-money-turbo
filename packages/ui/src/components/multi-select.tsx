@@ -2,7 +2,8 @@
 
 import React from "react";
 import { cn } from "../lib/utils";
-import Select, { useAsync } from "react-select/async";
+import Select from "react-select/async";
+import { components } from "react-select";
 
 export function MultiSelect({ ...props }: React.ComponentProps<typeof Select>) {
   return (
@@ -13,7 +14,7 @@ export function MultiSelect({ ...props }: React.ComponentProps<typeof Select>) {
       classNames={{
         control: (state) =>
           cn(
-            "h-10 rounded-md bg-background px-3",
+            "min-h-12 py-3.5 rounded-md bg-background px-3",
             state.isFocused
               ? "border border-primary ring-2 ring-ring/25"
               : "border border-input",
@@ -46,4 +47,5 @@ export function MultiSelect({ ...props }: React.ComponentProps<typeof Select>) {
   );
 }
 
-export { useAsync };
+export { components };
+export type * from "react-select";

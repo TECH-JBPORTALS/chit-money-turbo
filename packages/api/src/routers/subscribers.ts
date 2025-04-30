@@ -11,7 +11,9 @@ import {
 import { TRPCError } from "@trpc/server";
 import { customAlphabet } from "nanoid";
 import { clerkClient } from "@clerk/nextjs/server";
-import { eq } from "@cmt/db";
+import { ilike, inArray, eq, or } from "@cmt/db";
+import { z } from "zod";
+import { getQueryUserIds } from "../utils/clerk";
 
 const {
   subscribers,
@@ -157,4 +159,47 @@ export const subscribersRouter = {
         .set(input)
         .where(eq(subscribersBankAccounts.userId, ctx.session.userId))
     ),
+
+  search: protectedProcedure
+    .input(
+      z.object({
+        query: z.string().trim().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { query } = input;
+
+      // Get usersId's from the clerk with matching query string
+      const userIds = await getQueryUserIds(ctx.clerk, query?.trim());
+
+      // Match with the clerk userId's in the subscribers users table
+      const subs = await ctx.db.query.subscribers.findMany({
+        where: query
+          ? or(
+              inArray(schema.subscribers.id, userIds ?? []),
+              ilike(schema.subscribers.faceId, query.trim())
+            )
+          : undefined,
+        limit: 4,
+        orderBy: (t, { desc }) => [desc(t.createdAt)],
+      });
+
+      console.log(subs);
+      // Re-structure the data
+      const items = await Promise.all(
+        subs.map(async (sub) => {
+          const user = await ctx.clerk.users.getUser(sub.id);
+
+          return {
+            ...sub,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            imageUrl: user.imageUrl,
+            primaryEmailAddress: user.primaryEmailAddress?.emailAddress,
+          };
+        })
+      );
+
+      return items;
+    }),
 };

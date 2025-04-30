@@ -1,4 +1,10 @@
 "use client";
+
+import { createQueryClient } from "@/trpc/query-client";
+import { useTRPC } from "@/trpc/react";
+import { RouterOutputs } from "@cmt/api";
+import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
+import { Badge } from "@cmt/ui/components/badge";
 import { Button } from "@cmt/ui/components/button";
 import {
   Dialog,
@@ -19,11 +25,26 @@ import {
   FormLabel,
   FormMessage,
 } from "@cmt/ui/components/form";
-import { MultiSelect } from "@cmt/ui/components/multi-select";
+import {
+  FilterOptionOption,
+  GetOptionLabel,
+  GetOptionValue,
+  MultiSelect,
+  MultiValueProps,
+  OptionProps,
+  components,
+} from "@cmt/ui/components/multi-select";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, XCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { SpinnerPage } from "../spinner-page";
+import { Skeleton } from "@cmt/ui/components/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@cmt/ui/components/tooltip";
 
 const addSubscribersSchema = z.object({
   emails: z
@@ -32,11 +53,15 @@ const addSubscribersSchema = z.object({
     .default([]),
 });
 
+type Subscriber = RouterOutputs["subscribers"]["search"][number];
+
 export default function AddSubscribersDialog({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const trpc = useTRPC();
+  const queryClient = createQueryClient();
   const form = useForm<z.infer<typeof addSubscribersSchema>>({
     resolver: zodResolver(addSubscribersSchema),
     defaultValues: {
@@ -47,6 +72,90 @@ export default function AddSubscribersDialog({
   async function onSubmit(values: z.infer<typeof addSubscribersSchema>) {
     console.log(values);
   }
+
+  const Option = (props: OptionProps<Subscriber>) => {
+    return (
+      <components.Option {...props}>
+        <div className="flex gap-1 items-center">
+          <Avatar className="size-8">
+            <AvatarImage
+              src={props.data.imageUrl}
+              alt={props.data.firstName ?? ""}
+            />
+            <AvatarFallback>
+              {props.data.firstName?.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="space-y-1">
+            <div className="space-x-1.5">
+              <span className="text-xs">
+                {props.data.firstName} {props.data.lastName}
+              </span>
+              <Badge
+                variant={"outline"}
+                className="text-xs text-accent-foreground bg-accent"
+              >
+                {props.data.faceId}
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {props.data.primaryEmailAddress}
+            </p>
+          </div>
+        </div>
+      </components.Option>
+    );
+  };
+
+  const MultiValue = ({
+    components: mvComponents,
+    ...props
+  }: MultiValueProps<Subscriber>) => {
+    return (
+      <components.MultiValue
+        components={{
+          ...mvComponents,
+          Container: (props) => (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge
+                  {...props.innerProps}
+                  variant={"secondary"}
+                  className="text-xs shadow-md border border-border bg-secondary/50 py-0.5 my-1 rounded-full"
+                >
+                  <Avatar className="size-4">
+                    <AvatarImage
+                      src={props.data.imageUrl}
+                      alt={props.data.firstName ?? ""}
+                    />
+                    <AvatarFallback>
+                      {props.data.firstName?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {props.children}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>{props.data.faceId}</TooltipContent>
+            </Tooltip>
+          ),
+          Label: (props) => (
+            <>
+              {props.data.firstName} {props.data.lastName}
+            </>
+          ),
+        }}
+        {...props}
+      />
+    );
+  };
+
+  const getOptionLabel: GetOptionLabel<Subscriber> = (option) => {
+    return `${option.firstName} ${option.lastName}`;
+  };
+
+  const getOptionValue: GetOptionValue<Subscriber> = (option) => {
+    return `${option.id}`;
+  };
 
   return (
     <Dialog>
@@ -67,13 +176,26 @@ export default function AddSubscribersDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    {/* <Textarea
-                      placeholder="Search by emails, subscriber ID’s, names to create chits fot that subscriber with default commission rate of (2%)"
-                      className="resize-none min-h-32"
-                      {...field}
-                    /> */}
                     <MultiSelect
                       placeholder="Search by names, subscriber ID's and email addresses"
+                      loadOptions={(query, callback) =>
+                        queryClient.fetchQuery(
+                          trpc.subscribers.search.queryOptions({ query })
+                        )
+                      }
+                      getOptionLabel={getOptionLabel as any}
+                      getOptionValue={getOptionValue as any}
+                      components={{
+                        Option: Option as any,
+                        LoadingMessage: () => (
+                          <div className="h-full space-y-2">
+                            {Array.from({ length: 10 }).map((_, i) => (
+                              <Skeleton key={i} className="h-14 w-full" />
+                            ))}
+                          </div>
+                        ),
+                        MultiValue: MultiValue as any,
+                      }}
                       noOptionsMessage={() => (
                         <div className="flex flex-col items-center gap-1 py-4">
                           <InfoIcon
