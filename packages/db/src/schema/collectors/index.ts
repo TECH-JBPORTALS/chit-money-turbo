@@ -4,7 +4,7 @@ import { accountTypeEnum } from "../enums";
 
 /************************************* Users ****************************************/
 
-export const collectors = collectorsSchema.table("users", (t) => ({
+export const collectors = collectorsSchema.table("collectors", (t) => ({
   /** Clerk userId will be used as collectors ID */
   id: t.text().primaryKey(),
   dateOfBirth: t.date().notNull(),

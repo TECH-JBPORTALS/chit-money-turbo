@@ -65,6 +65,29 @@ export const subscribersRouter = {
       })
     ),
 
+  getById: protectedProcedure
+    .input(z.object({ subscriberId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const sub = await ctx.db.query.subscribers.findFirst({
+        where: eq(subscribers.id, input.subscriberId),
+        with: {
+          contact: true,
+          bankAccount: true,
+          homeAddress: true,
+          subscribersToBatches: true,
+        },
+      });
+      const user = await ctx.clerk.users.getUser(input.subscriberId);
+
+      return {
+        ...sub,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        imageUrl: user.imageUrl,
+        primaryEmailAddress: user.primaryEmailAddress,
+      };
+    }),
+
   getPersonalDetails: protectedProcedure.query(async ({ ctx }) => {
     const client = await clerkClient();
     const user = await client.users.getUser(ctx.session.userId);

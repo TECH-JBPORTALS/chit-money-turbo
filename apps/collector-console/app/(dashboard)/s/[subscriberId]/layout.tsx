@@ -1,19 +1,25 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Circle } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@cmt/ui/components/tabs";
 import { ScrollArea, ScrollBar } from "@cmt/ui/components/scroll-area";
-import Link from "next/link";
 import PaymentCard from "@/components/payment-card";
 import BackButton from "@/components/back-button";
 import { NavTabs } from "./nav-tabs";
+import { createQueryClient } from "@/trpc/query-client";
+import { trpc } from "@/trpc/server";
 
-export default function Layout({
+export default async function Layout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { subscriberId: string };
+  params: Promise<{ subscriberId: string }>;
 }) {
+  const client = createQueryClient();
+  const { subscriberId } = await params;
+  const sub = await client.fetchQuery(
+    trpc.subscribers.getById.queryOptions({ subscriberId })
+  );
+
   return (
     <section className="w-full h-full flex">
       <ScrollArea className="flex-1">
@@ -22,15 +28,15 @@ export default function Layout({
           <div className="flex items-center gap-4">
             <BackButton />
             <Avatar className="size-12 border border-border">
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>S</AvatarFallback>
+              <AvatarImage src={sub.imageUrl} />
+              <AvatarFallback>{sub.firstName?.charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
               <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-                Ada Shelby
+                {sub.firstName} {sub.lastName}
               </h4>
               <p className="text-muted-foreground text-sm">
-                whatyouwant@gmail.com
+                {sub.primaryEmailAddress?.emailAddress}
               </p>
             </div>
           </div>

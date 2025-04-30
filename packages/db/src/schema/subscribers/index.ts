@@ -6,7 +6,7 @@ import { index } from "drizzle-orm/pg-core";
 /************************************* Users ****************************************/
 
 export const subscribers = subscribersSchema.table(
-  "users",
+  "subscribers",
   (t) => ({
     /** Clerk userId will be used as collector ID */
     id: t.text().primaryKey(),

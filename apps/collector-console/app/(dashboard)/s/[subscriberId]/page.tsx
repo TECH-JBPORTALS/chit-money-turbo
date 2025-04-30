@@ -1,40 +1,53 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
+import { createQueryClient } from "@/trpc/query-client";
+import { trpc } from "@/trpc/server";
 import { Button } from "@cmt/ui/components/button";
-import { ArrowLeftIcon, ArrowUpRightSquare } from "lucide-react";
+import { ArrowUpRightSquare } from "lucide-react";
 
-export default function Page() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ subscriberId: string }>;
+}) {
+  const client = createQueryClient();
+  const { subscriberId } = await params;
+  const sub = await client.fetchQuery(
+    trpc.subscribers.getById.queryOptions({ subscriberId })
+  );
+
   return (
     <>
       {/** Personal Details */}
-      <div className="space-y-2">
+      <div className="space-y-2 text-sm">
         <p className="text-sm text-muted-foreground">Personal Details</p>
         <div className="inline-flex w-full justify-between">
           <b className="font-bold text-right">Full Name</b>
-          <p>Gina shelby</p>
+          <p>
+            {sub.firstName} {sub.lastName}
+          </p>
         </div>
         <div className="inline-flex w-full justify-between">
           <b className="font-bold text-right">Email Address</b>
-          <p>whatyouwant@gmail.com</p>
+          <p>{sub.primaryEmailAddress?.emailAddress}</p>
         </div>
         <div className="inline-flex w-full justify-between">
           <b className="font-bold text-right">Date Of Birth</b>
-          <p>12 May 2004</p>
+          <p>{sub.dateOfBirth && new Date(sub.dateOfBirth).toDateString()}</p>
         </div>
         <div className="inline-flex w-full justify-between">
           <b className="font-bold text-right">Joined On</b>
-          <p>24 Dec 2024</p>
+          <p>{sub.createdAt && new Date(sub.createdAt).toDateString()}</p>
         </div>
       </div>
       {/** Nominee Details */}
-      <div className="space-y-2">
+      <div className="space-y-2 text-sm">
         <p className="text-sm text-muted-foreground">Personal Details</p>
         <div className="inline-flex w-full justify-between">
           <b className="font-bold text-right">Nominee Full Name</b>
-          <p>Rohan Shelby</p>
+          <p>{sub.nomineeName}</p>
         </div>
         <div className="inline-flex w-full justify-between">
           <b className="font-bold text-right">Nominee Relationship</b>
-          <p>Son</p>
+          <p>{sub.nomineeRelationship}</p>
         </div>
       </div>
 
@@ -43,11 +56,11 @@ export default function Page() {
         <p className="text-sm text-muted-foreground">Contact Details</p>
         <div className="inline-flex w-full justify-between">
           <b className="font-bold text-right">Primary Phone Number</b>
-          <p>9836738393</p>
+          <p>{sub.contact?.primaryPhoneNumber}</p>
         </div>
         <div className="inline-flex w-full justify-between">
-          <b className="font-bold text-right">Alternative Phone Number</b>
-          <p>7093536273</p>
+          <b className="font-bold text-right">Secondary Phone Number</b>
+          <p>{sub.contact?.secondaryPhoneNumber}</p>
         </div>
         <div className="inline-flex w-full justify-between">
           <b className="font-bold text-right">Complete Address</b>

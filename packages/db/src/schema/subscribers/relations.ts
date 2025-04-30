@@ -8,9 +8,9 @@ import {
 import { subscribersToBatches } from "../public";
 
 export const subscribersRelations = relations(subscribers, ({ one, many }) => ({
+  contact: one(subscribersContacts),
   homeAddress: one(subscribersAddresses),
   bankAccount: one(subscribersBankAccounts),
-  contact: one(subscribersContacts),
   subscribersToBatches: many(subscribersToBatches),
 }));
 

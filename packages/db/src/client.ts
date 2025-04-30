@@ -13,17 +13,23 @@ const client = new Pool({
   max: process.env.SEED_MODE ? 1 : undefined,
 });
 
+const relations = {
+  ...colRelations,
+  ...publicRelations,
+  ...subRelations,
+};
+
 const schema = {
   ...subSchema,
   ...publicSchema,
   ...colSchema,
-  ...subRelations,
-  ...colRelations,
-  ...publicRelations,
 };
 
 const db = drizzle(client, {
-  schema,
+  schema: {
+    ...schema,
+    ...relations,
+  },
   casing: "snake_case",
 });
 
