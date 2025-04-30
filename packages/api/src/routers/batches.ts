@@ -5,6 +5,7 @@ import { addMonths } from "date-fns";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { schema } from "@cmt/db/client";
+import { generateChitId } from "@cmt/db/utils";
 import { getPagination, paginateInputSchema } from "../utils/paginate";
 import { getQueryUserIds } from "../utils/clerk";
 
@@ -30,6 +31,24 @@ export const batchesRouter = {
     });
     return batchesList ?? [];
   }),
+
+  addSubscriber: protectedProcedure
+    .input(z.object({ subId: z.string().min(1), batchId: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const { batch } = await generateChitId(input.batchId);
+
+      const subToBatch = await ctx.db
+        .insert(schema.subscribersToBatches)
+        .values({
+          // chitId,
+          subscriberId: input.subId,
+          batchId: batch.id,
+          commissionRate: batch.defaultCommissionRate,
+        })
+        .returning();
+
+      return subToBatch.at(0);
+    }),
 
   // Get subscribers within the batch
   getSubscribersOfBatch: protectedProcedure

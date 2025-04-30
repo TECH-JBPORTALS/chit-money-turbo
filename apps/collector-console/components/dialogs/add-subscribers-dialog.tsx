@@ -1,6 +1,5 @@
 "use client";
 
-import { createQueryClient } from "@/trpc/query-client";
 import { useTRPC } from "@/trpc/react";
 import { RouterOutputs } from "@cmt/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
@@ -19,14 +18,11 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@cmt/ui/components/form";
 import {
-  FilterOptionOption,
   GetOptionLabel,
   GetOptionValue,
   MultiSelect,
@@ -35,20 +31,24 @@ import {
   components,
 } from "@cmt/ui/components/multi-select";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { InfoIcon, XCircleIcon } from "lucide-react";
+import { InfoIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { SpinnerPage } from "../spinner-page";
 import { Skeleton } from "@cmt/ui/components/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@cmt/ui/components/tooltip";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useState } from "react";
+import { useDebounce } from "@uidotdev/usehooks";
 
 const addSubscribersSchema = z.object({
-  emails: z
-    .array(z.object({ id: z.string(), text: z.string() }))
+  subIds: z
+    .array(z.string())
     .min(1, "Atleast one subscriber is required move forward")
     .default([]),
 });
@@ -60,17 +60,43 @@ export default function AddSubscribersDialog({
 }: {
   children: React.ReactNode;
 }) {
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
   const trpc = useTRPC();
-  const queryClient = createQueryClient();
+  const queryClient = useQueryClient();
+  const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 1000);
+
   const form = useForm<z.infer<typeof addSubscribersSchema>>({
     resolver: zodResolver(addSubscribersSchema),
     defaultValues: {
-      emails: [],
+      subIds: [],
     },
   });
 
+  const { batchId } = useParams<{ batchId: string }>();
+
+  const { mutateAsync: addSubscribers, isPending } = useMutation(
+    trpc.batches.addSubscriber.mutationOptions({
+      async onSuccess(data) {
+        await queryClient.invalidateQueries(
+          trpc.batches.getSubscribersOfBatch.queryFilter()
+        );
+        toast.success(`${data?.chitId} Chit Id's created successfully`);
+      },
+      onError() {
+        toast.error(`Couldn't able add subscribers at this time`);
+      },
+    })
+  );
+
   async function onSubmit(values: z.infer<typeof addSubscribersSchema>) {
-    console.log(values);
+    await Promise.all(
+      values.subIds.map((subId) => addSubscribers({ batchId, subId }))
+    );
+
+    setOpen(false);
+    router.refresh();
   }
 
   const Option = (props: OptionProps<Subscriber>) => {
@@ -158,7 +184,7 @@ export default function AddSubscribersDialog({
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -172,21 +198,32 @@ export default function AddSubscribersDialog({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
               control={form.control}
-              name="emails"
+              name="subIds"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <MultiSelect
+                    <MultiSelect<Subscriber>
+                      isMulti
                       placeholder="Search by names, subscriber ID's and email addresses"
-                      loadOptions={(query, callback) =>
+                      loadOptions={() =>
                         queryClient.fetchQuery(
-                          trpc.subscribers.search.queryOptions({ query })
+                          trpc.subscribers.search.queryOptions({
+                            query: debouncedQuery,
+                          })
                         )
                       }
-                      getOptionLabel={getOptionLabel as any}
-                      getOptionValue={getOptionValue as any}
+                      inputValue={query}
+                      onInputChange={(newValue) => {
+                        setQuery(newValue ?? "");
+                      }}
+                      defaultOptions
+                      getOptionLabel={getOptionLabel}
+                      getOptionValue={getOptionValue}
+                      onChange={(newValue) => {
+                        field.onChange(newValue.map((n) => n.id));
+                      }}
                       components={{
-                        Option: Option as any,
+                        Option,
                         LoadingMessage: () => (
                           <div className="h-full space-y-2">
                             {Array.from({ length: 10 }).map((_, i) => (
@@ -194,7 +231,7 @@ export default function AddSubscribersDialog({
                             ))}
                           </div>
                         ),
-                        MultiValue: MultiValue as any,
+                        MultiValue,
                       }}
                       noOptionsMessage={() => (
                         <div className="flex flex-col items-center gap-1 py-4">
@@ -220,7 +257,9 @@ export default function AddSubscribersDialog({
                   Cancel
                 </Button>
               </DialogClose>
-              <Button size={"lg"}>Add</Button>
+              <Button size={"lg"} isLoading={isPending}>
+                Add
+              </Button>
             </DialogFooter>
           </form>
         </Form>

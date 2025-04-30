@@ -17,5 +17,8 @@ export async function generateChitId(batchId: string) {
   const scheme = batch.scheme;
   const currentIndex = subToBatch[0]?.count ?? 1;
 
-  return `CHIT${currentIndex.toString().padStart(scheme.toString().length, "0")}`;
+  return {
+    chitId: `CHIT${(currentIndex + 1).toString().padStart(scheme.toString().length, "0")}`,
+    batch,
+  };
 }

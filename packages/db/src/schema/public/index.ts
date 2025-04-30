@@ -35,6 +35,10 @@ export const batches = pgTable("batches", (t) => ({
 export const subscribersToBatches = pgTable(
   "subscribers_to_batches",
   (t) => ({
+    id: t
+      .text()
+      .$defaultFn(() => `sb_${ulid()}`)
+      .primaryKey(),
     batchId: t
       .text()
       .references(() => batches.id, {
@@ -51,7 +55,13 @@ export const subscribersToBatches = pgTable(
       .notNull(),
 
     /** Should be a unique ID within the single batch */
-    chitId: t.text().notNull(),
+    chitId: t
+      .text()
+      .$default(() => {
+        const id = ulid();
+        return `CHIT${id.substring(id.length - 6, id.length)}`;
+      })
+      .notNull(),
 
     commissionRate: t
       .numeric({ precision: 3, scale: 1, mode: "number" })

@@ -16,9 +16,9 @@
       "types": "./dist/schema/index.d.ts",
       "default": "./src/schema/index.ts"
     },
-    "./lib": {
-      "types": "./dist/lib.d.ts",
-      "default": "./src/lib.ts"
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "default": "./src/utils.ts"
     }
   },
   "scripts": {

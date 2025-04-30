@@ -224,12 +224,12 @@ async function main() {
 
       await Promise.all(
         randomSubs.map(async (sub, index) => {
-          const chitId = `CHIT${(index + 1).toString().padStart(batch.scheme.toString().length, "0")}`;
+          // const chitId = `CHIT${(index + 1).toString().padStart(batch.scheme.toString().length, "0")}`;
 
           await db.insert(schema.subscribersToBatches).values({
             subscriberId: sub.id,
             batchId: batch.id,
-            chitId,
+            // chitId,
             commissionRate: batch.defaultCommissionRate,
           });
         })

@@ -2,14 +2,16 @@
 
 import React from "react";
 import { cn } from "../lib/utils";
-import Select from "react-select/async";
-import { components } from "react-select";
+import Select, { AsyncProps } from "react-select/async";
+import { components, GroupBase } from "react-select";
 
-export function MultiSelect({ ...props }: React.ComponentProps<typeof Select>) {
+export function MultiSelect<
+  Option = unknown,
+  IsMulti extends boolean = true,
+  Group extends GroupBase<Option> = GroupBase<Option>,
+>({ ...props }: AsyncProps<Option, IsMulti, Group>) {
   return (
     <Select
-      closeMenuOnSelect={false}
-      isMulti
       unstyled
       classNames={{
         control: (state) =>
