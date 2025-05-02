@@ -117,7 +117,9 @@ export const batchesRouter = {
         limit: limit + 1,
         orderBy: ({ id }, { desc }) => [desc(id)],
         // Go down we go.. go.. with cursor of decending order page
-        where: query ? ilike(schema.batches.name, `%${query}`) : cursorCond,
+        where: query
+          ? and(cursorCond, ilike(schema.batches.name, `%${query}%`))
+          : cursorCond,
         with: {
           subscribersToBatches: {
             where: eq(
@@ -129,7 +131,7 @@ export const batchesRouter = {
         },
       });
 
-      const nextCursor = items.pop()?.id;
+      const nextCursor = items.length > 1 ? items.pop()?.id : undefined;
 
       return {
         nextCursor,

@@ -41,6 +41,7 @@
     "@trpc/client": "catalog:",
     "@trpc/server": "catalog:",
     "@trpc/tanstack-react-query": "catalog:",
+    "@uidotdev/usehooks": "^2.4.1",
     "@uploadthing/expo": "^7.2.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

@@ -26,6 +26,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { RouterOutputs, trpc } from "~/utils/api";
 import Spinner from "~/components/ui/spinner";
 import { SpinnerView } from "~/components/spinner-view";
+import { useDebounce } from "@uidotdev/usehooks";
 
 type Batch = RouterOutputs["batches"]["ofSubscriber"]["items"][number];
 
@@ -33,6 +34,8 @@ export default function Batches() {
   const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
+
+  const debouncedQuery = useDebounce(searchQuery, 1000);
 
   const {
     data: batches,
@@ -45,18 +48,13 @@ export default function Batches() {
   } = useInfiniteQuery(
     trpc.batches.ofSubscriber.infiniteQueryOptions(
       {
-        query: searchQuery,
+        query: debouncedQuery,
       },
       {
         initialCursor: undefined,
         getNextPageParam: ({ nextCursor }) => nextCursor,
       }
     )
-  );
-
-  console.log(
-    "Batches",
-    batches?.pages.flatMap((p) => p.items)
   );
 
   // Render batch status
