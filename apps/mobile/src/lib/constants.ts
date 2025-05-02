@@ -8,11 +8,11 @@ export const NAV_THEME = {
     text: "hsl(161 57% 5%)", // foreground
   },
   dark: {
-    background: "hsl(158.95 59% 2%)", // background
-    border: "hsl(161.35 14% 6%)", // border
-    card: "hsl(158.95 59% 2%)", // card
-    notification: "hsl(4.45 100% 50%)", // destructive
+    background: "hsl(223.81 0% 6%)", // background
+    border: "hsl(223.81 0% 13%)", // border
+    card: "hsl(223.81 0% 6%)", // card
+    notification: "hsl(6.35 85% 59%)", // destructive
     primary: "hsl(160.99 94% 30%)", // primary
-    text: "hsl(161 31% 98%)", // foreground
+    text: "hsl(161.03 2% 73%)", // foreground
   },
 };

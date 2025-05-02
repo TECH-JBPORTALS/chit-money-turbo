@@ -1,9 +1,10 @@
 import { Stack, Tabs } from "expo-router";
+import React from "react";
 import { SolarIcon } from "react-native-solar-icons";
 
 export default function TabsLayout() {
   return (
-    <>
+    <React.Fragment>
       <Stack.Screen options={{ headerShown: false }} />
       <Tabs
         screenOptions={{
@@ -22,6 +23,7 @@ export default function TabsLayout() {
           tabBarPosition: "bottom",
           headerShown: false,
           animation: "fade",
+          tabBarHideOnKeyboard: true,
         }}
       >
         <Tabs.Screen
@@ -84,6 +86,6 @@ export default function TabsLayout() {
           }}
         />
       </Tabs>
-    </>
+    </React.Fragment>
   );
 }

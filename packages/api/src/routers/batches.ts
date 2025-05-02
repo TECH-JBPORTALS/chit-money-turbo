@@ -103,18 +103,23 @@ export const batchesRouter = {
         .object({
           cursor: z.string().optional(),
           limit: z.number().default(10),
+          query: z.string().optional(),
         })
         .optional()
     )
     .query(async ({ ctx, input }) => {
       const cursor = input?.cursor;
       const limit = input?.limit ?? 10;
+      const query = input?.query;
+      const cursorCond = cursor ? lte(schema.batches.id, cursor) : undefined;
 
       const items = await ctx.db.query.batches.findMany({
         limit: limit + 1,
         orderBy: ({ id }, { desc }) => [desc(id)],
         // Go down we go.. go.. with cursor of decending order page
-        where: cursor ? lte(schema.batches.id, cursor) : undefined,
+        where: query
+          ? and(cursorCond, ilike(schema.batches.name, `%${query}%`))
+          : cursorCond,
         with: {
           subscribersToBatches: {
             where: eq(
@@ -173,7 +178,7 @@ export const batchesRouter = {
                     schema.subscribersToBatches.subscriberId,
                     userIds ?? []
                   ),
-                  ilike(schema.subscribersToBatches.chitId, query)
+                  ilike(schema.subscribersToBatches.chitId, `%${query}%`)
                 )
               : undefined
           ),

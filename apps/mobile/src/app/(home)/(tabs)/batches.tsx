@@ -47,10 +47,15 @@ export default function Batches() {
     fetchNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(
-    trpc.batches.ofSubscriber.infiniteQueryOptions(undefined, {
-      initialCursor: undefined,
-      getNextPageParam: ({ nextCursor }) => nextCursor,
-    })
+    trpc.batches.ofSubscriber.infiniteQueryOptions(
+      {
+        query: searchQuery,
+      },
+      {
+        initialCursor: undefined,
+        getNextPageParam: ({ nextCursor }) => nextCursor,
+      }
+    )
   );
 
   // Render batch status
@@ -111,11 +116,11 @@ export default function Batches() {
 
             {/** Search Bar */}
             <View className="relative flex-row items-center">
-              <Search className="absolute z-30 ml-2.5 mr-2.5 size-4 text-muted-foreground" />
+              <Search className="absolute z-30 ml-3.5 mr-3.5 size-5 text-muted-foreground" />
               <Input
                 placeholder="Search..."
                 placeholderClassName="text-sm"
-                className="ps-8 w-full h-11"
+                className="ps-10 w-full native:h-14"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
               />
@@ -123,11 +128,11 @@ export default function Batches() {
 
             {/** Filters */}
             <View className="flex-row gap-2">
-              {(["all", "ongoing", "upcoming", "completed"] as const).map(
+              {(["ongoing", "upcoming", "completed"] as const).map(
                 (filterType) => (
                   <Button
                     key={filterType}
-                    variant={"secondary"}
+                    variant={"outline"}
                     // className={`${filter === filterType ? "border-border" : "border-dashed"}`}
                     // variant={filter === filterType ? "default" : "outline"}
                     size={"sm"}
@@ -146,13 +151,9 @@ export default function Batches() {
         onEndReachedThreshold={1}
         onEndReached={() => hasNextPage && fetchNextPage()}
         ListFooterComponent={() =>
-          isFetchingNextPage ? (
+          isFetchingNextPage && (
             <View className="justify-center items-center pb-3">
               <Spinner size={28} />
-            </View>
-          ) : (
-            <View className="justify-center items-center pb-3">
-              <Muted>You have reached 😉</Muted>
             </View>
           )
         }

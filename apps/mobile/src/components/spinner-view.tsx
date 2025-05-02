@@ -7,7 +7,7 @@ export function SpinnerView() {
   const { isDarkColorScheme } = useColorScheme();
   return (
     <View className="flex h-screen items-center justify-center">
-      <Spinner size={48} color={!isDarkColorScheme ? "black" : "white"} />
+      <Spinner size={38} color={!isDarkColorScheme ? "black" : "white"} />
     </View>
   );
 }
