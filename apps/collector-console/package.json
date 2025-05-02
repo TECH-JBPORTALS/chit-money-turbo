@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "pnpm with-env next dev --turbopack",
-    "build": "pnpm with-env next build",
+    "build": "pnpm with-env turbo run migrate --filter=db && next build",
     "start": "pnpm with-env next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
