@@ -11,7 +11,7 @@ export default async function Page({
   const queryClient = createQueryClient();
   const { subscriberId } = await params;
   const batches = await queryClient.fetchQuery(
-    trpc.batches.getBatchesBySubscriber.queryOptions({ subscriberId })
+    trpc.batches.bySubscriberId.queryOptions({ subscriberId })
   );
 
   const activeBatches = batches.filter((b) => b.batchStatus === "active");

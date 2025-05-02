@@ -94,10 +94,10 @@ function FormLabel({
 
   return (
     <Label
-      data-slot="form-label"
-      data-error={!!error}
+      aria-error={!!error}
+      nativeID={formItemId}
       className={cn(
-        "data-[error=true]:text-destructive native:text-sm native:text-accent-foreground",
+        "native:aria-[error=true]:text-destructive native:text-sm native:text-accent-foreground",
         className
       )}
       htmlFor={formItemId}

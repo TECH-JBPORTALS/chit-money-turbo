@@ -22,7 +22,7 @@ import Link from "next/link";
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Subscriber =
-  RouterOutputs["batches"]["getSubscribersOfBatch"]["items"][number];
+  RouterOutputs["batches"]["getSubscribers"]["items"][number];
 
 export const columns: ColumnDef<Subscriber>[] = [
   {

@@ -6,8 +6,8 @@ import { View } from "react-native";
 export function SpinnerView() {
   const { isDarkColorScheme } = useColorScheme();
   return (
-    <View className="flex h-screen items-center justify-center">
-      <Spinner size={42} color={!isDarkColorScheme ? "black" : "white"} />
+    <View className="pt-36 h-full flex-1 items-center justify-center">
+      <Spinner size={38} color={!isDarkColorScheme ? "black" : "white"} />
     </View>
   );
 }

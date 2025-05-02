@@ -1,5 +1,5 @@
 import { batchInsertSchema } from "@cmt/db/schema";
-import { and, count, eq, ilike, inArray, or, sql } from "@cmt/db";
+import { and, count, eq, gt, gte, ilike, inArray, lte, or, sql } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { addMonths } from "date-fns";
 import { z } from "zod";
@@ -10,7 +10,9 @@ import { getPagination, paginateInputSchema } from "../utils/paginate";
 import { getQueryUserIds } from "../utils/clerk";
 
 export const batchesRouter = {
-  // Create new batch
+  /** Create new batch only
+   * @context collector
+   */
   create: protectedProcedure
     .input(batchInsertSchema)
     .mutation(({ ctx, input }) =>
@@ -24,7 +26,10 @@ export const batchesRouter = {
         .returning()
     ),
 
-  // Get all batches of collector
+  /**
+   * Get all batches
+   * @context collector
+   */
   getAll: protectedProcedure.query(async ({ ctx }) => {
     const batchesList = ctx.db.query.batches.findMany({
       where: eq(schema.batches.collectorId, ctx.session.userId),
@@ -32,6 +37,23 @@ export const batchesRouter = {
     return batchesList ?? [];
   }),
 
+  /**
+   * Get details of a batch
+   * @context collector | subscriber
+   */
+  getById: protectedProcedure
+    .input(z.object({ batchId: z.string() }))
+    .query(({ ctx, input }) =>
+      ctx.db.query.batches.findFirst({
+        where: eq(schema.batches.id, input.batchId),
+        with: { collector: true },
+      })
+    ),
+
+  /**
+   * Add subscriber
+   * @context collector
+   */
   addSubscriber: protectedProcedure
     .input(z.object({ subId: z.string().min(1), batchId: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
@@ -50,7 +72,11 @@ export const batchesRouter = {
       return subToBatch.at(0);
     }),
 
-  getBatchesBySubscriber: protectedProcedure
+  /**
+   * Get's batches the subscriber involved in a particular collector's org
+   * @context collector
+   */
+  bySubscriberId: protectedProcedure
     .input(z.object({ subscriberId: z.string() }))
     .query(({ ctx, input }) =>
       ctx.db.query.batches.findMany({
@@ -66,8 +92,85 @@ export const batchesRouter = {
       })
     ),
 
-  // Get subscribers within the batch
-  getSubscribersOfBatch: protectedProcedure
+  /**
+    Get's batches of subscriber withing the subscriber context
+    @context collector
+    @returns batches
+   */
+  ofSubscriber: protectedProcedure
+    .input(
+      z
+        .object({
+          cursor: z.string().optional(),
+          limit: z.number().default(10),
+          query: z.string().optional(),
+          batchStatus: z
+            .enum(["all", "active", "upcoming", "completed"])
+            .default("all"),
+        })
+        .optional()
+    )
+    .query(async ({ ctx, input }) => {
+      const cursor = input?.cursor;
+      const limit = input?.limit ?? 10;
+      const query = input?.query;
+      const cursorCond = cursor ? lte(schema.batches.id, cursor) : undefined;
+
+      const statusCond = () => {
+        switch (input?.batchStatus) {
+          case "all":
+            return undefined;
+
+          case "active":
+            return eq(schema.batches.batchStatus, "active");
+
+          case "completed":
+            return eq(schema.batches.batchStatus, "completed");
+
+          case "upcoming":
+            return gt(schema.batches.startsOn, new Date().toDateString());
+        }
+      };
+
+      const items = await ctx.db.query.batches.findMany({
+        limit: limit + 1,
+        orderBy: ({ id }, { desc }) => [desc(id)],
+        // Go down we go.. go.. with cursor of decending order page
+        where: query
+          ? and(
+              cursorCond,
+              statusCond(),
+              ilike(schema.batches.name, `%${query}%`)
+            )
+          : and(cursorCond, statusCond()),
+
+        with: {
+          subscribersToBatches: {
+            where: eq(
+              schema.subscribersToBatches.subscriberId,
+              ctx.session.userId
+            ),
+          },
+          collector: true,
+        },
+      });
+
+      const nextCursor = items.length > 1 ? items.pop()?.id : undefined;
+
+      return {
+        nextCursor,
+        items,
+      };
+    }),
+
+  /**
+    Get's subscriber of given batch withing the collector context
+    @context collector
+    @param batchId unique batch ID
+    @param query search string which searches through firstName, lastName, emailAddress, chitId
+    @returns subscribers
+   */
+  getSubscribers: protectedProcedure
     .input(
       paginateInputSchema.and(
         z.object({
@@ -99,7 +202,7 @@ export const batchesRouter = {
                     schema.subscribersToBatches.subscriberId,
                     userIds ?? []
                   ),
-                  ilike(schema.subscribersToBatches.chitId, query)
+                  ilike(schema.subscribersToBatches.chitId, `%${query}%`)
                 )
               : undefined
           ),

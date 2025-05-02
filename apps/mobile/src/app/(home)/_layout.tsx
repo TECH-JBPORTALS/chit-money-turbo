@@ -12,7 +12,7 @@ export default function HomeLayout() {
       initialRouteName="(tabs)"
     >
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="(batch)" />
+      <Stack.Screen name="(batch)" options={{ title: "" }} />
       <Stack.Screen name="cfh/[id]" options={{ title: "" }} />
       <Stack.Screen name="transaction/[id]" options={{ title: "" }} />
       <Stack.Screen
