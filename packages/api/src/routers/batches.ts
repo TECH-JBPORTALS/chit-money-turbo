@@ -141,7 +141,7 @@ export const batchesRouter = {
     @param query search string which searches through firstName, lastName, emailAddress, chitId
     @returns subscribers
    */
-  getSubscribersOfBatch: protectedProcedure
+  getSubscribers: protectedProcedure
     .input(
       paginateInputSchema.and(
         z.object({

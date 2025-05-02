@@ -1,14 +1,11 @@
 "use client";
 
-import SearchInput from "@/components/search-input";
-import React from "react";
 import { columns } from "./columns";
 import { useTRPC } from "@/trpc/react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "next/navigation";
 import { DataTable } from "@/components/data-table";
 import { SpinnerPage } from "@/components/spinner-page";
-import { parseAsString, useQueryState } from "nuqs";
 
 export function DataTableClient() {
   const trpc = useTRPC();
@@ -19,7 +16,7 @@ export function DataTableClient() {
 
   const { batchId } = useParams<{ batchId: string }>();
   const { data, isLoading } = useQuery(
-    trpc.batches.getSubscribersOfBatch.queryOptions({
+    trpc.batches.getSubscribers.queryOptions({
       batchId,
       pageIndex: parseInt(pageIndex),
       pageSize: parseInt(pageSize),
