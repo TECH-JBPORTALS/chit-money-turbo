@@ -27,7 +27,8 @@ import { SpinnerView } from "~/components/spinner-view";
 import { useDebounce } from "@uidotdev/usehooks";
 import { Badge } from "~/components/ui/badge";
 import SearchInput from "~/components/search-input";
-import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { isEmpty } from "lodash";
 
 type Batch = RouterOutputs["batches"]["ofSubscriber"]["items"][number];
 
@@ -133,24 +134,6 @@ export default function Batches() {
 
   const MemoizedFilters = memo(Filters);
 
-  if (true && !isLoading && isFetchedAfterMount)
-    return (
-      <View className="items-center flex-1 justify-center gap-3.5">
-        <Animated.View entering={FadeInDown.duration(400)}>
-          <Layers
-            size={48}
-            strokeWidth={1.25}
-            className="text-muted-foreground"
-          />
-        </Animated.View>
-        <Large>Your not in any batches, yet</Large>
-        <Muted className="text-center px-16">
-          As soon as you join any batches with any associated chit fund those
-          batches will appear over here
-        </Muted>
-      </View>
-    );
-
   return (
     <LinearBlurView className="flex-1">
       {/** Batches List */}
@@ -186,13 +169,30 @@ export default function Batches() {
           <View className="h-full gap-3.5 items-center justify-center">
             {isLoading ? (
               <SpinnerView />
+            ) : !debouncedQuery && selectedFilterType === "all" ? (
+              <View className="items-center flex-1 justify-center gap-3.5">
+                <Animated.View entering={FadeInDown.duration(400)}>
+                  <Layers
+                    size={48}
+                    strokeWidth={1.25}
+                    className="text-muted-foreground"
+                  />
+                </Animated.View>
+                <Large>Your not in any batches, yet</Large>
+                <Muted className="text-center px-16">
+                  As soon as you join any batches with any associated chit fund
+                  those batches will appear over here
+                </Muted>
+              </View>
             ) : (
               <React.Fragment>
-                <SearchX
-                  size={48}
-                  strokeWidth={1.25}
-                  className="text-muted-foreground"
-                />
+                <Animated.View entering={FadeInDown.duration(400)}>
+                  <SearchX
+                    size={48}
+                    strokeWidth={1.25}
+                    className="text-muted-foreground"
+                  />
+                </Animated.View>
                 <Large>No batches to show</Large>
                 <Muted className="text-center px-8">
                   Try different keywords for search, or remove filters applied
