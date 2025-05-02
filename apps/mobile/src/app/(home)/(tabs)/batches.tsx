@@ -40,7 +40,7 @@ export default function Batches() {
     "active" | "upcoming" | "completed" | "all"
   >("all");
 
-  const debouncedQuery = useDebounce(searchQuery, 1000);
+  const debouncedQuery = useDebounce(searchQuery, 800);
 
   const {
     data: batches,
@@ -148,7 +148,7 @@ export default function Batches() {
         showsVerticalScrollIndicator={false}
         centerContent
         ListHeaderComponent={
-          <View className="gap-2 pb-4">
+          <View className="gap-3.5 pb-4">
             <H2>All Batches</H2>
 
             {/** Search Bar */}
@@ -171,7 +171,7 @@ export default function Batches() {
               <SpinnerView />
             ) : !debouncedQuery && selectedFilterType === "all" ? (
               <View className="items-center flex-1 justify-center gap-3.5">
-                <Animated.View entering={FadeInDown.duration(400)}>
+                <Animated.View entering={FadeInDown.duration(360).springify()}>
                   <Layers
                     size={48}
                     strokeWidth={1.25}
@@ -186,13 +186,11 @@ export default function Batches() {
               </View>
             ) : (
               <React.Fragment>
-                <Animated.View entering={FadeInDown.duration(400)}>
-                  <SearchX
-                    size={48}
-                    strokeWidth={1.25}
-                    className="text-muted-foreground"
-                  />
-                </Animated.View>
+                <SearchX
+                  size={48}
+                  strokeWidth={1.25}
+                  className="text-muted-foreground"
+                />
                 <Large>No batches to show</Large>
                 <Muted className="text-center px-8">
                   Try different keywords for search, or remove filters applied
