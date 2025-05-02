@@ -10,7 +10,9 @@ import { getPagination, paginateInputSchema } from "../utils/paginate";
 import { getQueryUserIds } from "../utils/clerk";
 
 export const batchesRouter = {
-  // Create new batch
+  /** Create new batch only
+   * @context collector
+   */
   create: protectedProcedure
     .input(batchInsertSchema)
     .mutation(({ ctx, input }) =>
@@ -24,7 +26,10 @@ export const batchesRouter = {
         .returning()
     ),
 
-  // Get all batches of collector
+  /**
+   * Get all batches
+   * @context collector
+   */
   getAll: protectedProcedure.query(async ({ ctx }) => {
     const batchesList = ctx.db.query.batches.findMany({
       where: eq(schema.batches.collectorId, ctx.session.userId),
@@ -32,6 +37,23 @@ export const batchesRouter = {
     return batchesList ?? [];
   }),
 
+  /**
+   * Get details of a batch
+   * @context collector | subscriber
+   */
+  getById: protectedProcedure
+    .input(z.object({ batchId: z.string() }))
+    .query(({ ctx, input }) =>
+      ctx.db.query.batches.findFirst({
+        where: eq(schema.batches.id, input.batchId),
+        with: { collector: true },
+      })
+    ),
+
+  /**
+   * Add subscriber
+   * @context collector
+   */
   addSubscriber: protectedProcedure
     .input(z.object({ subId: z.string().min(1), batchId: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
@@ -50,7 +72,11 @@ export const batchesRouter = {
       return subToBatch.at(0);
     }),
 
-  getBatchesBySubscriber: protectedProcedure
+  /**
+   * Get's batches the subscriber involved in a particular collector's org
+   * @context collector
+   */
+  bySubscriberId: protectedProcedure
     .input(z.object({ subscriberId: z.string() }))
     .query(({ ctx, input }) =>
       ctx.db.query.batches.findMany({
@@ -68,10 +94,10 @@ export const batchesRouter = {
 
   /**
     Get's batches of subscriber withing the subscriber context
-    Alwasys youse withing the subscriber context
+    @context collector
     @returns batches
    */
-  getBatchesOfSubscriber: protectedProcedure
+  ofSubscriber: protectedProcedure
     .input(
       z
         .object({
@@ -110,7 +136,7 @@ export const batchesRouter = {
 
   /**
     Get's subscriber of given batch withing the collector context
-    Alwasys youse withing the collector context
+    @context collector
     @param batchId unique batch ID
     @param query search string which searches through firstName, lastName, emailAddress, chitId
     @returns subscribers

@@ -31,8 +31,7 @@ import { RouterOutputs, trpc } from "~/utils/api";
 import { SpinnerView } from "~/components/spinner-view";
 import Spinner from "~/components/ui/spinner";
 
-type Batch =
-  RouterOutputs["batches"]["getBatchesOfSubscriber"]["items"][number];
+type Batch = RouterOutputs["batches"]["ofSubscriber"]["items"][number];
 
 export default function Batches() {
   const router = useRouter();
@@ -48,7 +47,7 @@ export default function Batches() {
     fetchNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(
-    trpc.batches.getBatchesOfSubscriber.infiniteQueryOptions(undefined, {
+    trpc.batches.ofSubscriber.infiniteQueryOptions(undefined, {
       initialCursor: undefined,
       getNextPageParam: ({ nextCursor }) => nextCursor,
     })
@@ -204,12 +203,10 @@ export default function Batches() {
               <BatchCardFooter>
                 <View className="flex-row items-center gap-2">
                   <Avatar
-                    className="size-5"
+                    className="size-6"
                     alt={batch.collector?.orgName ?? ""}
                   >
-                    <AvatarImage
-                      source={{ uri: "https://github.com/spotify.png" }}
-                    />
+                    <AvatarImage source={{ uri: undefined }} />
                     <AvatarFallback>
                       <Text className="text-[8px]">
                         {batch.collector?.orgName.charAt(0).toUpperCase()}

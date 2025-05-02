@@ -23,6 +23,9 @@ import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Text } from "~/components/ui/text";
 import { Lead, Muted, Small } from "~/components/ui/typography";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { useQuery } from "@tanstack/react-query";
+import { trpc } from "~/utils/api";
+import { SpinnerView } from "~/components/spinner-view";
 
 // Types
 interface BatchDetails {
@@ -59,6 +62,10 @@ export default function BatchDetailsLayout() {
   const router = useRouter();
   const pathname = usePathname();
 
+  const { data: batch, isLoading } = useQuery(
+    trpc.batches.getById.queryOptions({ batchId })
+  );
+
   // Memoized active tab calculation
   const activeTab = React.useMemo(() => {
     // Logic to determine active tab based on current route
@@ -76,7 +83,7 @@ export default function BatchDetailsLayout() {
 
   // Render status component based on batch status
   const renderStatusComponent = () => {
-    switch (batchDetails.status) {
+    switch (batch?.batchStatus) {
       case "completed":
         return (
           <View className="flex-row items-center">
@@ -91,7 +98,7 @@ export default function BatchDetailsLayout() {
             />
           </View>
         );
-      case "upcoming":
+      case "active":
         return (
           <View className="flex-row items-center">
             <Small className="text-xs inline-flex flex-row items-center">
@@ -108,6 +115,9 @@ export default function BatchDetailsLayout() {
     }
   };
 
+  if (isLoading) return <SpinnerView />;
+  if (!batch) return null;
+
   return (
     <View className="pt-6 px-4 gap-6 flex-1">
       <Stack.Screen
@@ -115,8 +125,7 @@ export default function BatchDetailsLayout() {
           title: "",
           headerRight: () => (
             <Lead>
-              {batchDetails.completedMonths}/{batchDetails.numberOfMonths}{" "}
-              Months
+              {0}/{batch.scheme} Months
             </Lead>
           ),
         }}
@@ -125,20 +134,18 @@ export default function BatchDetailsLayout() {
       <BatchCard className="border-0">
         <BatchCardHeader className="px-0 pt-0 pb-3 justify-between">
           <Muted className="text-xs">
-            Started on {new Date(batchDetails.startDate).toLocaleDateString()}
+            Started on {new Date(batch.startsOn).toLocaleDateString()}
           </Muted>
           {renderStatusComponent()}
         </BatchCardHeader>
 
         <BatchCardContent className="px-0 gap-3">
-          <BatchCardTitle className="text-xl">
-            {batchDetails.name}
-          </BatchCardTitle>
+          <BatchCardTitle className="text-xl">{batch.name}</BatchCardTitle>
 
           <BatchCardBadgeRow>
             <BatchCardBadge>
               <Text className="font-semibold text-sm">
-                {batchDetails.targetAmount.toLocaleString("en-IN", {
+                {parseInt(batch.fundAmount).toLocaleString("en-IN", {
                   style: "currency",
                   currency: "INR",
                   maximumFractionDigits: 0,
@@ -146,15 +153,20 @@ export default function BatchDetailsLayout() {
               </Text>
             </BatchCardBadge>
             <BatchCardBadge>
-              <Text className="font-semibold text-sm">{batchDetails.type}</Text>
+              <Text className="font-semibold text-sm capitalize">
+                {batch.batchType}
+              </Text>
             </BatchCardBadge>
             <BatchCardBadge>
               <Text className="font-semibold text-sm">
-                {batchDetails.subscriptionAmount.toLocaleString("en-IN", {
-                  style: "currency",
-                  currency: "INR",
-                  maximumFractionDigits: 0,
-                })}
+                {(parseInt(batch.fundAmount) / batch.scheme).toLocaleString(
+                  "en-IN",
+                  {
+                    style: "currency",
+                    currency: "INR",
+                    maximumFractionDigits: 0,
+                  }
+                )}
                 /m
               </Text>
             </BatchCardBadge>
@@ -169,14 +181,16 @@ export default function BatchDetailsLayout() {
                   alt="ChitFund Image"
                   className="size-5 border border-border"
                 >
-                  <AvatarImage source={{ uri: batchDetails.chit_fund_image }} />
+                  <AvatarImage
+                    source={{ uri: batch.collector?.orgCertificateKey }}
+                  />
                   <AvatarFallback>
                     <Text className="text-[8px]">
-                      {batchDetails.chit_fund_name.charAt(0).toUpperCase()}
+                      {batch.collector?.orgName.charAt(0).toUpperCase()}
                     </Text>
                   </AvatarFallback>
                 </Avatar>
-                <Small className="text-xs">{batchDetails.chit_fund_name}</Small>
+                <Small className="text-xs">{batch.collector?.orgName}</Small>
               </View>
             </TouchableOpacity>
           </Link>
