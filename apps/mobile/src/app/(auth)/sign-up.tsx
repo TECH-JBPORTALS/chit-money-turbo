@@ -200,6 +200,7 @@ export default function SignUpScreen() {
               <FormControl>
                 <Input
                   {...field}
+                  placeholder="name@yourdomain.com"
                   autoFocus
                   editable={!form.formState.isSubmitting || isLoaded}
                   autoCapitalize="none"
