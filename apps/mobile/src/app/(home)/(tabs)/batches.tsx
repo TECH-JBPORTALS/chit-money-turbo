@@ -1,18 +1,14 @@
-import React, { useCallback, useMemo, useState } from "react";
-import {
-  ScrollView,
-  View,
-  TouchableOpacity,
-  RefreshControl,
-} from "react-native";
+import React, { useCallback, useState } from "react";
+import { View, TouchableOpacity, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 
 // Components
 import { LinearBlurView } from "~/components/linear-blurview";
-import { H2, Muted, Small } from "~/components/ui/typography";
+import { H2, Large, Muted, Small } from "~/components/ui/typography";
 import { Input } from "~/components/ui/input";
 import { Search } from "~/lib/icons/Search";
+import { Layers } from "~/lib/icons/Layers";
 import { Text } from "~/components/ui/text";
 import { Button } from "~/components/ui/button";
 import { SolarIcon } from "react-native-solar-icons";
@@ -26,10 +22,10 @@ import {
   BatchCardHeader,
   BatchCardTitle,
 } from "~/components/batch-card";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { RouterOutputs, trpc } from "~/utils/api";
-import { SpinnerView } from "~/components/spinner-view";
 import Spinner from "~/components/ui/spinner";
+import { SpinnerView } from "~/components/spinner-view";
 
 type Batch = RouterOutputs["batches"]["ofSubscriber"]["items"][number];
 
@@ -56,6 +52,11 @@ export default function Batches() {
         getNextPageParam: ({ nextCursor }) => nextCursor,
       }
     )
+  );
+
+  console.log(
+    "Batches",
+    batches?.pages.flatMap((p) => p.items)
   );
 
   // Render batch status
@@ -96,8 +97,6 @@ export default function Batches() {
     );
   }, []);
 
-  if (isLoading) return <SpinnerView />;
-
   return (
     <LinearBlurView className="flex-1">
       {/** Batches List */}
@@ -108,9 +107,10 @@ export default function Batches() {
             onRefresh={() => refetch()}
           />
         }
+        progressViewOffset={12}
         showsVerticalScrollIndicator={false}
         centerContent
-        ListHeaderComponent={() => (
+        ListHeaderComponent={
           <View className="gap-2 pb-4">
             <H2>All Batches</H2>
 
@@ -145,22 +145,40 @@ export default function Batches() {
               )}
             </View>
           </View>
-        )}
+        }
         estimatedItemSize={148}
-        data={batches?.pages.flatMap((p) => p.items)}
+        data={isLoading ? [] : batches?.pages.flatMap((p) => p.items)}
         onEndReachedThreshold={1}
         onEndReached={() => hasNextPage && fetchNextPage()}
+        ListEmptyComponent={() => (
+          <View className="h-full gap-3.5 items-center justify-center">
+            {isLoading ? (
+              <SpinnerView />
+            ) : (
+              <React.Fragment>
+                <Layers
+                  size={48}
+                  strokeWidth={1.25}
+                  className="text-muted-foreground"
+                />
+                <Large>No batches to show</Large>
+                <Muted className="text-center px-8">
+                  Try different keywords for search, or remove filters applied
+                </Muted>
+              </React.Fragment>
+            )}
+          </View>
+        )}
+        keyExtractor={(b) => b.id}
         ListFooterComponent={() =>
-          isFetchingNextPage && (
+          isFetchingNextPage ? (
             <View className="justify-center items-center pb-3">
               <Spinner size={28} />
             </View>
-          )
+          ) : null
         }
-        overScrollMode="always"
         renderItem={({ item: batch }) => (
           <TouchableOpacity
-            key={batch.id}
             onPress={() => router.push(`/(batch)/${batch.id}`)}
             style={{
               opacity: batch.batchStatus === "completed" ? 0.6 : 1,

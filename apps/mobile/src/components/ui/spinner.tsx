@@ -1,6 +1,4 @@
 import React, { useEffect } from "react";
-import { View } from "react-native";
-import Svg, { Circle } from "react-native-svg";
 import Animated, {
   useSharedValue,
   useAnimatedProps,
@@ -8,18 +6,19 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
-import { CircleDivide } from "~/lib/icons/CircleDivide";
+import { Loader } from "~/lib/icons/Loader";
 
-const AnimatedCircle = Animated.createAnimatedComponent(CircleDivide);
+const AnimatedLoader = Animated.createAnimatedComponent(Loader);
 
-const Spinner = ({ ...props }: React.ComponentProps<typeof CircleDivide>) => {
-  const rotation = useSharedValue(0);
+const Spinner = ({ ...props }: React.ComponentProps<typeof Loader>) => {
+  const rotation = useSharedValue(360);
   useEffect(() => {
     rotation.value = withRepeat(
-      withTiming(360, {
+      withTiming(0, {
         duration: 600,
         easing: Easing.linear,
-      })
+      }),
+      -1
     );
   }, []);
 
@@ -28,7 +27,7 @@ const Spinner = ({ ...props }: React.ComponentProps<typeof CircleDivide>) => {
   }));
 
   return (
-    <AnimatedCircle
+    <AnimatedLoader
       {...props}
       strokeWidth={1.25}
       className={"text-foreground opacity-70"}
