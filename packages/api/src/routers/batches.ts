@@ -104,6 +104,9 @@ export const batchesRouter = {
           cursor: z.string().optional(),
           limit: z.number().default(10),
           query: z.string().optional(),
+          batchStatus: z
+            .enum(["all", "active", "upcoming", "completed"])
+            .default("all"),
         })
         .optional()
     )
@@ -113,13 +116,34 @@ export const batchesRouter = {
       const query = input?.query;
       const cursorCond = cursor ? lte(schema.batches.id, cursor) : undefined;
 
+      const statusCond = () => {
+        switch (input?.batchStatus) {
+          case "all":
+            return undefined;
+
+          case "active":
+            return eq(schema.batches.batchStatus, "active");
+
+          case "completed":
+            return eq(schema.batches.batchStatus, "completed");
+
+          case "upcoming":
+            return gt(schema.batches.startsOn, new Date().toDateString());
+        }
+      };
+
       const items = await ctx.db.query.batches.findMany({
         limit: limit + 1,
         orderBy: ({ id }, { desc }) => [desc(id)],
         // Go down we go.. go.. with cursor of decending order page
         where: query
-          ? and(cursorCond, ilike(schema.batches.name, `%${query}%`))
-          : cursorCond,
+          ? and(
+              cursorCond,
+              statusCond(),
+              ilike(schema.batches.name, `%${query}%`)
+            )
+          : and(cursorCond, statusCond()),
+
         with: {
           subscribersToBatches: {
             where: eq(

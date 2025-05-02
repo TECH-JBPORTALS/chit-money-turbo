@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import { View, TouchableOpacity, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
@@ -27,6 +27,8 @@ import { RouterOutputs, trpc } from "~/utils/api";
 import Spinner from "~/components/ui/spinner";
 import { SpinnerView } from "~/components/spinner-view";
 import { useDebounce } from "@uidotdev/usehooks";
+import { Badge } from "~/components/ui/badge";
+import SearchInput from "~/components/search-input";
 
 type Batch = RouterOutputs["batches"]["ofSubscriber"]["items"][number];
 
@@ -34,6 +36,9 @@ export default function Batches() {
   const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFilterType, setFilterType] = useState<
+    "active" | "upcoming" | "completed" | "all"
+  >("all");
 
   const debouncedQuery = useDebounce(searchQuery, 1000);
 
@@ -49,6 +54,7 @@ export default function Batches() {
     trpc.batches.ofSubscriber.infiniteQueryOptions(
       {
         query: debouncedQuery,
+        batchStatus: selectedFilterType,
       },
       {
         initialCursor: undefined,
@@ -56,6 +62,10 @@ export default function Batches() {
       }
     )
   );
+
+  useEffect(() => {
+    console.log(selectedFilterType);
+  }, [selectedFilterType]);
 
   // Render batch status
   const renderBatchStatus = useCallback((batch: Batch) => {
@@ -95,6 +105,34 @@ export default function Batches() {
     );
   }, []);
 
+  const Filters = () => (
+    <View className="flex-row gap-2">
+      {(["all", "active", "completed", "upcoming"] as const).map(
+        (filterType) => (
+          <TouchableOpacity
+            onPress={() => {
+              setFilterType(filterType);
+            }}
+            key={filterType}
+          >
+            <Badge
+              className="px-3.5 py-1.5"
+              variant={
+                selectedFilterType === filterType ? "default" : "outline"
+              }
+            >
+              <Text className="text-sm">
+                {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
+              </Text>
+            </Badge>
+          </TouchableOpacity>
+        )
+      )}
+    </View>
+  );
+
+  const MemoizedFilters = memo(Filters);
+
   return (
     <LinearBlurView className="flex-1">
       {/** Batches List */}
@@ -113,35 +151,13 @@ export default function Batches() {
             <H2>All Batches</H2>
 
             {/** Search Bar */}
-            <View className="relative flex-row items-center">
-              <Search className="absolute z-30 ml-3.5 mr-3.5 size-5 text-muted-foreground" />
-              <Input
-                placeholder="Search..."
-                placeholderClassName="text-sm"
-                className="ps-10 w-full native:h-14"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-            </View>
+            <SearchInput
+              value={searchQuery}
+              onChangeText={(text) => setSearchQuery(text)}
+            />
 
             {/** Filters */}
-            <View className="flex-row gap-2">
-              {(["ongoing", "upcoming", "completed"] as const).map(
-                (filterType) => (
-                  <Button
-                    key={filterType}
-                    variant={"outline"}
-                    // className={`${filter === filterType ? "border-border" : "border-dashed"}`}
-                    // variant={filter === filterType ? "default" : "outline"}
-                    size={"sm"}
-                  >
-                    <Text>
-                      {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
-                    </Text>
-                  </Button>
-                )
-              )}
-            </View>
+            <MemoizedFilters />
           </View>
         }
         estimatedItemSize={148}
