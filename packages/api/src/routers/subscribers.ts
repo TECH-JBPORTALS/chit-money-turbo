@@ -192,6 +192,7 @@ export const subscribersRouter = {
     .query(async ({ ctx, input }) => {
       const { query } = input;
 
+      console.log("query", query);
       // Get usersId's from the clerk with matching query string
       const userIds = await getQueryUserIds(ctx.clerk, query?.trim());
 
@@ -200,7 +201,7 @@ export const subscribersRouter = {
         where: query
           ? or(
               inArray(schema.subscribers.id, userIds ?? []),
-              ilike(schema.subscribers.faceId, query.trim())
+              ilike(schema.subscribers.faceId, `%${query.trim()}%`)
             )
           : undefined,
         limit: 4,

@@ -43,7 +43,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
 
 const addSubscribersSchema = z.object({
@@ -65,7 +65,7 @@ export default function AddSubscribersDialog({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [query, setQuery] = useState("");
-  const debouncedQuery = useDebounce(query, 1000);
+  const debouncedQuery = useDebounce(query, 300);
 
   const form = useForm<z.infer<typeof addSubscribersSchema>>({
     resolver: zodResolver(addSubscribersSchema),
@@ -74,13 +74,26 @@ export default function AddSubscribersDialog({
     },
   });
 
+  const fetchOptions = useCallback(
+    () =>
+      queryClient.fetchQuery(
+        trpc.subscribers.search.queryOptions(
+          {
+            query: debouncedQuery,
+          },
+          { gcTime: 0 }
+        )
+      ),
+    [debouncedQuery]
+  );
+
   const { batchId } = useParams<{ batchId: string }>();
 
   const { mutateAsync: addSubscribers, isPending } = useMutation(
     trpc.batches.addSubscriber.mutationOptions({
       async onSuccess(data) {
         await queryClient.invalidateQueries(
-          trpc.batches.getSubscribersOfBatch.queryFilter()
+          trpc.batches.getSubscribers.queryFilter()
         );
         toast.success(`${data?.chitId} Chit Id's created successfully`);
       },
@@ -205,18 +218,11 @@ export default function AddSubscribersDialog({
                     <MultiSelect<Subscriber>
                       isMulti
                       placeholder="Search by names, subscriber ID's and email addresses"
-                      loadOptions={() =>
-                        queryClient.fetchQuery(
-                          trpc.subscribers.search.queryOptions({
-                            query: debouncedQuery,
-                          })
-                        )
-                      }
-                      inputValue={query}
-                      onInputChange={(newValue) => {
-                        setQuery(newValue ?? "");
+                      loadOptions={() => fetchOptions()}
+                      defaultInputValue={query}
+                      onInputChange={(value, a) => {
+                        setQuery(value);
                       }}
-                      defaultOptions
                       getOptionLabel={getOptionLabel}
                       getOptionValue={getOptionValue}
                       onChange={(newValue) => {

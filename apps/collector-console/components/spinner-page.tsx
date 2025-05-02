@@ -1,5 +1,5 @@
 import { cn } from "@cmt/ui/lib/utils";
-import { CircleDivideIcon, CircleSlash2Icon } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { HTMLAttributes } from "react";
 
 export function SpinnerPage({
@@ -14,9 +14,9 @@ export function SpinnerPage({
       )}
       {...props}
     >
-      <CircleDivideIcon
+      <LoaderCircle
         strokeWidth={1.25}
-        className="text-foreground/60 animate-spin size-10"
+        className="text-foreground/60 animate-spin size-8"
       />
     </div>
   );
