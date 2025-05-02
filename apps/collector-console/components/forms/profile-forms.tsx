@@ -30,6 +30,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Textarea } from "@cmt/ui/components/textarea";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { SpinnerPage } from "../spinner-page";
 
 export function PersonalInfoForm() {
   const client = useQueryClient();
@@ -66,15 +67,7 @@ export function PersonalInfoForm() {
     await updatePersonalDetails(values);
   };
 
-  if (form.formState.isLoading)
-    return (
-      <div className="h-full w-full py-10 flex items-center justify-center">
-        <Loader2Icon
-          strokeWidth={1.25}
-          className="size-11 animate-spin text-foreground/70"
-        />
-      </div>
-    );
+  if (form.formState.isLoading) return <SpinnerPage />;
 
   return (
     <Form {...form}>
@@ -173,15 +166,7 @@ export function ContactInfoForm() {
     await updateContactAddress(values);
   };
 
-  if (form.formState.isLoading)
-    return (
-      <div className="h-full w-full py-10 flex items-center justify-center">
-        <Loader2Icon
-          strokeWidth={1.25}
-          className="size-11 animate-spin text-foreground/70"
-        />
-      </div>
-    );
+  if (form.formState.isLoading) return <SpinnerPage />;
 
   return (
     <Form {...form}>
@@ -321,15 +306,7 @@ export function OrgInfoForm() {
     await updateOrg(values);
   };
 
-  if (form.formState.isLoading)
-    return (
-      <div className="h-full w-full py-10 flex items-center justify-center">
-        <Loader2Icon
-          strokeWidth={1.25}
-          className="size-11 animate-spin text-foreground/70"
-        />
-      </div>
-    );
+  if (form.formState.isLoading) return <SpinnerPage />;
 
   return (
     <Form {...form}>
@@ -417,7 +394,7 @@ export function BankInfoForm() {
       return {
         accountHolderName: data?.accountHolderName ?? "",
         accountNumber: data?.accountNumber ?? "",
-        accountType: data?.accountType ?? "",
+        accountType: data?.accountType ?? "savings",
         branchName: data?.branchName ?? "",
         city: data?.city ?? "",
         ifscCode: data?.ifscCode ?? "",
@@ -433,15 +410,7 @@ export function BankInfoForm() {
     await updateBankAccount(values);
   };
 
-  if (form.formState.isLoading)
-    return (
-      <div className="h-full w-full py-10 flex items-center justify-center">
-        <Loader2Icon
-          strokeWidth={1.25}
-          className="size-11 animate-spin text-foreground/70"
-        />
-      </div>
-    );
+  if (form.formState.isLoading) return <SpinnerPage />;
 
   return (
     <Form {...form}>
@@ -604,15 +573,7 @@ export function DocumentsForm() {
     await updateDocuments(values);
   };
 
-  if (form.formState.isLoading)
-    return (
-      <div className="h-full w-full py-10 flex items-center justify-center">
-        <Loader2Icon
-          strokeWidth={1.25}
-          className="size-11 animate-spin text-foreground/70"
-        />
-      </div>
-    );
+  if (form.formState.isLoading) return <SpinnerPage />;
 
   return (
     <Form {...form}>
