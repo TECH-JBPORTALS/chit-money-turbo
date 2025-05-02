@@ -6,11 +6,9 @@ import { FlashList } from "@shopify/flash-list";
 // Components
 import { LinearBlurView } from "~/components/linear-blurview";
 import { H2, Large, Muted, Small } from "~/components/ui/typography";
-import { Input } from "~/components/ui/input";
-import { Search } from "~/lib/icons/Search";
+import { SearchX } from "~/lib/icons/SearchX";
 import { Layers } from "~/lib/icons/Layers";
 import { Text } from "~/components/ui/text";
-import { Button } from "~/components/ui/button";
 import { SolarIcon } from "react-native-solar-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
@@ -29,6 +27,7 @@ import { SpinnerView } from "~/components/spinner-view";
 import { useDebounce } from "@uidotdev/usehooks";
 import { Badge } from "~/components/ui/badge";
 import SearchInput from "~/components/search-input";
+import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 
 type Batch = RouterOutputs["batches"]["ofSubscriber"]["items"][number];
 
@@ -48,6 +47,7 @@ export default function Batches() {
     refetch,
     isRefetching,
     hasNextPage,
+    isFetchedAfterMount,
     fetchNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(
@@ -63,9 +63,9 @@ export default function Batches() {
     )
   );
 
-  useEffect(() => {
-    console.log(selectedFilterType);
-  }, [selectedFilterType]);
+  const batchPageItems = isLoading
+    ? []
+    : batches?.pages.flatMap((p) => p.items);
 
   // Render batch status
   const renderBatchStatus = useCallback((batch: Batch) => {
@@ -133,6 +133,24 @@ export default function Batches() {
 
   const MemoizedFilters = memo(Filters);
 
+  if (true && !isLoading && isFetchedAfterMount)
+    return (
+      <View className="items-center flex-1 justify-center gap-3.5">
+        <Animated.View entering={FadeInDown.duration(400)}>
+          <Layers
+            size={48}
+            strokeWidth={1.25}
+            className="text-muted-foreground"
+          />
+        </Animated.View>
+        <Large>Your not in any batches, yet</Large>
+        <Muted className="text-center px-16">
+          As soon as you join any batches with any associated chit fund those
+          batches will appear over here
+        </Muted>
+      </View>
+    );
+
   return (
     <LinearBlurView className="flex-1">
       {/** Batches List */}
@@ -161,7 +179,7 @@ export default function Batches() {
           </View>
         }
         estimatedItemSize={148}
-        data={isLoading ? [] : batches?.pages.flatMap((p) => p.items)}
+        data={batchPageItems}
         onEndReachedThreshold={1}
         onEndReached={() => hasNextPage && fetchNextPage()}
         ListEmptyComponent={() => (
@@ -170,7 +188,7 @@ export default function Batches() {
               <SpinnerView />
             ) : (
               <React.Fragment>
-                <Layers
+                <SearchX
                   size={48}
                   strokeWidth={1.25}
                   className="text-muted-foreground"
@@ -256,137 +274,3 @@ export default function Batches() {
     </LinearBlurView>
   );
 }
-
-const data = [
-  {
-    id: "a123b456-c789d012-e345f678",
-    name: "Silver Stallions 2024",
-    target_amount: 50000,
-    type: "Dividend Chit",
-    subscription_amount: 10000,
-    chit_fund_name: "Prosperity Chit Fund",
-    chit_fund_image: "https://github.com/shadcn.png",
-    is_completed: false,
-    number_of_months: 12,
-    completed_months: 5,
-    is_upcoming: false,
-  },
-  {
-    id: "a123b459-c789d012-e345f678",
-    name: "New Gen 2024",
-    target_amount: 80000,
-    type: "Dividend Chit",
-    subscription_amount: 15000,
-    chit_fund_name: "Prosperity Chit Fund",
-    chit_fund_image: "https://github.com/shadcn.png",
-    is_completed: false,
-    number_of_months: 12,
-    completed_months: 0,
-    is_upcoming: true,
-  },
-  {
-    id: "g987h654-i321j210-k567l890",
-    name: "Rainbow Entrepreneurs",
-    target_amount: 100000,
-    type: "Fixed Chit",
-    subscription_amount: 15000,
-    chit_fund_name: "Sunrise Financial Services",
-    chit_fund_image: "https://github.com/mrzachnugent.png",
-    is_completed: true,
-    number_of_months: 24,
-    completed_months: 24,
-    is_upcoming: false,
-  },
-  {
-    id: "m456n789-o123p456-q789r012",
-    name: "Urban Dreamers Club",
-    target_amount: 75000,
-    type: "Flexible Chit",
-    subscription_amount: 7500,
-    chit_fund_name: "Harmony Investment Group",
-    chit_fund_image: "https://source.unsplash.com/random/400x400?investment,3",
-    is_completed: false,
-    number_of_months: 18,
-    completed_months: 10,
-    is_upcoming: false,
-  },
-  {
-    id: "s234t567-u890v123-w456x789",
-    name: "Future Innovators",
-    target_amount: 40000,
-    type: "Interest Chit",
-    subscription_amount: 5000,
-    chit_fund_name: "Vision Capital",
-    chit_fund_image: "https://source.unsplash.com/random/400x400?startup,4",
-    is_completed: false,
-    number_of_months: 15,
-    completed_months: 7,
-    is_upcoming: true,
-  },
-  {
-    id: "p987q654-r321s210-t567u890",
-    name: "Sunset Achievers",
-    target_amount: 60000,
-    type: "Dividend Chit",
-    subscription_amount: 12000,
-    chit_fund_name: "Golden Horizon Fund",
-    chit_fund_image: "https://source.unsplash.com/random/400x400?money,5",
-    is_completed: false,
-    number_of_months: 20,
-    completed_months: 12,
-    is_upcoming: false,
-  },
-  {
-    id: "x456y789-z123a456-b789c012",
-    name: "Tech Titans Group",
-    target_amount: 125000,
-    type: "Fixed Chit",
-    subscription_amount: 20000,
-    chit_fund_name: "Innovation Finance",
-    chit_fund_image: "https://source.unsplash.com/random/400x400?technology,6",
-    is_completed: false,
-    number_of_months: 30,
-    completed_months: 15,
-    is_upcoming: false,
-  },
-  {
-    id: "d234e567-f890g123-h456i789",
-    name: "Community Builders",
-    target_amount: 85000,
-    type: "Interest Chit",
-    subscription_amount: 8500,
-    chit_fund_name: "Social Impact Fund",
-    chit_fund_image: "https://source.unsplash.com/random/400x400?community,7",
-    is_completed: true,
-    number_of_months: 16,
-    completed_months: 16,
-    is_upcoming: false,
-  },
-  {
-    id: "j456k789-l123m456-n789o012",
-    name: "Green Energy Collective",
-    target_amount: 95000,
-    type: "Flexible Chit",
-    subscription_amount: 11000,
-    chit_fund_name: "Sustainable Investments",
-    chit_fund_image: "https://source.unsplash.com/random/400x400?energy,8",
-    is_completed: false,
-    number_of_months: 22,
-    completed_months: 14,
-    is_upcoming: false,
-  },
-  {
-    id: "r234s567-t890u123-v456w789",
-    name: "Young Entrepreneurs Network",
-    target_amount: 55000,
-    type: "Dividend Chit",
-    subscription_amount: 9000,
-    chit_fund_name: "Emerging Talent Fund",
-    chit_fund_image:
-      "https://source.unsplash.com/random/400x400?entrepreneurs,9",
-    is_completed: false,
-    number_of_months: 14,
-    completed_months: 8,
-    is_upcoming: true,
-  },
-];

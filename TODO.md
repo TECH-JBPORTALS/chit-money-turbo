@@ -7,7 +7,7 @@
 
 ## Tue 29, Apr 25
 
-- [x] feat(cc): Batch subscribers
+- [-] feat(cc): Batch subscribers
   - [ ] Fix create batch
   - [x] Prepare db schema
   - [x] Prepare seed
@@ -19,11 +19,11 @@
 
 ## Wed 30, Apr 25
 
-- [-] feat(mobile): Batches
+- [x] feat(mobile): Batches
   - [x] Listing joined batches of subscribers
   - [x] View subscriber batch list with inifinite scroll to enable paginaton - mobile
   - [x] View batch details subscriber
-  - [ ] Filter batch details subscribr
+  - [x] Filter batch details subscriber
 
 ## Thur 1, May 25
 
@@ -31,7 +31,7 @@ Holiday - Workers Day
 
 ## Fri 2, May 25
 
-- [ ] feat-(cc): Payments
+- [-] feat-(cc): Payments
   - [ ] Schema design
   - [ ] Seeding
   - [ ] Payment listing

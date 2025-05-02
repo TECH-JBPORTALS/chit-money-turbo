@@ -67,6 +67,7 @@
     "expo-updates": "~0.27.4",
     "expo-web-browser": "~14.0.2",
     "jwt-decode": "^4.0.0",
+    "lodash": "^4.17.21",
     "lucide-react-native": "^0.479.0",
     "nativewind": "^4.1.23",
     "react": "catalog:react18",
