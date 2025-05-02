@@ -24,6 +24,12 @@
     "seed": {
       "cache": false
     },
+    "gen-migrations": {
+      "cache": false
+    },
+    "migrate": {
+      "cache": false
+    },
     "clean": {
       "cache": false
     },
