@@ -1,5 +1,17 @@
 import { batchInsertSchema } from "@cmt/db/schema";
-import { and, count, eq, gt, gte, ilike, inArray, lte, or, sql } from "@cmt/db";
+import {
+  and,
+  count,
+  eq,
+  exists,
+  gt,
+  gte,
+  ilike,
+  inArray,
+  lte,
+  or,
+  sql,
+} from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { addMonths } from "date-fns";
 import { z } from "zod";
@@ -136,21 +148,26 @@ export const batchesRouter = {
         limit: limit + 1,
         orderBy: ({ id }, { desc }) => [desc(id)],
         // Go down we go.. go.. with cursor of decending order page
-        where: query
-          ? and(
-              cursorCond,
-              statusCond(),
-              ilike(schema.batches.name, `%${query}%`)
-            )
-          : and(cursorCond, statusCond()),
-
+        where: and(
+          cursorCond,
+          statusCond(),
+          query ? ilike(schema.batches.name, `%${query}%`) : undefined,
+          exists(
+            ctx.db
+              .select()
+              .from(schema.subscribersToBatches)
+              .where(
+                and(
+                  eq(schema.subscribersToBatches.batchId, schema.batches.id),
+                  eq(
+                    schema.subscribersToBatches.subscriberId,
+                    ctx.session.userId
+                  )
+                )
+              )
+          )
+        ),
         with: {
-          subscribersToBatches: {
-            where: eq(
-              schema.subscribersToBatches.subscriberId,
-              ctx.session.userId
-            ),
-          },
           collector: true,
         },
       });
