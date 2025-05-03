@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ScrollView, View } from "react-native";
+import { ScrollView, TouchableOpacity, View } from "react-native";
 import { useSignUp } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
 import { Muted, P, Small } from "~/components/ui/typography";
@@ -18,6 +18,13 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeperator,
+  InputOTPSlot,
+  OTPInputRef,
+} from "~/components/ui/input-otp";
 
 const signUpSchema = z
   .object({
@@ -57,6 +64,7 @@ const verificationSchema = z.object({
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
+  const otpInputRef = React.useRef<OTPInputRef>(null);
   const router = useRouter();
   const form = useForm({
     resolver: zodResolver(signUpSchema),
@@ -147,31 +155,61 @@ export default function SignUpScreen() {
             control={verificationForm.control}
             name="code"
             render={({ field }) => (
-              <FormItem className="w-full">
+              <FormItem className="h-16 gap-3">
                 <FormControl>
-                  <Input
-                    {...field}
-                    autoFocus
-                    editable={
-                      !verificationForm.formState.isSubmitting || isLoaded
-                    }
-                    keyboardType="number-pad"
-                    textAlign="center"
-                    className="native:text-xl font-bold text-primary"
-                    onChangeText={field.onChange}
+                  <InputOTP
+                    defaultValue={field.value}
+                    maxLength={6}
+                    ref={otpInputRef}
+                    onChange={(text) => field.onChange(text)}
+                    render={({ slots }) => (
+                      <InputOTPGroup>
+                        <View className="flex-row">
+                          {slots.slice(0, 3).map((s, i) => (
+                            <InputOTPSlot
+                              key={i}
+                              {...s}
+                              index={i}
+                              placeholderChar={"#"}
+                            />
+                          ))}
+                        </View>
+                        <InputOTPSeperator />
+                        <View className="flex-row">
+                          {slots.slice(3).map((s, i) => (
+                            <InputOTPSlot
+                              key={i}
+                              {...s}
+                              index={i}
+                              placeholderChar={"#"}
+                            />
+                          ))}
+                        </View>
+                      </InputOTPGroup>
+                    )}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-center" />
               </FormItem>
             )}
           />
           <Button
-            className="w-full"
+            className="w-full mt-5"
             isLoading={verificationForm.formState.isSubmitting}
             onPress={verificationForm.handleSubmit(onVerifyPress)}
           >
             <Text>Verify</Text>
           </Button>
+
+          <Muted>
+            Is email address misspelled?{" "}
+            <TouchableOpacity
+              className="mt-1"
+              onPress={() => setPendingVerification(false)}
+            >
+              <Muted className="text-primary">Edit email address</Muted>
+            </TouchableOpacity>
+          </Muted>
         </Form>
       </View>
     );
