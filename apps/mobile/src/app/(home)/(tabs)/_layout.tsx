@@ -1,8 +1,11 @@
+import { useUser } from "@clerk/clerk-expo";
 import { Stack, Tabs } from "expo-router";
 import React from "react";
 import { SolarIcon } from "react-native-solar-icons";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 
 export default function TabsLayout() {
+  const { user } = useUser();
   return (
     <React.Fragment>
       <Stack.Screen options={{ headerShown: false }} />
@@ -76,12 +79,13 @@ export default function TabsLayout() {
             title: "Profile",
             headerTitle: "Your Profile",
             tabBarIcon: ({ color, focused, size }) => (
-              <SolarIcon
-                type={focused ? "bold-duotone" : "line-duotone"}
-                size={size}
-                color={color}
-                name="UserCircle"
-              />
+              <Avatar
+                className="size-6"
+                alt={`user-${user?.firstName?.charAt(0)}`}
+              >
+                <AvatarImage source={{ uri: user?.imageUrl }} />
+                <AvatarFallback>{user?.firstName?.charAt(0)}</AvatarFallback>
+              </Avatar>
             ),
           }}
         />
