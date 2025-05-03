@@ -86,7 +86,12 @@ export const subscriberDocumentsSchema = subscribersInsertSchema.pick({
 });
 export const subscriberAddressInfoSchema = subscribersAddressInsertSchema;
 export const subscriberContactInfoSchema = subscribersContactInsertSchema;
-export const subscriberBankInfoSchema = subscribersBankAccountInsertSchema;
+export const subscriberBankInfoSchema = subscribersBankAccountInsertSchema
+  .and(z.object({ confirmAccountNumber: z.string().min(1) }))
+  .refine((s) => s.accountNumber === s.confirmAccountNumber, {
+    message: "Confirm account number not matched with original account number ",
+    path: ["confirmAccountNumber"],
+  });
 
 export const subscriberOnboardingSchema = z.object({
   personalInfo: subscriberPersonalInfoSchema,

@@ -39,6 +39,8 @@ import { BlurView } from "expo-blur";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { useMutation } from "@tanstack/react-query";
 import { trpc } from "~/utils/api";
+import { DatePicker } from "~/components/ui/date-picker";
+import React from "react";
 
 function PersonalInfoForm() {
   const {
@@ -105,7 +107,13 @@ function PersonalInfoForm() {
             <FormItem>
               <FormLabel>Date Of Birth</FormLabel>
               <FormControl>
-                <Input {...field} onChangeText={field.onChange} />
+                <DatePicker
+                  {...field}
+                  value={new Date(field.value)}
+                  onChange={(event, date) =>
+                    field.onChange(date?.toDateString())
+                  }
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -359,7 +367,7 @@ function DocumentsForm() {
               <FormLabel>{"Aadhar Card Photo (front)"}</FormLabel>
               <FormControl>
                 {field.value ? (
-                  <>
+                  <React.Fragment>
                     <Image
                       source={{ uri: getUTPublicUrl(field.value) }}
                       style={{ width: "auto", height: 200, borderRadius: 6 }}
@@ -392,7 +400,7 @@ function DocumentsForm() {
                       <RotateCcw className="size-5 text-secondary-foreground" />
                       <Text>Re-Capture Image</Text>
                     </Button>
-                  </>
+                  </React.Fragment>
                 ) : (
                   <Button
                     isLoading={isAadharFrontImageUploading}
@@ -692,7 +700,11 @@ function BankInfoForm() {
             <FormItem>
               <FormLabel>Confirm Account Number</FormLabel>
               <FormControl>
-                <Input {...field} onChangeText={field.onChange} />
+                <Input
+                  {...field}
+                  value={field.value}
+                  onChangeText={(t) => field.onChange(t)}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
