@@ -3,6 +3,8 @@ import { Stack, Tabs } from "expo-router";
 import React from "react";
 import { SolarIcon } from "react-native-solar-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Text } from "~/components/ui/text";
+import { cn } from "~/lib/utils";
 
 export default function TabsLayout() {
   const { user } = useUser();
@@ -80,11 +82,19 @@ export default function TabsLayout() {
             headerTitle: "Your Profile",
             tabBarIcon: ({ color, focused, size }) => (
               <Avatar
-                className="size-6"
+                className={cn(
+                  "size-6 p-[1px]",
+                  focused && "border border-primary "
+                )}
                 alt={`user-${user?.firstName?.charAt(0)}`}
               >
-                <AvatarImage source={{ uri: user?.imageUrl }} />
-                <AvatarFallback>{user?.firstName?.charAt(0)}</AvatarFallback>
+                <AvatarImage
+                  style={{ borderRadius: 9999 }}
+                  source={{ uri: user?.imageUrl }}
+                />
+                <AvatarFallback>
+                  <Text>{user?.firstName?.charAt(0)}</Text>
+                </AvatarFallback>
               </Avatar>
             ),
           }}
