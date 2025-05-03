@@ -703,6 +703,7 @@ function BankInfoForm() {
                 <Input
                   {...field}
                   value={field.value}
+                  secureTextEntry
                   onChangeText={(t) => field.onChange(t)}
                 />
               </FormControl>
