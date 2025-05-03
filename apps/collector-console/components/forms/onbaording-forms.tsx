@@ -227,7 +227,11 @@ export function ContactInfoForm({
                   <FormItem>
                     <FormLabel>Primary Phone Number</FormLabel>
                     <FormControl>
-                      <Input placeholder="eg. 9930390403" {...field} />
+                      <Input
+                        type="number"
+                        placeholder="eg. 9930390403"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                     <FormDescription>
@@ -243,7 +247,11 @@ export function ContactInfoForm({
                   <FormItem>
                     <FormLabel>{"Secondary Phone Number (optional)"}</FormLabel>
                     <FormControl>
-                      <Input placeholder="eg. 9930390403" {...field} />
+                      <Input
+                        type="number"
+                        placeholder="eg. 9930390403"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                     <FormDescription>
@@ -330,7 +338,7 @@ export function AddressInfoForm({
                   <FormItem>
                     <FormLabel>Pincode</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -431,7 +439,7 @@ export function BankInfoForm({
                   <FormItem>
                     <FormLabel>Account Number</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -444,7 +452,7 @@ export function BankInfoForm({
                   <FormItem>
                     <FormLabel>Confirm Account Number</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -540,7 +548,7 @@ export function BankInfoForm({
                   <FormItem>
                     <FormLabel>Pincode</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

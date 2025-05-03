@@ -38,12 +38,26 @@ export const collectorsBankAccountsInsertSchema = createInsertSchema(
   collectorsBankAccounts,
   {
     accountType: z.enum(["savings", "current"]).default("savings"),
+    upiId: z
+      .string()
+      .min(3, "UPI ID too short")
+      .max(50, "UPI ID too long")
+      .regex(/^[\w.-]+@[\w.-]+$/, "Invalid UPI ID"),
   }
 ).omit({
   userId: true,
 });
+
 export const collectorsBankAccountsUpdateSchema = createUpdateSchema(
-  collectorsBankAccounts
+  collectorsBankAccounts,
+  {
+    accountType: z.enum(["savings", "current"]).default("savings"),
+    upiId: z
+      .string()
+      .min(3, "UPI ID too short")
+      .max(50, "UPI ID too long")
+      .regex(/^[\w.-]+@[\w.-]+$/, "Invalid UPI ID"),
+  }
 );
 
 export const collectorsContactInsertSchema = createInsertSchema(
