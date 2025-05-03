@@ -196,13 +196,16 @@ export function ContactInfoForm({
     resolver: zodResolver(contactInfoSchema),
     defaultValues: {
       primaryPhoneNumber: state?.primaryPhoneNumber ?? "",
-      secondaryPhoneNumber: state?.secondaryPhoneNumber ?? "",
+      secondaryPhoneNumber: state?.secondaryPhoneNumber ?? undefined,
     },
   });
   const { next, prev } = useSteps();
 
   const onSubmit = async (values: z.infer<typeof contactInfoSchema>) => {
-    await setState(values);
+    await setState({
+      ...values,
+      secondaryPhoneNumber: values.secondaryPhoneNumber ?? undefined,
+    });
     next();
   };
 
