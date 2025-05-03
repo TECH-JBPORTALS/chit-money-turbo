@@ -64,7 +64,7 @@ export function SignInForm({
         });
 
         if (status === "complete") {
-          setActive({ session: createdSessionId });
+          await setActive({ session: createdSessionId });
           router.refresh();
         }
       }
