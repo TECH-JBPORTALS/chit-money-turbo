@@ -1,0 +1,91 @@
+name: Preview Builds (Vercel + EAS)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  deploy_to_vercel:
+    name: Deploy Collector Console to Vercel
+    runs-on: ubuntu-latest
+
+    outputs:
+      preview_url: ${{ steps.set_url.outputs.preview_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: apps/collector-console
+          scope: ${{ secrets.VERCEL_TEAM_ID }}
+          prod: false # Preview deployment
+          alias-domains: |
+            collector-console--${{ github.head_ref }}.vercel.app
+
+      - name: Set Preview URL
+        id: set_url
+        run: |
+          echo "preview_url=https://collector-console--${{ github.head_ref }}.vercel.app" >> $GITHUB_OUTPUT
+
+  eas_build_or_update:
+    name: EAS Build or Update
+    needs: deploy_to_vercel
+    runs-on: ubuntu-latest
+
+    env:
+      EXPO_PUBLIC_SERVER_URL: ${{ needs.deploy_to_vercel.outputs.preview_url }}
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Decide Build or Update
+        id: build_type
+        run: |
+          # Create a flag file if this is the first run for the branch
+          CACHE_DIR=".eas-cache"
+          FLAG_FILE="$CACHE_DIR/${{ github.head_ref }}.built"
+
+          mkdir -p $CACHE_DIR
+
+          if [ -f "$FLAG_FILE" ]; then
+            echo "This branch has already been built. Will run update."
+            echo "action=update" >> $GITHUB_OUTPUT
+          else
+            echo "First build for this branch."
+            echo "action=build" >> $GITHUB_OUTPUT
+            touch "$FLAG_FILE"
+          fi
+
+      - name: EAS Build
+        working-directory: apps/mobile
+        if: steps.build_type.outputs.action == 'build'
+        run: |
+          eas build --platform android --profile preview --non-interactive --channel=${{ github.head_ref }}
+
+      - name: EAS Update
+        working-directory: apps/mobile
+        if: steps.build_type.outputs.action == 'update'
+        run: |
+          eas update --branch=${{ github.head_ref }} --platform android
