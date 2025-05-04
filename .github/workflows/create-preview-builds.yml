@@ -46,7 +46,10 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Add Database Env's
-        run: vercel env add DATABASE_URL preview --force --token=${{ secrets.VERCEL_TOKEN }} ${{ github.head_ref }} < .env
+        run: |
+          touch db.txt
+          echo "${{ steps.create-branch.outputs.db_url_pooled }}" >> db.txt
+          vercel env add DATABASE_URL preview --force --token=${{ secrets.VERCEL_TOKEN }} ${{ github.head_ref }} < db.txt
 
       - name: Pull Vercel Environment Information
         run: vercel pull --yes  --environment=preview --git-branch=${{ github.head_ref }} --token=${{ secrets.VERCEL_TOKEN }}
