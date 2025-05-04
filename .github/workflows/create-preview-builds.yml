@@ -34,7 +34,7 @@ jobs:
       - name: Deploy & Alias
         id: set_url
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --global-config=.vercel --cwd=apps/collector-console --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --environment=preview --global-config=.vercel --cwd=apps/collector-console --token=${{ secrets.VERCEL_TOKEN }})
           echo "Deployment URL: $DEPLOYMENT_URL"
 
           # Create alias like: collector-console--feature-branch-name.vercel.app
