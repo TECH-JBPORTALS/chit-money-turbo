@@ -49,7 +49,7 @@ jobs:
         run: vercel pull --yes  --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Add Database Env's
-        run: vercel env add DATABASE_URL preview --force --sensitive ${{ github.head_ref }} < .env
+        run: vercel env add DATABASE_URL preview --force --sensitive --token=${{ secrets.VERCEL_TOKEN }} ${{ github.head_ref }} < .env
 
       - name: Build Project Artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
@@ -80,12 +80,12 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 8
+          version: 10.4.1
 
       - name: Install dependencies
         run: pnpm install
@@ -95,6 +95,7 @@ jobs:
 
       - name: Decide Build or Update
         id: build_type
+        working-directory: apps/mobile
         run: |
           # Create a flag file if this is the first run for the branch
           CACHE_DIR=".eas-cache"
