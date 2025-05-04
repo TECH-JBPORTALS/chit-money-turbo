@@ -67,6 +67,9 @@ jobs:
         with:
           version: 10.4.1
 
+      - name: Install dependencies
+        run: pnpm install
+
       - name: Run Migrations
         run: pnpm run db:migrate
         env:
