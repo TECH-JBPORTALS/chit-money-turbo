@@ -36,8 +36,5 @@
     "ignoredBuiltDependencies": [
       "browser-tabs-lock"
     ]
-  },
-  "overrides": {
-    "react": "19.0.0"
   }
 }

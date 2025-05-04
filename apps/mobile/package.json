@@ -105,9 +105,6 @@
     "@types/react": "catalog:react19",
     "typescript": "catalog:"
   },
-  "overrides": {
-    "react": "19.0.0"
-  },
   "expo": {
     "doctor": {
       "reactNativeDirectoryCheck": {
