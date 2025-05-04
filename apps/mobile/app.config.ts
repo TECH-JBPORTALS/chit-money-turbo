@@ -54,7 +54,7 @@ export default ({ config }: ConfigContext) => {
       [
         "expo-router",
         {
-          origin: "https://chit-money-sub-nerd--api-only.expo.app",
+          origin: "https://chit-money-sub-nerd--my-preview.expo.app/",
         },
       ],
       "expo-font",

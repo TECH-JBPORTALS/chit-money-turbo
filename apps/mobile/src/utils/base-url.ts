@@ -20,5 +20,5 @@ export const getBaseUrl = () => {
     return process.env.EXPO_PUBLIC_SERVER_URL;
   }
 
-  return `http://${localhost}:8081`;
+  return `https://chit-money-sub-nerd--my-preview.expo.app`;
 };

@@ -1,0 +1,69 @@
+name: Create EAS Build
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  web_preview_build:
+    name: Build & Deploy Web
+    runs-on: ubuntu-latest
+    if: github.ref_name != 'main'
+    outputs:
+      preview_url: ${{ steps.set_url.outputs.preview_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.4.1
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Export Web App
+        run: pnpm dlx expo export:web --platform web --dump-assetmap --no-ssg
+
+      - name: Deploy Web App
+        run: npx eas deploy --alias=${{ github.ref_name }} --non-interactive
+
+      - name: Set Alias Preview URL
+        id: set_url
+        run: |
+          ALIAS_URL="https://chit-money-sub-nerd--${{ github.ref_name }}.expo.app"
+          echo "preview_url=$ALIAS_URL" >> $GITHUB_OUTPUT
+
+  # android_preview_build:
+  #   name: Build Android App (Preview)
+  #   runs-on: ubuntu-latest
+  #   needs: web_preview_build
+  #   env:
+  #     EXPO_PUBLIC_SERVER_URL: ${{ needs.web_preview_build.outputs.preview_url }}
+  #     EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Setup Node
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 22.13.1
+
+  #     - name: Setup pnpm
+  #       uses: pnpm/action-setup@v2
+  #       with:
+  #         version: 10.4.1
+
+  #     - name: Install dependencies
+  #       run: pnpm install
+
+  #     - name: Build Android App
+  #       run: pnpm eas build --platform android --profile preview --non-interactive
