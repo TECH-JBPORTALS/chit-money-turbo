@@ -31,7 +31,7 @@ jobs:
         run: pnpm install
 
       - name: Export Web App
-        run: pnpm dlx expo export:web --platform web --dump-assetmap --no-ssg
+        run: pnpm dlx expo export --platform web --dump-assetmap --no-ssg
 
       - name: Deploy Web App
         run: npx eas deploy --alias=${{ github.ref_name }} --non-interactive
