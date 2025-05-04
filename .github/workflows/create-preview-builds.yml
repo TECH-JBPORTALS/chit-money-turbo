@@ -27,11 +27,10 @@ jobs:
           role: neondb_owner
           api_key: ${{ secrets.NEON_API_KEY }}
 
-      - name: Set Database Config's
+      - name: Set Neon Database URLs in .env
         run: |
-          touch .env
-          DATABASE_URL = {{steps.create-branch.outputs.db_url_with_pooler }}/neondb >> .env
-          echo DATABASE_URL_UNPOOLED = {{steps.create-branch.outputs.db_url }}/neondb >> .env
+          echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}/neondb" > .env
+          echo "DATABASE_URL_UNPOOLED=${{ steps.create-branch.outputs.db_url }}/neondb" >> .env
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
