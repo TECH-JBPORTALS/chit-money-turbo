@@ -23,11 +23,11 @@ catalog:
   "@trpc/server": ^11.0.0
 
 catalogs:
-  react18:
-    react: ^18.3.1
-    react-dom: ^18.3.1
-    "@types/react": ^18.3.11
-    "@types/react-dom": ^18.3.1
+  react19:
+    react: ^19.0.0
+    react-dom: ^19.0.0
+    "@types/react": ^19.0.0
+    "@types/react-dom": ^19.0.0
     "@types/node": ^20.0.0
 
   tailwind3:
@@ -36,6 +36,6 @@ catalogs:
   tailwind4:
     tailwindcss: ^4.0.8
 
-  rfh752:
-    react-hook-form: ^7.52.1
-    "@hookform/resolvers": ^3.9.0
+  rfh7:
+    react-hook-form: ^7.56.2
+    "@hookform/resolvers": ^5.0.1

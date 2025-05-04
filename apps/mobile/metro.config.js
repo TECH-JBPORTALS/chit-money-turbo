@@ -16,8 +16,8 @@ const config = withTurborepoManagedCache(
 
 // XXX: Resolve our exports in workspace packages
 // https://github.com/expo/expo/issues/26926
-config.resolver.unstable_enablePackageExports = true;
-config.resolver.unstable_conditionNames = ["require", "default"];
+// As per the new (Expo SDK 53) release notes
+// config.resolver.unstable_enablePackageExports = false;
 
 module.exports = config;
 

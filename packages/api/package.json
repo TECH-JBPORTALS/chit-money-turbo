@@ -28,7 +28,7 @@
     "@cmt/eslint-config": "workspace:*",
     "@cmt/typescript-config": "workspace:*",
     "@cmt/validators": "workspace:*",
-    "@types/node": "catalog:react18",
+    "@types/node": "catalog:react19",
     "tailwindcss": "catalog:tailwind4",
     "typescript": "catalog:"
   }

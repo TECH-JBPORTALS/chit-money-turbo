@@ -37,6 +37,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "~/utils/api";
 import { Toaster } from "sonner-native";
+import useIsmorphicLayoutEffect from "use-isomorphic-layout-effect";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -130,7 +131,7 @@ function Outlet() {
   const router = useRouter();
   const onboardingComplete = user?.publicMetadata.onboardingComplete;
 
-  useEffect(() => {
+  useIsmorphicLayoutEffect(() => {
     (async () => {
       const theme = await AsyncStorage.getItem("theme");
 

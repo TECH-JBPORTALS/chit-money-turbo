@@ -48,6 +48,8 @@ export default ({ config }: ConfigContext) => {
       output: "server",
     },
     plugins: [
+      "expo-secure-store",
+      "expo-web-browser",
       [
         "expo-router",
         {
