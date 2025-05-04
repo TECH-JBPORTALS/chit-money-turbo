@@ -25,11 +25,9 @@ import {
   DefaultTheme,
   DarkTheme,
 } from "@react-navigation/native";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
-import { StatusBar } from "expo-status-bar";
-import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { PortalHost } from "@rn-primitives/portal";
@@ -100,10 +98,6 @@ function ThemeWrapper({ children }: { children: React.ReactNode }) {
             : NAV_THEME.light.background,
         }}
       >
-        <StatusBar
-          style={isDarkColorScheme ? "light" : "dark"}
-          backgroundColor="transparent"
-        />
         {children}
       </View>
     </ThemeProvider>
@@ -137,13 +131,11 @@ function Outlet() {
       const theme = await AsyncStorage.getItem("theme");
 
       if (!theme) {
-        setAndroidNavigationBar(colorScheme);
         AsyncStorage.setItem("theme", colorScheme);
         setIsColorSchemeLoaded(true);
         return;
       }
       const colorTheme = theme === "dark" ? "dark" : "light";
-      setAndroidNavigationBar(colorScheme);
 
       if (colorTheme !== colorScheme) {
         setColorScheme(colorTheme);
