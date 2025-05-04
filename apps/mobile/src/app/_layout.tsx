@@ -38,6 +38,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "~/utils/api";
 import { Toaster } from "sonner-native";
 import useIsmorphicLayoutEffect from "use-isomorphic-layout-effect";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -196,7 +197,9 @@ function Outlet() {
 
   return (
     <ThemeWrapper>
-      <Slot />
+      <SafeAreaProvider>
+        <Slot />
+      </SafeAreaProvider>
     </ThemeWrapper>
   );
 }

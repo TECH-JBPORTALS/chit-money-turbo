@@ -1,7 +1,6 @@
 import React from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { View } from "react-native";
 import { cn } from "~/lib/utils";
 import { StyleSheet } from "react-native";
@@ -10,7 +9,7 @@ export function LinearBlurView({
   children,
   className,
   ...props
-}: React.ComponentProps<typeof SafeAreaView>) {
+}: React.ComponentProps<typeof View>) {
   const gradient = [`rgba(5,148,103,0.15)`, "transparent"] as const;
   return (
     <View className="flex-1">
@@ -21,12 +20,9 @@ export function LinearBlurView({
         colors={gradient}
         className="h-64"
       />
-      <SafeAreaView
-        className={cn("flex-1 px-4 py-1 gap-6", className)}
-        {...props}
-      >
+      <View className={cn("flex-1 px-4 py-1 gap-6", className)} {...props}>
         {children}
-      </SafeAreaView>
+      </View>
     </View>
   );
 }
