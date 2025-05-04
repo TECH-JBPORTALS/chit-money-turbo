@@ -3,7 +3,7 @@ name: Create EAS Build
 on:
   workflow_run:
     workflows:
-      - Create/Delete Branch for Pull Request
+      - Neon
     types:
       - completed
 
