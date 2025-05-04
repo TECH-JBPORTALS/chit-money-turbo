@@ -45,11 +45,11 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes  --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-
       - name: Add Database Env's
-        run: vercel env add DATABASE_URL preview --force --sensitive --token=${{ secrets.VERCEL_TOKEN }} ${{ github.head_ref }} < .env
+        run: vercel env add DATABASE_URL preview --force --token=${{ secrets.VERCEL_TOKEN }} ${{ github.head_ref }} < .env
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes  --environment=preview --branch=${{ github.head_ref }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
@@ -80,7 +80,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.x
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -90,8 +90,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Install EAS CLI
-        run: npm install -g eas-cli
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Decide Build or Update
         id: build_type
@@ -116,10 +119,10 @@ jobs:
         working-directory: apps/mobile
         if: steps.build_type.outputs.action == 'build'
         run: |
-          eas build --platform android --profile preview --non-interactive --channel=${{ github.head_ref }}
+          eas build --platform android --profile preview --non-interactive
 
       - name: EAS Update
-        working-directory: apps/mobile
         if: steps.build_type.outputs.action == 'update'
-        run: |
-          eas update --branch=${{ github.head_ref }} --platform android
+        uses: expo/expo-github-action/preview@v8
+        with:
+          command: eas update --auto
