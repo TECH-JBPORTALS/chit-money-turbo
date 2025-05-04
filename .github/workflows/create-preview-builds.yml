@@ -48,19 +48,19 @@ jobs:
       - name: Add Database Env's
         run: |
           touch db.txt
-          echo "${{ steps.create-branch.outputs.db_url_pooled }}" >> db.txt
+          echo "$DATABASE_URL" >> db.txt
           vercel env add DATABASE_URL preview --force --token=${{ secrets.VERCEL_TOKEN }} ${{ github.head_ref }} < db.txt
 
       - name: Pull Vercel Environment Information
         run: vercel pull --yes  --environment=preview --git-branch=${{ github.head_ref }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --target=preview --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy & Alias
         id: set_url
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt -b DATABASE_URL=$DATABASE_URL -e DATABASE_URL=$DATABASE_URL --token=${{ secrets.VERCEL_TOKEN }})
           echo "Deployment URL: $DEPLOYMENT_URL"
 
           ALIAS_URL="https://chit-money-collector-console--${{ github.head_ref }}.vercel.app"
