@@ -3,9 +3,13 @@ env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 on:
-  push:
+  pull_request:
     branches-ignore:
       - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 jobs:
   deploy_to_vercel:
@@ -29,6 +33,7 @@ jobs:
 
       - name: Set Neon Database URLs in .env
         run: |
+          touch .env
           echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler }}/neondb" > .env
           echo "DATABASE_URL_UNPOOLED=${{ steps.create-branch.outputs.db_url }}/neondb" >> .env
 
