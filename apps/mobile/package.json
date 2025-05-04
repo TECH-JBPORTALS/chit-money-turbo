@@ -16,7 +16,7 @@
     "vercel-build": "expo export -p web --no-ssg"
   },
   "dependencies": {
-    "@clerk/backend": "^1.25.8",
+    "@clerk/backend": "catalog:",
     "@clerk/clerk-expo": "^2.8.5",
     "@expo-google-fonts/fira-code": "^0.2.3",
     "@expo-google-fonts/urbanist": "^0.2.3",

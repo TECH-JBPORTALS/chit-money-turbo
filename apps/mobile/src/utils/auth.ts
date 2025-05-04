@@ -1,9 +1,5 @@
-import { createClerkClient } from "@clerk/backend";
+import { clerk } from "@cmt/api";
 import { jwtDecode } from "jwt-decode";
-
-export const clerk = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY,
-});
 
 export const auth = async (req: Request) => {
   // Get the session token from the request

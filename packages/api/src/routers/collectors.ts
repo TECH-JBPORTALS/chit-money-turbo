@@ -11,7 +11,6 @@ import {
 } from "@cmt/validators";
 import { TRPCError } from "@trpc/server";
 import { eq } from "@cmt/db";
-import { clerkClient } from "@clerk/nextjs/server";
 
 const {
   collectors,
@@ -26,8 +25,7 @@ export const collectorsRouter = {
     .mutation(({ ctx, input }) =>
       // DB Transaction to prevent unsync data
       ctx.db.transaction(async (tx) => {
-        const client = await clerkClient();
-        const user = await client.users.updateUser(ctx.session.userId, {
+        const user = await ctx.clerk.users.updateUser(ctx.session.userId, {
           firstName: input.personalInfo.firstName,
           lastName: input.personalInfo.lastName,
         });

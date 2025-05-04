@@ -1,4 +1,5 @@
-import { auth, clerk } from "~/utils/auth";
+import { clerk } from "@cmt/api";
+import { auth } from "~/utils/auth";
 
 export async function POST(req: Request) {
   const session = await auth(req);
