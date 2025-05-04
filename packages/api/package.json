@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "catalog:",
+    "@clerk/backend": "catalog:",
     "@trpc/server": "catalog:",
     "date-fns": "^4.1.0",
     "nanoid": "^5.1.5",
@@ -27,7 +28,7 @@
     "@cmt/eslint-config": "workspace:*",
     "@cmt/typescript-config": "workspace:*",
     "@cmt/validators": "workspace:*",
-    "@types/node": "catalog:react18",
+    "@types/node": "catalog:react19",
     "tailwindcss": "catalog:tailwind4",
     "typescript": "catalog:"
   }

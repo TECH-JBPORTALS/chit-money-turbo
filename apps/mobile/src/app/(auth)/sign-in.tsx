@@ -95,6 +95,8 @@ export default function Page() {
                 <Input
                   {...field}
                   autoFocus
+                  textContentType="emailAddress"
+                  keyboardType="email-address"
                   editable={!form.formState.isLoading || isLoaded}
                   autoCapitalize="none"
                   onChangeText={field.onChange}
@@ -120,6 +122,7 @@ export default function Page() {
                 <Input
                   {...field}
                   secureTextEntry
+                  textContentType="password"
                   editable={!form.formState.isLoading || isLoaded}
                   autoCapitalize="none"
                   onChangeText={field.onChange}

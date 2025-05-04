@@ -9,38 +9,38 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import {
-  auth as clerkAuth,
-  clerkClient,
-  Session,
-  verifyToken,
-} from "@clerk/nextjs/server";
+import { createClerkClient, Session, verifyToken } from "@clerk/backend";
 import { db } from "@cmt/db/client";
 
+export const clerk = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY,
+});
+
+async function verifyAuthToken(token: string | null) {
+  if (!token) return null;
+
+  const authJwt = await verifyToken(token, {
+    secretKey: process.env.CLERK_SECRET_KEY,
+  });
+
+  const authSession = clerk.sessions.getSession(authJwt.sid);
+
+  return authSession;
+}
+
 /**
- * Isomorphic Session getter for API requests
+ * getAuthorizationSession getter for API requests
  * - Expo requests will have a session token in the Authorization header
- * - Next.js requests will have a session token in cookies
+ * - Next.js requests will have a session token in cookies so no need to pass down from here it will automatically recogonize from the request
  */
-const isomorphicGetSession = async (headers: Headers) => {
-  const client = await clerkClient();
+const getAuthorizationSession = async (headers: Headers) => {
   const authToken = headers.get("Authorization")?.split(" ")[1] ?? null;
 
   if (authToken) {
-    const authJwt = await verifyToken(authToken, {
-      secretKey: process.env.CLERK_SECRET_KEY,
-    });
-    const authSession = client.sessions.getSession(authJwt.sid);
-    return authSession;
+    return verifyAuthToken(authToken);
   }
 
-  //if it's cookie
-  const authObj = await clerkAuth();
-
-  if (!authObj.sessionId) return null;
-
-  const session = await client.sessions.getSession(authObj.sessionId);
-  return session;
+  return null;
 };
 
 /**
@@ -60,8 +60,7 @@ export const createTRPCContext = async (opts: {
   session: Session | null;
 }) => {
   const authToken = opts.headers.get("Authorization") ?? null;
-  const session = await isomorphicGetSession(opts.headers);
-  const clerk = await clerkClient();
+  const session = await getAuthorizationSession(opts.headers);
 
   const source = opts.headers.get("x-trpc-source") ?? "unknown";
   console.log(">>> tRPC Request from", source, "by", session?.userId);

@@ -36,6 +36,7 @@ export default ({ config }: ConfigContext) => {
         backgroundColor: "#ffffff",
       },
       package: scheme,
+      edgeToEdgeEnabled: true,
     },
     updates: {
       url: "https://u.expo.dev/af73ccee-6f1b-4a7e-a1f7-4daeb769609f",
@@ -48,10 +49,12 @@ export default ({ config }: ConfigContext) => {
       output: "server",
     },
     plugins: [
+      "expo-secure-store",
+      "expo-web-browser",
       [
         "expo-router",
         {
-          origin: "https://chit-money-sub-nerd--api-only.expo.app",
+          origin: "https://chit-money-sub-nerd--my-preview.expo.app/",
         },
       ],
       "expo-font",

@@ -22,10 +22,11 @@ import { Avatar, AvatarImage, AvatarFallback } from "~/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Text } from "~/components/ui/text";
 import { Lead, Muted, Small } from "~/components/ui/typography";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { Pressable, TouchableOpacity } from "react-native-gesture-handler";
 import { useQuery } from "@tanstack/react-query";
 import { trpc } from "~/utils/api";
 import { SpinnerView } from "~/components/spinner-view";
+import { SafeAreaView } from "~/components/safe-area-view";
 
 // Types
 interface BatchDetails {
@@ -119,7 +120,7 @@ export default function BatchDetailsLayout() {
   if (!batch) return null;
 
   return (
-    <View className="pt-6 px-4 gap-6 flex-1">
+    <View className="px-4 gap-6 flex-1">
       <Stack.Screen
         options={{
           title: "",
@@ -175,7 +176,7 @@ export default function BatchDetailsLayout() {
 
         <BatchCardFooter className="px-0 pb-0">
           <Link asChild href={`/cfh/2`}>
-            <TouchableOpacity>
+            <Pressable>
               <View className="flex-row items-center gap-2">
                 <Avatar
                   alt="ChitFund Image"
@@ -192,7 +193,7 @@ export default function BatchDetailsLayout() {
                 </Avatar>
                 <Small className="text-xs">{batch.collector?.orgName}</Small>
               </View>
-            </TouchableOpacity>
+            </Pressable>
           </Link>
         </BatchCardFooter>
       </BatchCard>
@@ -218,7 +219,10 @@ export default function BatchDetailsLayout() {
         </Tabs>
 
         <Stack
-          screenOptions={{ headerShown: false, animation: "fade_from_bottom" }}
+          screenOptions={{
+            headerShown: false,
+            animation: "fade_from_bottom",
+          }}
         />
       </View>
     </View>

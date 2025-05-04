@@ -10,7 +10,6 @@ import {
 } from "@cmt/validators";
 import { TRPCError } from "@trpc/server";
 import { customAlphabet } from "nanoid";
-import { clerkClient } from "@clerk/nextjs/server";
 import { ilike, inArray, eq, or } from "@cmt/db";
 import { z } from "zod";
 import { getQueryUserIds } from "../utils/clerk";
@@ -29,8 +28,7 @@ export const subscribersRouter = {
       // DB Transaction to prevent unsync data
       ctx.db.transaction(async (tx) => {
         const randomFaceId = customAlphabet("0123456789", 10);
-        const client = await clerkClient();
-        const user = await client.users.updateUser(ctx.session.userId, {
+        const user = await ctx.clerk.users.updateUser(ctx.session.userId, {
           firstName: input.personalInfo.firstName,
           lastName: input.personalInfo.lastName,
         });
@@ -89,8 +87,7 @@ export const subscribersRouter = {
     }),
 
   getPersonalDetails: protectedProcedure.query(async ({ ctx }) => {
-    const client = await clerkClient();
-    const user = await client.users.getUser(ctx.session.userId);
+    const user = await ctx.clerk.users.getUser(ctx.session.userId);
     const subscriber = await ctx.db.query.subscribers.findFirst({
       where: eq(subscribers.id, ctx.session.userId),
     });

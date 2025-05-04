@@ -238,8 +238,10 @@ export default function SignUpScreen() {
               <FormControl>
                 <Input
                   {...field}
+                  keyboardType="email-address"
                   placeholder="name@yourdomain.com"
                   autoFocus
+                  textContentType="emailAddress"
                   editable={!form.formState.isSubmitting || isLoaded}
                   autoCapitalize="none"
                   onChangeText={field.onChange}
@@ -260,6 +262,7 @@ export default function SignUpScreen() {
                 <Input
                   {...field}
                   secureTextEntry
+                  textContentType="newPassword"
                   editable={!form.formState.isSubmitting || isLoaded}
                   autoCapitalize="none"
                   onChangeText={field.onChange}
@@ -280,6 +283,7 @@ export default function SignUpScreen() {
                 <Input
                   {...field}
                   secureTextEntry
+                  textContentType="newPassword"
                   editable={!form.formState.isSubmitting || isLoaded}
                   autoCapitalize="none"
                   onChangeText={field.onChange}
