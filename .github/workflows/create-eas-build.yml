@@ -40,7 +40,7 @@ jobs:
 
       - name: Deploy Web App
         working-directory: apps/mobile
-        run: npx eas deploy --alias=${{ github.ref_name }} --non-interactive
+        run: EXPO_TOKEN=${{ secrets.EXPO_TOKEN }} eas deploy --alias=${{ github.ref_name }} --non-interactive
 
       - name: Set Alias Preview URL
         id: set_url
