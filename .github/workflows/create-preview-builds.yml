@@ -24,7 +24,7 @@ jobs:
 
       - name: Build Project Artifacts
         working-directory: apps/collector-console
-        run: vercel build --environment=preview --global-config=.vercel --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --global-config=.vercel --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy & Alias
         id: set_url
