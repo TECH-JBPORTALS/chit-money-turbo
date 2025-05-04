@@ -34,9 +34,13 @@ jobs:
       #   working-directory: apps/mobile
       #   run: pnpm dlx expo export --platform web --dump-assetmap --no-ssg
 
+      - name: Install EAS
+        working-directory: apps/mobile
+        run: npm i eas-cli --global
+
       - name: Deploy Web App
         working-directory: apps/mobile
-        run: pnpm dlx eas deploy --alias=${{ github.ref_name }} --non-interactive
+        run: npm eas deploy --alias=${{ github.ref_name }} --non-interactive
 
       - name: Set Alias Preview URL
         id: set_url
