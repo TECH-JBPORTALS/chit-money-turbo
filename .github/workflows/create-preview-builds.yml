@@ -99,6 +99,9 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Update EAS preview env variables
+        run: eas env:update --name EXPO_PUBLIC_SERVER_URL --value ${{needs.deploy_to_vercel.outputs.preview_url}} --visibility plaintext --environment preview --non-interactive
+
       - name: 🔪 Decide Build or Update
         id: build_type
         working-directory: apps/mobile
@@ -120,7 +123,7 @@ jobs:
 
       - name: 🕸️ EAS Build
         working-directory: apps/mobile
-        if: steps.build_type.outputs.action == 'build'
+        if: true
         run: |
           eas build --platform android --profile preview --non-interactive
 
