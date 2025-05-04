@@ -31,11 +31,11 @@ jobs:
           role: neondb_owner
           api_key: ${{ secrets.NEON_API_KEY }}
 
-      - name: Set Neon Database URLs in .env
-        run: |
-          touch .env
-          echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_pooled }}/neondb" >> .env
-          echo "DATABASE_URL_UNPOOLED=${{ steps.create-branch.outputs.db_url }}/neondb" >> .env
+      # - name: Set Neon Database URLs in .env
+      #   run: |
+      #     touch .env
+      #     echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_pooled }}/neondb" >> .env
+      #     echo "DATABASE_URL_UNPOOLED=${{ steps.create-branch.outputs.db_url }}/neondb" >> .env
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -48,7 +48,7 @@ jobs:
       - name: Add Database Env's
         run: |
           touch db.txt
-          echo "$DATABASE_URL" >> db.txt
+          echo ${{ steps.create-branch.outputs.db_url_pooled }} >> db.txt
           vercel env add DATABASE_URL preview --force --token=${{ secrets.VERCEL_TOKEN }} ${{ github.head_ref }} < db.txt
 
       - name: Pull Vercel Environment Information
@@ -60,7 +60,7 @@ jobs:
       - name: Deploy & Alias
         id: set_url
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt -b DATABASE_URL=$DATABASE_URL -e DATABASE_URL=$DATABASE_URL --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt -b DATABASE_URL=${{ steps.create-branch.outputs.db_url_pooled }} -e DATABASE_URL=${{ steps.create-branch.outputs.db_url_pooled }} --token=${{ secrets.VERCEL_TOKEN }})
           echo "Deployment URL: $DEPLOYMENT_URL"
 
           ALIAS_URL="https://chit-money-collector-console--${{ github.head_ref }}.vercel.app"
