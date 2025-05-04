@@ -67,8 +67,9 @@ export default function BankDetails() {
 
       return {
         accountHolderName: data?.accountHolderName ?? "",
+        confirmAccountNumber: data?.accountNumber ?? "",
         accountNumber: data?.accountNumber ?? "",
-        accountType: data?.accountType ?? "",
+        accountType: data?.accountType ?? "savings",
         branchName: data?.branchName ?? "",
         city: data?.city ?? "",
         ifscCode: data?.ifscCode ?? "",
@@ -111,6 +112,24 @@ export default function BankDetails() {
                 <FormLabel>Account Number</FormLabel>
                 <FormControl>
                   <Input {...field} onChangeText={field.onChange} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="confirmAccountNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Account Number</FormLabel>
+                <FormControl>
+                  <Input
+                    secureTextEntry
+                    {...field}
+                    onChangeText={field.onChange}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
