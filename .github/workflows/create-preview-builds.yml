@@ -1,8 +1,11 @@
 name: Preview Builds (Vercel + EAS)
-
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   deploy_to_vercel:
@@ -25,16 +28,16 @@ jobs:
 
       - name: Pull Vercel Environment Information
         working-directory: apps/collector-console
-        run: vercel pull --yes  --environment=preview --global-config=.vercel --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes  --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
         working-directory: apps/collector-console
-        run: vercel build --global-config=.vercel --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/collector-console
 
       - name: Deploy & Alias
         id: set_url
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --environment=preview --global-config=.vercel --cwd=apps/collector-console --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}) --cwd=apps/collector-console
           echo "Deployment URL: $DEPLOYMENT_URL"
 
           # Create alias like: collector-console--feature-branch-name.vercel.app
