@@ -1,9 +1,10 @@
 import { Stack } from "expo-router";
-import { SafeAreaView } from "~/components/safe-area-view";
+import React from "react";
 
 export default function HomeLayout() {
   return (
-    <SafeAreaView>
+    <React.Fragment>
+      <Stack.Screen options={{ headerShown: false }} />
       <Stack
         screenOptions={{
           headerTitleStyle: {
@@ -35,6 +36,6 @@ export default function HomeLayout() {
           options={{ title: "Bank Details" }}
         />
       </Stack>
-    </SafeAreaView>
+    </React.Fragment>
   );
 }

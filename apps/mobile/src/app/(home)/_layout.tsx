@@ -12,7 +12,11 @@ export default function Layout() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false,
+        headerShadowVisible: false,
+        headerTitleStyle: {
+          fontFamily: "Urbanist_600SemiBold",
+          fontSize: 30,
+        },
       }}
     >
       <Stack.Screen name="(tabs)" />
