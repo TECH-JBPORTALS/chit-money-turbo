@@ -57,9 +57,8 @@ jobs:
           DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
           echo "Deployment URL: $DEPLOYMENT_URL"
 
-          # Create alias like: collector-console--feature-branch-name.vercel.app
-          ALIAS_URL="https://collector-console--${{ github.head_ref }}.vercel.app"
-          vercel alias $DEPLOYMENT_URL collector-console--${{ github.head_ref }}.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
+          ALIAS_URL="https://chit-money-collector-console--${{ github.head_ref }}.vercel.app"
+          vercel alias set $DEPLOYMENT_URL chit-money-collector-console--${{ github.head_ref }}.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
 
           echo "preview_url=$ALIAS_URL" >> $GITHUB_OUTPUT
 
