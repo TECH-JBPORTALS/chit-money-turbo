@@ -18,6 +18,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Neon Database Create Branch Action
+        uses: neondatabase/create-branch-action@v6
+        id: create-branch
+        with:
+          project_id: ${{ secrets.NEON_PROJECT_ID }}
+          branch_name: ${{ github.head_ref }}
+          role: neondb_owner
+          api_key: ${{ secrets.NEON_API_KEY }}
+
+      - name: Set Database Config's
+        run: |
+          touch .env
+          DATABASE_URL = {{steps.create-branch.outputs.db_url_with_pooler }}/neondb >> .env
+          echo DATABASE_URL_UNPOOLED = {{steps.create-branch.outputs.db_url }}/neondb >> .env
+
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
