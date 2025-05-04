@@ -15,22 +15,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: apps/collector-console
-          scope: ${{ secrets.VERCEL_TEAM_ID }}
-          prod: false # Preview deployment
-          alias-domains: |
-            collector-console--${{ github.head_ref }}.vercel.app
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
 
-      - name: Set Preview URL
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/collector-console
+
+      - name: Deploy & Alias
         id: set_url
         run: |
-          echo "preview_url=https://collector-console--${{ github.head_ref }}.vercel.app" >> $GITHUB_OUTPUT
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/collector-console)
+          echo "Deployment URL: $DEPLOYMENT_URL"
+
+          # Create alias like: collector-console--feature-branch-name.vercel.app
+          ALIAS_URL="https://collector-console--${{ github.head_ref }}.vercel.app"
+          vercel alias $DEPLOYMENT_URL collector-console--${{ github.head_ref }}.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
+
+          echo "preview_url=$ALIAS_URL" >> $GITHUB_OUTPUT
 
   eas_build_or_update:
     name: EAS Build or Update
