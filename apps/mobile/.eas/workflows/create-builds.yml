@@ -16,9 +16,3 @@ jobs:
     environment: preview
     params:
       alias: ${{github.ref_name}}
-
-  print_depoloyed_var:
-    name: Print Deployed Variabled
-    type: custom
-    steps:
-      - run: echo ${{steps.web_preview_build.outputs}}
