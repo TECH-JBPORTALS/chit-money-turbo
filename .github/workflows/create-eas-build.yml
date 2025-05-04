@@ -6,11 +6,6 @@ on:
       - Create/Delete Branch for Pull Request
     types:
       - completed
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
 
 jobs:
   web_preview_build:
