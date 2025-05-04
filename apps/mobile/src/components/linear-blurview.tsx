@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import { View } from "react-native";
 import { cn } from "~/lib/utils";
 import { StyleSheet } from "react-native";
+import { SafeAreaView } from "./safe-area-view";
 
 export function LinearBlurView({
   children,
@@ -20,9 +21,9 @@ export function LinearBlurView({
         colors={gradient}
         className="h-64"
       />
-      <View className={cn("flex-1 px-4 py-1 gap-6", className)} {...props}>
+      <SafeAreaView className={cn("flex-1 px-4 gap-6", className)} {...props}>
         {children}
-      </View>
+      </SafeAreaView>
     </View>
   );
 }

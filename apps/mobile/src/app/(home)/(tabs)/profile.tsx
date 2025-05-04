@@ -22,27 +22,27 @@ const items = [
   {
     name: "Personal & Nominee Details",
     icon: User,
-    url: "/profile/pn-details",
+    url: "/(stacks)/profile/pn-details",
   },
   {
     name: "Credit Score History",
     icon: Radar,
-    url: "/credit-score",
+    url: "/(stacks)/credit-score",
   },
   {
     name: "Documents",
     icon: Files,
-    url: "/profile/documents",
+    url: "/(stacks)/profile/documents",
   },
   {
     name: "Contact Details",
     icon: Contact,
-    url: "/profile/contact-details",
+    url: "/(stacks)/profile/contact-details",
   },
   {
     name: "Bank Details",
     icon: Landmark,
-    url: "/profile/bank-details",
+    url: "/(stacks)/profile/bank-details",
   },
 ];
 

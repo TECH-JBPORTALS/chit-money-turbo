@@ -36,6 +36,7 @@ export default ({ config }: ConfigContext) => {
         backgroundColor: "#ffffff",
       },
       package: scheme,
+      edgeToEdgeEnabled: true,
     },
     updates: {
       url: "https://u.expo.dev/af73ccee-6f1b-4a7e-a1f7-4daeb769609f",
