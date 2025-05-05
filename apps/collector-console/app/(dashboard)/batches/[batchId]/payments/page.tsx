@@ -1,12 +1,9 @@
-import { DataTable } from "@/components/data-table";
-import { columns, Payment } from "./columns";
 import SearchInput from "@/components/search-input";
 import { Button } from "@cmt/ui/components/button";
-import { PlusCircleIcon, SquareIcon } from "lucide-react";
+import { PlusCircleIcon } from "lucide-react";
 import {
   Command,
   CommandEmpty,
-  CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
@@ -17,36 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@cmt/ui/components/popover";
-
-const data: Payment[] = [
-  {
-    id: "1",
-    chit_id: "#738392J",
-    email: "jhon@gmail.com",
-    full_name: "Jhon Abraham",
-    subscription_amount: "3000",
-    status: "Paid",
-    paid_on: new Date(2024, 2, 12),
-  },
-  {
-    id: "1",
-    chit_id: "#738392J",
-    email: "jhon@gmail.com",
-    full_name: "Jhon Abraham",
-    subscription_amount: "2000",
-    status: "Not Paid",
-    paid_on: new Date(2024, 2, 12),
-  },
-  {
-    id: "1",
-    chit_id: "#738392J",
-    email: "jhon@gmail.com",
-    full_name: "Jhon Abraham",
-    subscription_amount: "4000",
-    status: "Paid",
-    paid_on: new Date(2024, 2, 12),
-  },
-];
+import { DataTableClient } from "./datatable-client";
 
 export default function Page() {
   return (
@@ -91,7 +59,7 @@ export default function Page() {
           </PopoverContent>
         </Popover>
       </div>
-      <DataTable columns={columns} data={data} />
+      <DataTableClient />
     </div>
   );
 }

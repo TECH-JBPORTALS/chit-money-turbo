@@ -4,6 +4,8 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { schema } from "@cmt/db/client";
 import { addMonths, format } from "date-fns";
+import { paginateInputSchema } from "../utils/paginate";
+import { getSubscribersByBatchId } from "../utils/actions";
 
 export const paymentsRouter = {
   /** Get runway for specific brach based batch schema and starts on date
@@ -31,5 +33,24 @@ export const paymentsRouter = {
       });
 
       return { batch, months };
+    }),
+
+  /** Get list subscribers for runway with the status of payment paid or not paid
+   * @context collector
+   */
+  ofBatchSelectedRunway: protectedProcedure
+    .input(
+      paginateInputSchema.and(
+        z.object({
+          batchId: z.string(),
+          query: z.string().optional(),
+          runway: z.string(),
+        })
+      )
+    )
+    .query(async ({ ctx, input }) => {
+      const subs = await getSubscribersByBatchId({ ctx, input });
+
+      return subs;
     }),
 };

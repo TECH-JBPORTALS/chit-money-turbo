@@ -20,7 +20,7 @@ export default async function Layout({
   );
 
   return (
-    <section className="w-full flex h-full">
+    <section className="w-full flex h-svh overflow-hidden">
       <ScrollArea className="flex-1">
         <div className="flex-1 pr-4 py-8">{children}</div>
       </ScrollArea>

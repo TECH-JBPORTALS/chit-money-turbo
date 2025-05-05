@@ -1,9 +1,8 @@
 "use client";
 
 import { AddPaymentDialog } from "@/components/dialogs/add-payemnt-dialog";
-import EditCommisionsDialog from "@/components/dialogs/edit-commission-dialog";
-import PaymentHistoryDialog from "@/components/dialogs/payment-history-dialog";
 import { ViewPaymentDialog } from "@/components/dialogs/view-payment-dialog";
+import { RouterOutputs } from "@cmt/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Badge } from "@cmt/ui/components/badge";
 import { Button } from "@cmt/ui/components/button";
@@ -16,28 +15,16 @@ import {
 import { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNowStrict } from "date-fns";
 import {
-  ArrowUpRightIcon,
   DeleteIcon,
   MoreHorizontal,
-  PercentIcon,
   PlusIcon,
   ScrollTextIcon,
 } from "lucide-react";
 import Link from "next/link";
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-export type Payment = {
-  id: string;
-  chit_id: string;
-  full_name: string;
-  subscription_amount: string;
-  status: "Paid" | "Not Paid";
-  email: string;
-  paid_on: Date;
-};
-
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<
+  RouterOutputs["payments"]["ofBatchSelectedRunway"]["items"][number]
+>[] = [
   {
     accessorKey: "id",
     header: "Subscriber",
@@ -46,14 +33,18 @@ export const columns: ColumnDef<Payment>[] = [
       return (
         <div className="inline-flex gap-2">
           <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>S</AvatarFallback>
+            <AvatarImage src={row.subscriber.imageUrl} />
+            <AvatarFallback>
+              {row.subscriber.firstName?.charAt(0)}
+            </AvatarFallback>
           </Avatar>
           <div>
-            <Link className="hover:underline" href={`/s/${row.id}`}>
-              <span>{row.full_name}</span>
+            <Link className="hover:underline" href={`/s/${row.subscriberId}`}>
+              <span>
+                {row.subscriber.firstName} {row.subscriber.lastName}
+              </span>
             </Link>
-            <p className="text-muted-foreground text-sm">{row.chit_id}</p>
+            <p className="text-muted-foreground text-sm">{row.chitId}</p>
           </div>
         </div>
       );
@@ -63,11 +54,7 @@ export const columns: ColumnDef<Payment>[] = [
     accessorKey: "subscription_amount",
     header: "Subscription Amount",
     cell(props) {
-      return (
-        <div className="font-bold">
-          ₹{props.row.original.subscription_amount}
-        </div>
-      );
+      return <div className="font-bold">₹{50000}</div>;
     },
   },
   {
@@ -78,7 +65,7 @@ export const columns: ColumnDef<Payment>[] = [
 
       return (
         <div className="text-center">
-          {row.status == "Paid" ? (
+          {false ? (
             <Badge>Paid</Badge>
           ) : (
             <Badge variant={"outline"}>Not Paid</Badge>
@@ -93,7 +80,7 @@ export const columns: ColumnDef<Payment>[] = [
       const original = props.row.original;
       return (
         <div className="text-right">
-          {original.status === "Not Paid" ? (
+          {true ? (
             <AddPaymentDialog>
               <Button variant={"secondary"}>
                 <PlusIcon /> Collect
@@ -101,7 +88,7 @@ export const columns: ColumnDef<Payment>[] = [
             </AddPaymentDialog>
           ) : (
             <time className="text-sm text-muted-foreground">
-              {formatDistanceToNowStrict(props.row.original.paid_on, {
+              {formatDistanceToNowStrict(props.row.original.createdAt, {
                 addSuffix: true,
               })}
             </time>

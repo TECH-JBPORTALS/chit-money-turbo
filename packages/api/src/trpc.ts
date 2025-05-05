@@ -73,6 +73,12 @@ export const createTRPCContext = async (opts: {
   };
 };
 
+type Context = Awaited<ReturnType<typeof createTRPCContext>>;
+
+export type AuthedContext = Context & {
+  session: NonNullable<Context["session"]>;
+};
+
 /**
  * 2. INITIALIZATION
  *
@@ -157,6 +163,7 @@ export const protectedProcedure = t.procedure
     }
     return next({
       ctx: {
+        ...ctx,
         // infers the `session` as non-nullable
         session: ctx.session,
       },
