@@ -23,7 +23,7 @@ export function DataTableClient() {
       pageIndex: parseInt(pageIndex),
       pageSize: parseInt(pageSize),
       query,
-      runway: currentRunway,
+      runwayDate: currentRunway,
     })
   );
 

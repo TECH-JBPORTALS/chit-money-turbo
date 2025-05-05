@@ -54,7 +54,19 @@ export const columns: ColumnDef<
     accessorKey: "subscription_amount",
     header: "Subscription Amount",
     cell(props) {
-      return <div className="font-bold">₹{50000}</div>;
+      return (
+        <div className="font-bold text-base">
+          {props.row.original.payment.subscriptionAmount.toLocaleString(
+            "en-IN",
+            {
+              currencyDisplay: "symbol",
+              currency: "INR",
+              maximumFractionDigits: 0,
+              style: "currency",
+            }
+          )}
+        </div>
+      );
     },
   },
   {
@@ -65,7 +77,7 @@ export const columns: ColumnDef<
 
       return (
         <div className="text-center">
-          {false ? (
+          {row.payment.status === "paid" ? (
             <Badge>Paid</Badge>
           ) : (
             <Badge variant={"outline"}>Not Paid</Badge>
@@ -80,7 +92,7 @@ export const columns: ColumnDef<
       const original = props.row.original;
       return (
         <div className="text-right">
-          {true ? (
+          {original.payment.status === "not paid" ? (
             <AddPaymentDialog>
               <Button variant={"secondary"}>
                 <PlusIcon /> Collect

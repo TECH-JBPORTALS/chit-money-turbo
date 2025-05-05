@@ -1,4 +1,4 @@
-import { eq } from "@cmt/db";
+import { and, eq, sql } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
@@ -6,6 +6,7 @@ import { schema } from "@cmt/db/client";
 import { addMonths, format } from "date-fns";
 import { paginateInputSchema } from "../utils/paginate";
 import { getSubscribersByBatchId } from "../utils/actions";
+import { generateChitId } from "@cmt/db/utils";
 
 export const paymentsRouter = {
   /** Get runway for specific brach based batch schema and starts on date
@@ -44,13 +45,48 @@ export const paymentsRouter = {
         z.object({
           batchId: z.string(),
           query: z.string().optional(),
-          runway: z.string(),
+          runwayDate: z.string(),
         })
       )
     )
     .query(async ({ ctx, input }) => {
       const subs = await getSubscribersByBatchId({ ctx, input });
+      const runwayDate = new Date(input.runwayDate);
+      const { batch } = await generateChitId(input.batchId);
+      const subscriptionAmount = Math.ceil(
+        parseInt(batch.fundAmount) / batch.scheme
+      );
 
-      return subs;
+      const mappedItems = await Promise.all(
+        subs.items.flatMap(async (sub) => {
+          let status: "paid" | "not paid" = "not paid";
+
+          const inputMonth = runwayDate.getMonth() + 1; // JavaScript months are 0-indexed
+          const inputYear = runwayDate.getFullYear();
+
+          // Check if: subscriber paid for given runway date
+          const payment = await ctx.db.query.payments.findFirst({
+            where: and(
+              eq(schema.payments.subscriberToBatchId, sub.id),
+              sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate}) = ${inputMonth}`,
+              sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate}) = ${inputYear}`
+            ),
+          });
+
+          if (payment) status = "paid";
+
+          return {
+            ...sub,
+            payment: {
+              ...payment,
+              subscriptionAmount:
+                payment?.subscriptionAmount ?? subscriptionAmount,
+              status,
+            },
+          };
+        })
+      );
+
+      return { ...subs, items: mappedItems };
     }),
 };

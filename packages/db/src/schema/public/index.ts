@@ -98,6 +98,8 @@ export const payments = pgTable(
         onUpdate: "cascade",
       })
       .notNull(),
+    /** Actual date of chit */
+    runwayDate: t.date().notNull(),
     penalty: t.numeric({ precision: 3, mode: "number" }).default(0).notNull(),
     subscriptionAmount: t.numeric({ precision: 3, mode: "number" }).notNull(),
     totalAmount: t.numeric({ precision: 3, mode: "number" }).notNull(),

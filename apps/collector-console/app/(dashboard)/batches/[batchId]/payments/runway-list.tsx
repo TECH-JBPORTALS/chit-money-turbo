@@ -35,7 +35,7 @@ export function RunwayList({
           )}
           variant={"ghost"}
         >
-          {i + 1} {r.label}
+          <b>{i + 1}.</b> {r.label}
         </Button>
       ))}
     </div>

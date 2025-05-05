@@ -1,4 +1,3 @@
-import SearchInput from "@/components/search-input";
 import { Button } from "@cmt/ui/components/button";
 import { PlusCircleIcon } from "lucide-react";
 import {
@@ -15,6 +14,7 @@ import {
   PopoverTrigger,
 } from "@cmt/ui/components/popover";
 import { DataTableClient } from "./datatable-client";
+import SearchClient from "./search-client";
 
 export default function Page() {
   return (
@@ -29,7 +29,7 @@ export default function Page() {
       </div>
 
       <div className="inline-flex gap-2 items-center">
-        <SearchInput placeholder="Search..." className="ml-0.5 w-[600px]" />
+        <SearchClient />
 
         <Popover>
           <PopoverTrigger asChild>
