@@ -31,12 +31,6 @@ jobs:
           role: neondb_owner
           api_key: ${{ secrets.NEON_API_KEY }}
 
-      # - name: Set Neon Database URLs in .env
-      #   run: |
-      #     touch .env
-      #     echo "DATABASE_URL=${{ steps.create-branch.outputs.db_url_pooled }}/neondb" >> .env
-      #     echo "DATABASE_URL_UNPOOLED=${{ steps.create-branch.outputs.db_url }}/neondb" >> .env
-
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
@@ -67,6 +61,16 @@ jobs:
           vercel alias set $DEPLOYMENT_URL chit-money-collector-console--${{ github.head_ref }}.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
 
           echo "preview_url=$ALIAS_URL" >> $GITHUB_OUTPUT
+
+      - name: 💬 Comment Preview URL on PR
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            🚀Collector Console Preview Deployment Ready!
+            🌐 [View Preview](https://chit-money-collector-console--${{ github.head_ref }}.vercel.app)
 
   eas_build_or_update:
     name: EAS Build or Update
@@ -123,15 +127,42 @@ jobs:
           fi
 
       - name: 🕸️ EAS Build
+        working-directory: apps/mobile
         if: true
-        uses: expo/expo-github-action/preview@v8
-        with:
-          command: cd apps/mobile && eas build --platform android --profile preview --non-interactive
+        id: eas-build
+        run: |
+          EAS_OUTPUT=$( eas build --platform android --profile preview --non-interactive --json )
+          BUILD_URL=$(echo $EAS_OUTPUT | jq -r '.[0].artifacts.buildUrl')
+          echo "build_url=$BUILD_URL" >> $GITHUB_OUTPUT
 
       - name: 🚀 EAS Update
+        working-directory: apps/mobile
+        id: eas-update
         if: steps.build_type.outputs.action == 'update'
-        uses: expo/expo-github-action/preview@v8
+        run: |
+          UPDATE_OUTPUT=$(eas update --auto --branch ${{ github.event.pull_request.head.ref }} --json)
+          QR_CODE_URL=$(echo $UPDATE_OUTPUT | jq -r '.qrCodeUrl')
+          echo "qr_code_url=$QR_CODE_URL" >> $GITHUB_OUTPUT
+
+      - name: 💬 Comment EAS Links on PR
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
         with:
-          # `github.event.pull_request.head.ref` is only available on `pull_request` triggers.
-          # Use your own, or keep the automatically inferred branch name from `--auto`, when using different triggers.
-          command: cd apps/mobile && eas update --auto --branch ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            🚀 **Preview Deployment Ready!**
+            🌐 [View Web Preview](https://chit-money-collector-console--${{ github.head_ref }}.vercel.app)
+
+            📱 **Expo Preview App:**
+            ${{
+              steps.eas_build.outputs.build_url != '' 
+                && format('🔗 [Download Build]({0})', steps.eas_build.outputs.build_url) 
+                || ''
+            }}
+
+            ${{
+              steps.eas_update.outputs.qr_code_url != ''
+                && format('![QR Code]({0})', steps.eas_update.outputs.qr_code_url)
+                || ''
+            }}
