@@ -39,3 +39,5 @@ android/
 # typescript
 *.tsbuildinfo
 .vercel
+
+!.eas/build/
