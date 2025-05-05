@@ -16,7 +16,6 @@
       "autoIncrement": true,
       "distribution": "internal",
       "android": {
-        "withoutCredentials": false,
         "config": "android-build-with-credentials.yml",
         "buildType": "apk",
         "image": "latest"
