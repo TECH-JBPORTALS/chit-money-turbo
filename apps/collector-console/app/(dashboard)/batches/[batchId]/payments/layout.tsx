@@ -1,7 +1,24 @@
-import { Button } from "@cmt/ui/components/button";
+import { createQueryClient } from "@/trpc/query-client";
+import { trpc } from "@/trpc/server";
 import { ScrollArea } from "@cmt/ui/components/scroll-area";
+import { SearchParams } from "nuqs/server";
+import { RunwayList } from "./runway-list";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({
+  children,
+  params,
+  searchParams,
+}: {
+  children: React.ReactNode;
+  params: Promise<{ batchId: string }>;
+  searchParams: Promise<SearchParams>;
+}) {
+  const queryClient = createQueryClient();
+  const { batchId } = await params;
+  const runway = await queryClient.fetchQuery(
+    trpc.payments.getRunway.queryOptions({ batchId })
+  );
+
   return (
     <section className="w-full flex h-full">
       <ScrollArea className="flex-1">
@@ -16,23 +33,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </p>
           </div>
 
-          <div>
-            <Button
-              className="rounded-s-none bg-accent border-l-2 border-l-primary w-full justify-start"
-              variant={"ghost"}
-            >
-              1. Jan 2024
-            </Button>
-            {Array.from({ length: 10 }).map((_, i) => (
-              <Button
-                key={i}
-                className="rounded-s-none justify-start w-full"
-                variant={"ghost"}
-              >
-                {i + 1} Feb 2024
-              </Button>
-            ))}
-          </div>
+          <RunwayList runway={runway} />
         </aside>
       </ScrollArea>
     </section>

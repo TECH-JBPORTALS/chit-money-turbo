@@ -6,4 +6,4 @@ export const clerkSearchParams = {
   __clerk_ticket: parseAsString,
 };
 
-export const loadSearchParams = createLoader(clerkSearchParams);
+export const loadClerkSearchParams = createLoader(clerkSearchParams);

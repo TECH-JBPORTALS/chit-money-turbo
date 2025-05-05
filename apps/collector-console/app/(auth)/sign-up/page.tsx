@@ -1,5 +1,5 @@
 import { SignUpForm } from "@/components/forms/signup-form";
-import { loadSearchParams } from "@/lib/clerk-searchparams";
+import { loadClerkSearchParams } from "@/lib/search-params";
 import { clerkClient } from "@clerk/nextjs/server";
 import { jwtDecode } from "jwt-decode";
 import { SearchParams } from "nuqs/server";
@@ -33,7 +33,7 @@ async function getInvitaion(clerkTicket: string | null) {
 }
 
 export default async function Page({ searchParams }: PageProps) {
-  const { __clerk_ticket } = await loadSearchParams(searchParams);
+  const { __clerk_ticket } = await loadClerkSearchParams(searchParams);
 
   const invitaion = await getInvitaion(__clerk_ticket);
 
