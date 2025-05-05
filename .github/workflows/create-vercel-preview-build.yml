@@ -1,0 +1,166 @@
+name: Create Vercel Preview Build
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+on:
+  pull_request:
+    branches-ignore:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  deploy_to_vercel:
+    name: Deploy Collector Console to Vercel
+    runs-on: ubuntu-latest
+
+    outputs:
+      preview_url: ${{ steps.set_url.outputs.preview_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Neon Database Create Branch Action
+        uses: neondatabase/create-branch-action@v6
+        id: create-branch
+        with:
+          project_id: ${{ secrets.NEON_PROJECT_ID }}
+          branch_name: ${{ github.head_ref }}
+          role: neondb_owner
+          api_key: ${{ secrets.NEON_API_KEY }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.4.1
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Add Database Env's
+        run: |
+          touch db.txt
+          echo ${{ steps.create-branch.outputs.db_url_pooled }} >> db.txt
+          vercel env add DATABASE_URL preview --force --token=${{ secrets.VERCEL_TOKEN }} ${{ github.head_ref }} < db.txt
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes  --environment=preview --git-branch=${{ github.head_ref }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --target=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy & Alias
+        id: set_url
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt -b DATABASE_URL=${{ steps.create-branch.outputs.db_url_pooled }} -e DATABASE_URL=${{ steps.create-branch.outputs.db_url_pooled }} --token=${{ secrets.VERCEL_TOKEN }})
+          echo "Deployment URL: $DEPLOYMENT_URL"
+
+          ALIAS_URL="https://chit-money-collector-console--${{ github.head_ref }}.vercel.app"
+          vercel alias set $DEPLOYMENT_URL chit-money-collector-console--${{ github.head_ref }}.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
+
+          echo "preview_url=$ALIAS_URL" >> $GITHUB_OUTPUT
+
+      - name: 💬 Comment Preview URL on PR
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            🚀Collector Console Preview Deployment Ready!
+            🌐 [View Preview](https://chit-money-collector-console--${{ github.head_ref }}.vercel.app)
+
+  eas_build_or_update:
+    name: EAS Build or Update
+    needs: deploy_to_vercel
+    runs-on: ubuntu-latest
+
+    env:
+      EXPO_PUBLIC_SERVER_URL: ${{ needs.deploy_to_vercel.outputs.preview_url }}
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.4.1
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Update EAS preview env variables
+        working-directory: apps/mobile
+        run: eas env:update --variable-name EXPO_PUBLIC_SERVER_URL --value ${{needs.deploy_to_vercel.outputs.preview_url}} --visibility plaintext --variable-environment preview --non-interactive
+
+      - name: 🔪 Decide Build or Update
+        id: build_type
+        working-directory: apps/mobile
+        run: |
+          # Create a flag file if this is the first run for the branch
+          CACHE_DIR=".eas-cache"
+          FLAG_FILE="$CACHE_DIR/${{ github.head_ref }}.built"
+
+          mkdir -p $CACHE_DIR
+
+          if [ -f "$FLAG_FILE" ]; then
+            echo "This branch has already been built. Will run update."
+            echo "action=update" >> $GITHUB_OUTPUT
+          else
+            echo "First build for this branch."
+            echo "action=build" >> $GITHUB_OUTPUT
+            touch "$FLAG_FILE"
+          fi
+
+      - name: 🕸️ EAS Build
+        working-directory: apps/mobile
+        if: steps.build_type.outputs.action == 'build'
+        id: eas-build
+        run: |
+          export EAS_CHANNEL=${{ github.head_ref }}
+          EAS_OUTPUT=$( eas build --platform android --profile preview --non-interactive --json )
+          BUILD_URL=$(echo $EAS_OUTPUT | jq -r '.[0].artifacts.buildUrl')
+          echo "build_url=$BUILD_URL" >> $GITHUB_OUTPUT
+
+      - name: 🚀 EAS Update
+        working-directory: apps/mobile
+        id: eas-update
+        if: steps.build_type.outputs.action == 'update'
+        run: |
+          UPDATE_OUTPUT=$(eas update --auto --branch ${{ github.event.pull_request.head.ref }} --json)
+          QR_CODE_URL=$(echo $UPDATE_OUTPUT | jq -r '.qrCodeUrl')
+          echo "qr_code_url=$QR_CODE_URL" >> $GITHUB_OUTPUT
+
+      - name: 💬 Comment EAS Links on PR
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            📱 **Expo Preview App:**
+            ${{
+              steps.eas_build.outputs.build_url != '' 
+                && format('🔗 [Download Build]({0})', steps.eas_build.outputs.build_url) 
+                || 'No build url provided, May be build cancelled or failed'
+            }}
+
+            ${{
+              steps.eas_update.outputs.qr_code_url != ''
+                && format('![QR Code]({0})', steps.eas_update.outputs.qr_code_url)
+                || 'No QR code url provided, May be update cancelled or failed'
+            }}
