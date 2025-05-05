@@ -15,8 +15,9 @@
     "preview": {
       "autoIncrement": true,
       "distribution": "internal",
-      "config": "preview.yml",
       "android": {
+        "withoutCredentials": false,
+        "config": "android-build-with-credentials.yml",
         "buildType": "apk",
         "image": "latest"
       }

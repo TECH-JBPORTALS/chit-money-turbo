@@ -151,18 +151,15 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            🚀 **Preview Deployment Ready!**
-            🌐 [View Web Preview](https://chit-money-collector-console--${{ github.head_ref }}.vercel.app)
-
             📱 **Expo Preview App:**
             ${{
               steps.eas_build.outputs.build_url != '' 
                 && format('🔗 [Download Build]({0})', steps.eas_build.outputs.build_url) 
-                || ''
+                || 'No build url provided, May be build cancelled or failed'
             }}
 
             ${{
               steps.eas_update.outputs.qr_code_url != ''
                 && format('![QR Code]({0})', steps.eas_update.outputs.qr_code_url)
-                || ''
+                || 'No QR code url provided, May be update cancelled or failed'
             }}
