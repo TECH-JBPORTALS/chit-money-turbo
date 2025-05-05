@@ -15,7 +15,7 @@
     "preview": {
       "autoIncrement": true,
       "distribution": "internal",
-      "channel": "preview",
+      "config": "preview.yml",
       "android": {
         "buildType": "apk",
         "image": "latest"
