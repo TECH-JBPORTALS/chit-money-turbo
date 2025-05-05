@@ -128,7 +128,7 @@ jobs:
 
       - name: 🕸️ EAS Build
         working-directory: apps/mobile
-        if: true
+        if: steps.build_type.outputs.action == 'build'
         id: eas-build
         run: |
           EAS_OUTPUT=$( eas build --platform android --profile preview --non-interactive --json )
@@ -148,7 +148,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: peter-evans/create-or-update-comment@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             🚀 **Preview Deployment Ready!**
