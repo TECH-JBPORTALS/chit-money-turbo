@@ -1,5 +1,5 @@
 import { createInsertSchema } from "drizzle-zod";
-import { batches, subscribersToBatches } from ".";
+import { batches, payments, subscribersToBatches } from ".";
 import { z } from "zod";
 
 export const batchInsertSchema = createInsertSchema(batches).omit({
@@ -34,6 +34,7 @@ export const subscribersToBatchUpdateSchema = createInsertSchema(
   subscribersToBatches
 )
   .omit({
+    id: true,
     chitId: true,
     createdAt: true,
     updatedAt: true,
@@ -46,3 +47,9 @@ export const subscribersToBatchUpdateSchema = createInsertSchema(
         .min(1, "subscriberToBatchId is required for updation"),
     })
   );
+
+export const paymentInsertSchema = createInsertSchema(payments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});

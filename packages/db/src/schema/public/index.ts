@@ -1,8 +1,13 @@
 import { ulid } from "ulid";
-import { pgTable, uniqueIndex } from "drizzle-orm/pg-core";
+import { index, pgTable, uniqueIndex } from "drizzle-orm/pg-core";
 import { collectors } from "../collectors";
 import { subscribers } from "../subscribers";
-import { batchStatusEnum, batchTypeEnum } from "../enums";
+import {
+  batchStatusEnum,
+  batchTypeEnum,
+  paymentModeEnum,
+  payoutStatusEnum,
+} from "../enums";
 
 /************************************* Batches ***************************************/
 
@@ -75,4 +80,75 @@ export const subscribersToBatches = pgTable(
     createdAt: t.timestamp().defaultNow().notNull(),
   }),
   (self) => [uniqueIndex("chitId_unique_batch").on(self.chitId, self.batchId)]
+);
+
+/************************************* Payments ***************************************/
+
+export const payments = pgTable(
+  "payments",
+  (t) => ({
+    id: t
+      .text()
+      .$defaultFn(() => `pamnt_${ulid()}`)
+      .primaryKey(),
+    subscriberToBatchId: t
+      .text()
+      .references(() => subscribersToBatches.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      })
+      .notNull(),
+    penalty: t.numeric({ precision: 3, mode: "number" }).default(0).notNull(),
+    subscriptionAmount: t.numeric({ precision: 3, mode: "number" }).notNull(),
+    totalAmount: t.numeric({ precision: 3, mode: "number" }).notNull(),
+    paymentMode: paymentModeEnum("payment_mode").default("cash").notNull(),
+    transactionId: t.text(),
+    creditScoreAffected: t.integer().notNull(),
+    /** Special paid on to explicitly define the paid date */
+    paidOn: t.date().defaultNow().notNull(),
+    updatedAt: t.timestamp().$onUpdate(() => new Date()),
+    createdAt: t.timestamp().defaultNow().notNull(),
+  }),
+  (self) => [index().on(self.subscriberToBatchId)]
+);
+
+export const payouts = pgTable(
+  "payouts",
+  (t) => ({
+    id: t
+      .text()
+      .$defaultFn(() => `paout_${ulid()}`)
+      .primaryKey(),
+    subscriberToBatchId: t
+      .text()
+      .references(() => subscribersToBatches.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      })
+      .notNull(),
+
+    month: t.date().notNull(),
+    deductions: t
+      .numeric({ precision: 3, mode: "number" })
+      .default(0)
+      .notNull(),
+    amount: t.numeric({ precision: 3, mode: "number" }).notNull(),
+    totalAmount: t.numeric({ precision: 3, mode: "number" }).notNull(),
+    payoutStatus: payoutStatusEnum("payout_status")
+      .default("requested")
+      .notNull(),
+    paymentMode: paymentModeEnum("payment_mode").default("cash").notNull(),
+    transactionId: t.text(),
+
+    /** Special paid on to explicitly define the paid date */
+    requestedAt: t.timestamp(),
+    acceptedAt: t.timestamp(),
+    cancelledAt: t.timestamp(),
+    rejectionReason: t.text(),
+    disbursedAt: t.timestamp(),
+    rejectedAt: t.timestamp(),
+    updatedAt: t.timestamp().$onUpdate(() => new Date()),
+    createdAt: t.timestamp().defaultNow().notNull(),
+  }),
+  (self) => [index().on(self.subscriberToBatchId)]
 );

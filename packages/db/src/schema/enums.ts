@@ -11,3 +11,17 @@ export const accountTypeEnum = pgEnum("account_type_enum", [
   "savings",
   "current",
 ]);
+
+export const paymentModeEnum = pgEnum("payment_mode_enum", [
+  "cash",
+  "upi/bank",
+  "cheque",
+]);
+
+export const payoutStatusEnum = pgEnum("payout_status_enum", [
+  "requested",
+  "accepted",
+  "rejected",
+  "disbursed",
+  "cancelled",
+]);
