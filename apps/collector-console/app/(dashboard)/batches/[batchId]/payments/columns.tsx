@@ -56,7 +56,7 @@ export const columns: ColumnDef<
     header: "Subscription Amount",
     cell(props) {
       return (
-        <div>
+        <div className="font-bold">
           {props.row.original.payment.subscriptionAmount.toLocaleString(
             "en-IN",
             {
