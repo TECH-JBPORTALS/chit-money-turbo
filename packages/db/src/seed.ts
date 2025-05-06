@@ -224,13 +224,61 @@ async function main() {
 
       await Promise.all(
         randomSubs.map(async (sub, index) => {
-          // const chitId = `CHIT${(index + 1).toString().padStart(batch.scheme.toString().length, "0")}`;
+          const subscribersToBatch = await db
+            .insert(schema.subscribersToBatches)
+            .values({
+              subscriberId: sub.id,
+              batchId: batch.id,
+              commissionRate: batch.defaultCommissionRate,
+            })
+            .returning();
 
-          await db.insert(schema.subscribersToBatches).values({
-            subscriberId: sub.id,
-            batchId: batch.id,
-            // chitId,
-            commissionRate: batch.defaultCommissionRate,
+          console.log(`Making few payments for ${sub.faceId}`);
+
+          const runwayDates = Array.from({ length: batch.scheme }).map(
+            (_, i) => {
+              return addMonths(batch.startsOn, index);
+            }
+          );
+
+          const randomDates = f.helpers.arrayElements(runwayDates, 10);
+
+          randomDates.map(async (runwayDate) => {
+            const paidOn = f.date.between({
+              from: batch.startsOn,
+              to: addMonths(batch.startsOn, batch.scheme),
+            });
+
+            const creditScoreAffected = runwayDate > paidOn ? 20 : -10;
+
+            const penalty = runwayDate < paidOn ? -300 : 0;
+
+            const subscriptionAmount = Math.ceil(
+              parseInt(batch.fundAmount) / batch.scheme
+            );
+
+            const totalAmount = subscriptionAmount + penalty;
+
+            const paymentMode = f.helpers.arrayElement([
+              "cash",
+              "upi/bank",
+              "cheque",
+            ]);
+
+            const transactionId =
+              paymentMode === "upi/bank" ? f.finance.iban() : null;
+
+            db.insert(schema.payments).values({
+              runwayDate: runwayDate.toDateString(),
+              creditScoreAffected,
+              paidOn: paidOn.toDateString(),
+              subscriptionAmount,
+              subscriberToBatchId: subscribersToBatch.at(0)!.id,
+              totalAmount,
+              paymentMode,
+              transactionId,
+              penalty,
+            });
           });
         })
       );
