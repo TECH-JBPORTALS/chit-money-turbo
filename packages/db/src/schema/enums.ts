@@ -24,4 +24,5 @@ export const payoutStatusEnum = pgEnum("payout_status_enum", [
   "rejected",
   "disbursed",
   "cancelled",
+  "approved",
 ]);

@@ -1,6 +1,7 @@
 "use client";
 import { AddPayoutDialog } from "@/components/dialogs/add-payout-dialog";
 import { ViewPayoutDialog } from "@/components/dialogs/view-payout-dialog";
+import { RouterOutputs } from "@cmt/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Badge } from "@cmt/ui/components/badge";
 import { Button } from "@cmt/ui/components/button";
@@ -11,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@cmt/ui/components/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
+import { format, formatDate } from "date-fns";
 import {
   ArrowUpRightIcon,
   MoreHorizontal,
@@ -21,20 +22,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-export type Payout = {
-  id: string;
-  chit_id: string;
-  full_name: string;
-  payout_month: string;
-  amount: string;
-  status: "Disbursed" | "Approved";
-  email: string;
-  joined_on: Date;
-};
-
-export const columns: ColumnDef<Payout>[] = [
+export const columns: ColumnDef<
+  RouterOutputs["payouts"]["ofBatch"]["items"][number]
+>[] = [
   {
     accessorKey: "id",
     header: "Subscriber",
@@ -48,9 +38,13 @@ export const columns: ColumnDef<Payout>[] = [
           </Avatar>
           <div>
             <Link className="hover:underline" href={`/s/${row.id}`}>
-              <span>{row.full_name}</span>
+              <span>
+                {row.subscriber.firstName} {row.subscriber.lastName}
+              </span>
             </Link>
-            <p className="text-muted-foreground text-sm">{row.chit_id}</p>
+            <p className="text-muted-foreground text-sm">
+              {row.subscribersToBatches.chitId}
+            </p>
           </div>
         </div>
       );
@@ -60,7 +54,11 @@ export const columns: ColumnDef<Payout>[] = [
     accessorKey: "payout_month",
     header: "Payout Month",
     cell(props) {
-      return <div className="font-bold">{props.row.original.payout_month}</div>;
+      return (
+        <div className="font-bold">
+          {formatDate(props.row.original.month, "MMMM yyyy")}
+        </div>
+      );
     },
   },
   {
@@ -78,13 +76,13 @@ export const columns: ColumnDef<Payout>[] = [
     cell(props) {
       const row = props.row.original;
 
-      if (row.status === "Disbursed")
+      if (row.payoutStatus === "disbursed")
         return (
           <div className="text-right">
             <Badge>Disbursed</Badge>
           </div>
         );
-      else if (row.status === "Approved")
+      else if (row.payoutStatus === "approved")
         return (
           <div className="text-right">
             <Badge variant={"secondary"}>Approved</Badge>
@@ -95,13 +93,13 @@ export const columns: ColumnDef<Payout>[] = [
   {
     accessorKey: "joined_on",
     header(props) {
-      return <div className="text-right font-bold">Joined On</div>;
+      return <div className="text-right font-bold">Created At</div>;
     },
     cell(props) {
       return (
         <div className="text-right">
           <time className="text-sm text-muted-foreground">
-            {format(props.row.original.joined_on, "dd MMM, yyyy")}
+            {format(props.row.original.createdAt, "dd MMM, yyyy")}
           </time>
         </div>
       );
@@ -125,7 +123,7 @@ export const columns: ColumnDef<Payout>[] = [
                 </DropdownMenuItem>
               </ViewPayoutDialog>
 
-              {props.row.original.status === "Approved" && (
+              {props.row.original.payoutStatus === "approved" && (
                 <AddPayoutDialog>
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     <ArrowUpRightIcon />

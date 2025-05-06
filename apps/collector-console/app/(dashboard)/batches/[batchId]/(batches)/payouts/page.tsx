@@ -1,73 +1,11 @@
 import SearchInput from "@/components/search-input";
 import { Button } from "@cmt/ui/components/button";
 import { PlusCircleIcon } from "lucide-react";
-import { columns, Payout } from "./columns";
-import { DataTable } from "@/components/data-table";
 import { PayoutRequestsButton } from "@/components/payout-requests-popover";
 import { SelectPayoutPersonDialog } from "@/components/dialogs/add-payout-dialog";
+import { DataTableClient } from "./datatable-client";
+import SearchClient from "./search-client";
 
-const data: Payout[] = [
-  {
-    id: "hellowiiddkejkeje",
-    amount: "20000",
-    chit_id: "#28273892",
-    email: "huno@gmail.com",
-    status: "Disbursed",
-    payout_month: "1. March 2024",
-    full_name: "Hunaid",
-    joined_on: new Date(2025, 3, 10),
-  },
-  {
-    id: "hellowiiddkejkeje",
-    amount: "20000",
-    chit_id: "#28273892",
-    email: "huno@gmail.com",
-    status: "Disbursed",
-    payout_month: "1. March 2024",
-    full_name: "Hunaid",
-    joined_on: new Date(2024, 3, 1),
-  },
-  {
-    id: "hellowiiddkejkeje",
-    amount: "20000",
-    chit_id: "#28273892",
-    email: "huno@gmail.com",
-    status: "Approved",
-    payout_month: "1. March 2024",
-    full_name: "Hunaid",
-    joined_on: new Date(2025, 2, 1),
-  },
-  {
-    id: "hellowiiddkejkeje",
-    amount: "20000",
-    chit_id: "#28273892",
-    email: "huno@gmail.com",
-    status: "Disbursed",
-    payout_month: "1. March 2024",
-    full_name: "Hunaid",
-    joined_on: new Date(2024, 3, 1),
-  },
-  {
-    id: "hellowiiddkejkeje",
-    amount: "20000",
-    chit_id: "#28273892",
-    email: "huno@gmail.com",
-    status: "Approved",
-    payout_month: "1. March 2024",
-    full_name: "Hunaid",
-    joined_on: new Date(2024, 3, 1),
-  },
-  {
-    id: "hellowiiddkejkeje",
-    amount: "20000",
-    chit_id: "#28273892",
-    email: "huno@gmail.com",
-    status: "Disbursed",
-    payout_month: "1. March 2024",
-    full_name: "Hunaid",
-    joined_on: new Date(2024, 3, 1),
-  },
-];
 export default function Page() {
   return (
     <div className="flex flex-col gap-8 text-2xl">
@@ -93,9 +31,9 @@ export default function Page() {
         </div>
       </div>
 
-      <SearchInput placeholder="Search..." className="w-[600px]" />
+      <SearchClient />
 
-      <DataTable columns={columns} data={data} />
+      <DataTableClient />
     </div>
   );
 }

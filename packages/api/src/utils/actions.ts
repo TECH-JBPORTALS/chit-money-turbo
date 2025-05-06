@@ -111,6 +111,8 @@ export async function getSubscribersByBatchId({
       ),
       with: {
         subscriber: true,
+        payments: true,
+        payouts: true,
       },
       limit: pageSize,
       offset: !query ? offset : undefined,

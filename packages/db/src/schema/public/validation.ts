@@ -1,5 +1,5 @@
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
-import { batches, payments, subscribersToBatches } from ".";
+import { batches, payments, payouts, subscribersToBatches } from ".";
 import { z } from "zod";
 
 export const batchInsertSchema = createInsertSchema(batches).omit({
@@ -67,6 +67,32 @@ export const paymentUpdateSchema = createUpdateSchema(payments, {
     invalid_type_error: "Invalid subscription amount",
   }),
   paidOn: z.string().min(1, "Payment date is required"),
+  transactionId: z.string().optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const payoutInsertSchema = createInsertSchema(payouts, {
+  deductions: z.number({ invalid_type_error: "Invalid deductions value" }),
+  amount: z.number({
+    invalid_type_error: "Invalid amount value",
+  }),
+  disbursedAt: z.date({ required_error: "Disbursed date is required" }),
+  transactionId: z.string().optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const payoutUpdateSchema = createUpdateSchema(payouts, {
+  deductions: z.number({ invalid_type_error: "Invalid deductions value" }),
+  amount: z.number({
+    invalid_type_error: "Invalid amount value",
+  }),
+  disbursedAt: z.date({ required_error: "Disbursed date is required" }),
   transactionId: z.string().optional(),
 }).omit({
   id: true,

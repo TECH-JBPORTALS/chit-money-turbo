@@ -130,12 +130,9 @@ export const payouts = pgTable(
       .notNull(),
 
     month: t.date().notNull(),
-    deductions: t
-      .numeric({ precision: 3, mode: "number" })
-      .default(0)
-      .notNull(),
-    amount: t.numeric({ precision: 3, mode: "number" }).notNull(),
-    totalAmount: t.numeric({ precision: 3, mode: "number" }).notNull(),
+    deductions: t.integer().default(0).notNull(),
+    amount: t.integer().notNull(),
+    totalAmount: t.integer().notNull(),
     payoutStatus: payoutStatusEnum("payout_status")
       .default("requested")
       .notNull(),
