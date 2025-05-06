@@ -4,6 +4,7 @@ import { db } from "./client";
 import { reset } from "drizzle-seed";
 import { schema } from "@/client";
 import { addMonths } from "date-fns";
+import { eq } from "drizzle-orm";
 
 async function main() {
   //Check for seed mode
@@ -237,33 +238,38 @@ async function main() {
               commissionRate: batch.defaultCommissionRate,
             })
             .returning();
-
-          randomSubs.map(async (sub, index) => {
-            runwayDates.map(async (rd) => {
-              const deductions = f.helpers.arrayElement([200, 400, 1000, 2000]);
-              const amount = parseInt(batch.fundAmount);
-              const payoutStatus = f.helpers.arrayElement([
-                "requested",
-                "accepted",
-                "rejected",
-                "cancelled",
-                "disbursed",
-              ]);
-
-              await db.insert(schema.payouts).values({
-                amount,
-                month: rd.toDateString(),
-                subscriberToBatchId: subscribersToBatch.at(0)!.id,
-                deductions,
-                totalAmount: amount - deductions,
-                payoutStatus,
-                paymentMode: "cash",
-              });
-            });
-          });
         })
       );
 
+      //Get chits
+
+      const subscribersToBatcheData =
+        await db.query.subscribersToBatches.findMany({
+          where: eq(schema.subscribersToBatches.batchId, batch.id),
+        });
+
+      runwayDates.map(async (rd, i) => {
+        const deductions = f.helpers.arrayElement([200, 400, 1000, 2000]);
+        const amount = parseInt(batch.fundAmount);
+        const payoutStatus = f.helpers.arrayElement([
+          // "requested",
+          // "accepted",
+          // "rejected",
+          // "cancelled",
+          "disbursed",
+          "approved",
+        ]);
+
+        await db.insert(schema.payouts).values({
+          amount,
+          month: rd.toDateString(),
+          subscriberToBatchId: subscribersToBatcheData.at(i)!.id,
+          deductions,
+          totalAmount: amount - deductions,
+          payoutStatus,
+          paymentMode: "cash",
+        });
+      });
       //Payments
       // randomSubs.map(async (sub, index) => {randomSubs.map(async (sub, index) => {
       //     const subscribersToBatch = await db

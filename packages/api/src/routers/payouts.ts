@@ -1,4 +1,4 @@
-import { and, count, desc, eq, inArray, sql } from "@cmt/db";
+import { and, count, desc, eq, ilike, inArray, or, sql } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
@@ -100,13 +100,23 @@ export const payoutsRouter = {
       const pageIndex = input.pageIndex;
       const pageSize = input.pageSize;
 
+      const queryCond = input.query
+        ? ilike(schema.subscribersToBatches.chitId, `%${input.query}%`)
+        : undefined;
+
       const sb = await ctx.db.query.subscribersToBatches.findMany({
         where: subIds
           ? and(
               eq(schema.subscribersToBatches.batchId, input.batchId),
-              inArray(schema.subscribersToBatches.subscriberId, subIds)
+              or(
+                inArray(schema.subscribersToBatches.subscriberId, subIds),
+                queryCond
+              )
             )
-          : eq(schema.subscribersToBatches.batchId, input.batchId),
+          : or(
+              eq(schema.subscribersToBatches.batchId, input.batchId),
+              queryCond
+            ),
       });
 
       const [payouts, total] = await Promise.all([
