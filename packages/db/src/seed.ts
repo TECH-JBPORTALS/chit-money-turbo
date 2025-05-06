@@ -104,7 +104,7 @@ async function main() {
     // Batches
     for (let index = 0; index < 5; index++) {
       await db.insert(schema.batches).values({
-        name: `${f.company.buzzNoun().toLocaleUpperCase()} ${f.date.between({ from: Date.now(), to: "2030-01-01" }).getFullYear()}`,
+        name: `${f.company.buzzNoun()} ${f.date.between({ from: Date.now(), to: "2030-01-01" }).getFullYear()}`,
         defaultCommissionRate: f.number.float({ min: 2, max: 8 }),
         dueOn: f.helpers.arrayElement([10, 1, 5, 20]).toString(),
         startsOn: startsOn.toDateString(),
@@ -218,9 +218,9 @@ async function main() {
         max: batch.scheme,
       });
 
-      console.log(
-        `${randomSubs.length} subscribers joining ${batch.name} 👥\n`
-      );
+      console.log(`${randomSubs.length} subscribers joining ${batch.name} 👥`);
+
+      console.log(`Subscriber making few payments for ${batch.name} \n`);
 
       await Promise.all(
         randomSubs.map(async (sub, index) => {
@@ -233,8 +233,6 @@ async function main() {
             })
             .returning();
 
-          console.log(`Making few payments for ${sub.faceId}`);
-
           const runwayDates = Array.from({ length: batch.scheme }).map(
             (_, i) => {
               return addMonths(batch.startsOn, index);
@@ -243,43 +241,51 @@ async function main() {
 
           const randomDates = f.helpers.arrayElements(runwayDates, 10);
 
-          randomDates.map(async (runwayDate) => {
-            const paidOn = f.date.between({
-              from: batch.startsOn,
-              to: addMonths(batch.startsOn, batch.scheme),
-            });
+          //Payments
+          await Promise.all(
+            randomDates.map((runwayDate) => {
+              const paidOn = f.date.between({
+                from: batch.startsOn,
+                to: addMonths(batch.startsOn, batch.scheme),
+              });
 
-            const creditScoreAffected = runwayDate > paidOn ? 20 : -10;
+              const creditScoreAffected = runwayDate > paidOn ? 20 : -10;
 
-            const penalty = runwayDate < paidOn ? -300 : 0;
+              const penalty =
+                runwayDate < paidOn
+                  ? f.helpers.arrayElement([200, 300, 400, 500, 600])
+                  : 0;
 
-            const subscriptionAmount = Math.ceil(
-              parseInt(batch.fundAmount) / batch.scheme
-            );
+              const subscriptionAmount = Math.ceil(
+                parseInt(batch.fundAmount) / batch.scheme
+              );
 
-            const totalAmount = subscriptionAmount + penalty;
+              const totalAmount = subscriptionAmount + penalty;
 
-            const paymentMode = f.helpers.arrayElement([
-              "cash",
-              "upi/bank",
-              "cheque",
-            ]);
+              const paymentMode = f.helpers.arrayElement([
+                "cash",
+                "upi/bank",
+                "cheque",
+              ]);
 
-            const transactionId =
-              paymentMode === "upi/bank" ? f.finance.iban() : null;
+              const transactionId =
+                paymentMode === "upi/bank" ? f.finance.iban() : null;
 
-            db.insert(schema.payments).values({
-              runwayDate: runwayDate.toDateString(),
-              creditScoreAffected,
-              paidOn: paidOn.toDateString(),
-              subscriptionAmount,
-              subscriberToBatchId: subscribersToBatch.at(0)!.id,
-              totalAmount,
-              paymentMode,
-              transactionId,
-              penalty,
-            });
-          });
+              return db.insert(schema.payments).values({
+                runwayDate: runwayDate.toDateString(),
+                creditScoreAffected,
+                paidOn: paidOn.toDateString(),
+                subscriptionAmount,
+                subscriberToBatchId: subscribersToBatch.at(0)!.id,
+                totalAmount,
+                paymentMode,
+                transactionId,
+                penalty,
+              });
+            })
+          );
+
+          //Payouts ...
         })
       );
     })

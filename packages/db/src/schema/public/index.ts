@@ -100,9 +100,9 @@ export const payments = pgTable(
       .notNull(),
     /** Actual date of chit */
     runwayDate: t.date().notNull(),
-    penalty: t.numeric({ precision: 3, mode: "number" }).default(0).notNull(),
-    subscriptionAmount: t.numeric({ precision: 3, mode: "number" }).notNull(),
-    totalAmount: t.numeric({ precision: 3, mode: "number" }).notNull(),
+    penalty: t.integer().default(0).notNull(),
+    subscriptionAmount: t.integer().notNull(),
+    totalAmount: t.integer().notNull(),
     paymentMode: paymentModeEnum("payment_mode").default("cash").notNull(),
     transactionId: t.text(),
     creditScoreAffected: t.integer().notNull(),
