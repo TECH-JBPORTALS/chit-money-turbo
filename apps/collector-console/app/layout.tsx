@@ -38,7 +38,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body
-          className={`${fontSans.variable} ${fontGeist.variable} ${fontMono.variable} font-sans antialiased `}
+          className={`${fontGeist.variable} ${fontMono.variable} font-sans antialiased `}
         >
           <Providers>
             <NextSSRPlugin

@@ -7,8 +7,55 @@ import { addMonths, format } from "date-fns";
 import { paginateInputSchema } from "../utils/paginate";
 import { getSubscribersByBatchId } from "../utils/actions";
 import { generateChitId } from "@cmt/db/utils";
+import { paymentInsertSchema, paymentUpdateSchema } from "@cmt/db/schema";
 
 export const paymentsRouter = {
+  /** Create payment for subscribersToBatchId
+   * @context collector
+   */
+  create: protectedProcedure
+    .input(
+      paymentInsertSchema.omit({ totalAmount: true, creditScoreAffected: true })
+    )
+    .mutation(({ ctx, input }) =>
+      ctx.db
+        .insert(schema.payments)
+        .values({
+          ...input,
+          totalAmount: input.subscriptionAmount + input.penalty,
+          creditScoreAffected: input.paidOn > input.runwayDate ? -10 : 10,
+        })
+        .returning()
+        .then((v) => v.at(0))
+    ),
+
+  /** Delete payment for paymentId
+   * @context collector
+   */
+  delete: protectedProcedure
+    .input(z.object({ paymentId: z.string().min(1) }))
+    .mutation(({ ctx, input }) =>
+      ctx.db
+        .delete(schema.payments)
+        .where(eq(schema.payments.id, input.paymentId))
+        .returning()
+        .then((v) => v.at(0))
+    ),
+
+  /** Update payment for paymentId
+   * @context collector
+   */
+  update: protectedProcedure
+    .input(paymentUpdateSchema.and(z.object({ paymentId: z.string().min(1) })))
+    .mutation(({ ctx, input }) =>
+      ctx.db
+        .update(schema.payments)
+        .set(input)
+        .where(eq(schema.payments.id, input.paymentId))
+        .returning()
+        .then((v) => v.at(0))
+    ),
+
   /** Get runway for specific brach based batch schema and starts on date
    * @context collector
    */
@@ -82,6 +129,7 @@ export const paymentsRouter = {
               subscriptionAmount:
                 payment?.subscriptionAmount ?? subscriptionAmount,
               status,
+              runwayDate: payment?.runwayDate ?? input.runwayDate,
             },
           };
         })
@@ -89,7 +137,9 @@ export const paymentsRouter = {
 
       return { ...subs, items: mappedItems };
     }),
-
+  /** Get payment details by paymentID
+   * @context collector
+   */
   getById: protectedProcedure
     .input(z.object({ paymentId: z.string().min(1) }))
     .query(async ({ ctx, input }) => {

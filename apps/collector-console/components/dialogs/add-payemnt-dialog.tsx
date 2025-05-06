@@ -37,11 +37,17 @@ import { z } from "zod";
 import SearchInput from "../search-input";
 import { ScrollArea } from "@cmt/ui/components/scroll-area";
 import { Separator } from "@cmt/ui/components/separator";
+import { paymentInsertSchema } from "@cmt/db/schema";
+import { RouterOutputs } from "@cmt/api";
+import { formatDate } from "date-fns";
+import { useTRPC } from "@/trpc/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
-const paymentDetailsForm = z.object({
-  subscription_amount: z.number().min(1, "Amount must be greater than 0"),
-  penalty_charges: z.number().min(0, "No negative value accepted"),
-  payment_date: z.string().nonempty("Required"),
+const paymentDetailsForm = paymentInsertSchema.pick({
+  subscriptionAmount: true,
+  penalty: true,
+  paidOn: true,
 });
 
 function PaymentDetailsForm(
@@ -51,10 +57,11 @@ function PaymentDetailsForm(
     resolver: zodResolver(paymentDetailsForm),
     defaultValues: props.state,
   });
+
   const { next } = useSteps();
 
   async function onSubmit(values: z.infer<typeof paymentDetailsForm>) {
-    props.setState(values);
+    await props.setState(values);
     next();
   }
 
@@ -63,7 +70,7 @@ function PaymentDetailsForm(
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
-          name="subscription_amount"
+          name="subscriptionAmount"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Subscription Amount</FormLabel>
@@ -80,7 +87,7 @@ function PaymentDetailsForm(
         />
         <FormField
           control={form.control}
-          name="penalty_charges"
+          name="penalty"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Penalty Charges</FormLabel>
@@ -97,12 +104,12 @@ function PaymentDetailsForm(
         />
         <FormField
           control={form.control}
-          name="payment_date"
+          name="paidOn"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Payment Date</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input type="date" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -115,7 +122,7 @@ function PaymentDetailsForm(
             </Button>
           </DialogClose>
           <Button type="submit" size={"lg"}>
-            Create
+            Next
           </Button>
         </DialogFooter>
       </form>
@@ -123,15 +130,23 @@ function PaymentDetailsForm(
   );
 }
 
-const paymentSummaryForm = z.object({
-  method: z.enum(["Cash", "UPI", "Cheque"]),
-  transaction_id: z.string().nonempty("Required"),
-});
+const paymentSummaryForm = paymentInsertSchema
+  .pick({
+    paymentMode: true,
+    transactionId: true,
+  })
+  .refine((v) => v.paymentMode === "upi/bank" || !!v.transactionId, {
+    message: "Transaction ID is required for UPI/Bank payments",
+    path: ["transactionId"],
+  });
 
 function PaymentSummaryForm(
   props: StepProps<z.infer<typeof paymentSummaryForm>> & {
-    subscription_amount: number;
-    penalty_charges: number;
+    subscriptionAmount: number;
+    penalty: number;
+    runwayDate: string;
+    subscriberToBatchId: string;
+    paidOn: string;
   }
 ) {
   const form = useForm<z.infer<typeof paymentSummaryForm>>({
@@ -140,10 +155,33 @@ function PaymentSummaryForm(
   });
 
   const { prev } = useSteps();
-  const totalAmountPayable = props.subscription_amount + props.penalty_charges;
+
+  const totalAmountPayable = props.subscriptionAmount + props.penalty;
+
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: createPayment, isPending } = useMutation(
+    trpc.payments.create.mutationOptions({
+      onSuccess: async (data) => {
+        await queryClient.invalidateQueries(trpc.payments.pathFilter());
+        toast.success("Payment details added");
+      },
+      onError: async (d, v) => {
+        console.log(d.message);
+        await queryClient.invalidateQueries(trpc.payments.pathFilter());
+        toast.error("Couldn't able to add payment at this time", {
+          description: "Try again later sometime",
+        });
+      },
+    })
+  );
 
   async function onSubmit(values: z.infer<typeof paymentSummaryForm>) {
-    console.log(values);
+    await createPayment({
+      ...values,
+      ...props,
+    });
   }
 
   return (
@@ -159,7 +197,7 @@ function PaymentSummaryForm(
               </small>
 
               <p className="text-sm text-right">
-                {props.subscription_amount.toLocaleString("en-IN", {
+                {props.subscriptionAmount.toLocaleString("en-IN", {
                   currencyDisplay: "symbol",
                   style: "currency",
                   currency: "INR",
@@ -172,7 +210,7 @@ function PaymentSummaryForm(
               </small>
 
               <p className="text-sm text-right">
-                {props.penalty_charges.toLocaleString("en-IN", {
+                {props.penalty.toLocaleString("en-IN", {
                   currencyDisplay: "symbol",
                   style: "currency",
                   currency: "INR",
@@ -182,7 +220,7 @@ function PaymentSummaryForm(
             <Separator />
             <div className="inline-flex justify-between w-full">
               <small className="text-muted-foreground text-sm">
-                Total amount to be payment
+                Total amount to be paid
               </small>
 
               <p className="text-sm text-right">
@@ -197,23 +235,23 @@ function PaymentSummaryForm(
         </div>
 
         <FormField
-          name="method"
+          name="paymentMode"
           control={form.control}
           render={({ field }) => (
             <FormItem className="w-full">
               <Tabs value={field.value} onValueChange={field.onChange}>
                 <TabsList className="w-full">
-                  <TabsTrigger value="Cash">Cash</TabsTrigger>
-                  <TabsTrigger value="UPI">UPI/Bank</TabsTrigger>
-                  <TabsTrigger value="Cheque">Cheque</TabsTrigger>
+                  <TabsTrigger value="cash">Cash</TabsTrigger>
+                  <TabsTrigger value="upi/bank">UPI/Bank</TabsTrigger>
+                  <TabsTrigger value="cheque">Cheque</TabsTrigger>
                 </TabsList>
                 <TabsContent
                   className="border px-3 py-5 rounded-md"
-                  value="UPI"
+                  value="upi/bank"
                 >
                   <FormField
                     control={form.control}
-                    name="transaction_id"
+                    name="transactionId"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Transactoin ID</FormLabel>
@@ -229,7 +267,6 @@ function PaymentSummaryForm(
             </FormItem>
           )}
         />
-
         <DialogFooter>
           <Button
             size={"lg"}
@@ -239,23 +276,39 @@ function PaymentSummaryForm(
           >
             Back
           </Button>
-          <Button size={"lg"}>Complete</Button>
+          <Button isLoading={isPending} size={"lg"}>
+            Complete
+          </Button>
         </DialogFooter>
       </form>
     </Form>
   );
 }
 
-export function AddPaymentDialog({ children }: { children: React.ReactNode }) {
-  const { current: currentStep, total } = useSteps();
+export function AddPaymentDialog({
+  children,
+  data,
+}: {
+  children: React.ReactNode;
+  data: RouterOutputs["payments"]["ofBatchSelectedRunway"]["items"][number];
+}) {
+  const {
+    current: currentStep,
+    total,
+    prev,
+    next,
+    hasPrev,
+    hasNext,
+  } = useSteps();
+
   const [globalState, setGlobalState] = useState<
     z.infer<typeof paymentDetailsForm & typeof paymentSummaryForm>
   >({
-    subscription_amount: 40000,
-    penalty_charges: 0,
-    method: "Cash",
-    payment_date: "",
-    transaction_id: "",
+    subscriptionAmount: data.payment.subscriptionAmount,
+    penalty: data.payment.penalty ?? 0,
+    paymentMode: data.payment.paymentMode ?? "cash",
+    paidOn: data.payment.paidOn ?? "",
+    transactionId: data.payment.transactionId ?? "",
   });
 
   return (
@@ -264,14 +317,18 @@ export function AddPaymentDialog({ children }: { children: React.ReactNode }) {
       <DialogContent className="gap-0">
         <DialogHeader className="flex flex-col items-center">
           <Avatar className="size-16">
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>S</AvatarFallback>
+            <AvatarImage src={data.subscriber.imageUrl} />
+            <AvatarFallback>
+              {data.subscriber.firstName?.charAt(0)}
+            </AvatarFallback>
           </Avatar>
-          <DialogTitle>Ada Shelby</DialogTitle>
-          <DialogDescription>#CHIT00</DialogDescription>
+          <DialogTitle>
+            {data.subscriber.firstName} {data.subscriber.lastName}
+          </DialogTitle>
+          <DialogDescription>{data.chitId}</DialogDescription>
           <span className="inline-flex gap-1.5 text-lg text-muted-foreground font-semibold">
             <Badge variant={"secondary"} className="border-primary">
-              3. Mar 2004
+              {formatDate(data.payment.runwayDate, "MMM yyyy")}
             </Badge>
             Payment
           </span>
@@ -301,50 +358,13 @@ export function AddPaymentDialog({ children }: { children: React.ReactNode }) {
             setState={(state) =>
               setGlobalState((prev) => ({ ...prev, ...state }))
             }
-            subscription_amount={globalState.subscription_amount}
-            penalty_charges={globalState.penalty_charges}
+            subscriptionAmount={globalState.subscriptionAmount}
+            penalty={globalState.penalty}
+            paidOn={globalState.paidOn}
+            runwayDate={data.payment.runwayDate}
+            subscriberToBatchId={data.id}
           />
         </Steps>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-export function SelectPaymentPersonDialog({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="gap-3">
-        <DialogHeader>
-          <DialogTitle>Select Subscriber</DialogTitle>
-          <DialogDescription>
-            All subscribers eligible for <b>3. Mar 2024</b> payment
-          </DialogDescription>
-          <SearchInput placeholder="Search..." className="w-full" />
-        </DialogHeader>
-        <ScrollArea className="flex-1 flex flex-col px-4 max-h-[450px] h-[450px]">
-          {Array.from({ length: 9 }).map((_, i) => (
-            <div className="inline-flex py-2  w-full mt-2 items-center justify-between">
-              <div className="inline-flex gap-2">
-                <Avatar className="size-10 border-2">
-                  <AvatarImage src="https://github.com/linear.png" />
-                  <AvatarFallback>N</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-bold text-sm">Ada Shelby</p>
-                  <p className="text-sm text-muted-foreground">#CHIT002</p>
-                </div>
-              </div>
-              <AddPaymentDialog>
-                <Button variant={"secondary"}>Make Payment</Button>
-              </AddPaymentDialog>
-            </div>
-          ))}
-        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

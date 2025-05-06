@@ -29,9 +29,9 @@ export function RunwayList({
           key={i}
           onClick={() => setCurrentRunway(r.value)}
           className={cn(
-            "rounded-s-none justify-start w-full",
+            "rounded-s-none duration-100 justify-start w-full font-normal text-foreground/50",
             r.value === currentRunway &&
-              "rounded-s-none bg-accent border-l-2 border-l-primary w-full justify-start"
+              "rounded-s-none bg-accent border-l-2 text-foreground border-l-primary w-full justify-start"
           )}
           variant={"ghost"}
         >

@@ -55,7 +55,7 @@ export const columns: ColumnDef<
     header: "Subscription Amount",
     cell(props) {
       return (
-        <div className="font-bold text-base">
+        <div>
           {props.row.original.payment.subscriptionAmount.toLocaleString(
             "en-IN",
             {
@@ -93,16 +93,19 @@ export const columns: ColumnDef<
       return (
         <div className="text-right">
           {original.payment.status === "not paid" ? (
-            <AddPaymentDialog>
+            <AddPaymentDialog data={original}>
               <Button variant={"secondary"}>
                 <PlusIcon /> Collect
               </Button>
             </AddPaymentDialog>
           ) : (
             <time className="text-sm text-muted-foreground">
-              {formatDistanceToNowStrict(props.row.original.createdAt, {
-                addSuffix: true,
-              })}
+              {formatDistanceToNowStrict(
+                props.row.original!.payment!.createdAt!,
+                {
+                  addSuffix: true,
+                }
+              )}
             </time>
           )}
         </div>
