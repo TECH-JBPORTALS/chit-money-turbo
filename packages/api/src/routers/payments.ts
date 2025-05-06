@@ -38,8 +38,6 @@ export const paymentsRouter = {
       ctx.db
         .delete(schema.payments)
         .where(eq(schema.payments.id, input.paymentId))
-        .returning()
-        .then((v) => v.at(0))
     ),
 
   /** Update payment for paymentId

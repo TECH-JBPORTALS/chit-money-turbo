@@ -135,9 +135,13 @@ const paymentSummaryForm = paymentInsertSchema
     paymentMode: true,
     transactionId: true,
   })
-  .refine((v) => v.paymentMode === "upi/bank" || !!v.transactionId, {
-    message: "Transaction ID is required for UPI/Bank payments",
-    path: ["transactionId"],
+  .superRefine((v, ctx) => {
+    if (v.paymentMode === "upi/bank" && !v.transactionId)
+      ctx.addIssue({
+        path: ["transactionId"],
+        code: "custom",
+        message: "Transation ID required for payment mode UPI/Bank",
+      });
   });
 
 function PaymentSummaryForm(

@@ -1,5 +1,6 @@
 "use client";
 
+import DeletePaymentAlertDialog from "@/components/alert-dialogs/delete-payment-alertdialog";
 import { AddPaymentDialog } from "@/components/dialogs/add-payemnt-dialog";
 import { ViewPaymentDialog } from "@/components/dialogs/view-payment-dialog";
 import { RouterOutputs } from "@cmt/api";
@@ -114,11 +115,14 @@ export const columns: ColumnDef<
   },
   {
     id: "more-actions",
+    header(props) {
+      return <div className="w-[60px]" />;
+    },
     cell(props) {
       if (props.row.original.payment.id)
         return (
           <div className="text-right px-4">
-            <DropdownMenu>
+            <DropdownMenu key={"payment-dropdown"}>
               <DropdownMenuTrigger asChild>
                 <Button size={"icon"} variant={"ghost"}>
                   <MoreHorizontal />
@@ -130,10 +134,17 @@ export const columns: ColumnDef<
                     <ScrollTextIcon /> View Details
                   </DropdownMenuItem>
                 </ViewPaymentDialog>
-                <DropdownMenuItem variant="destructive">
-                  <DeleteIcon />
-                  Remove
-                </DropdownMenuItem>
+                <DeletePaymentAlertDialog
+                  paymentId={props.row.original.payment.id}
+                >
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    variant="destructive"
+                  >
+                    <DeleteIcon />
+                    Remove
+                  </DropdownMenuItem>
+                </DeletePaymentAlertDialog>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
