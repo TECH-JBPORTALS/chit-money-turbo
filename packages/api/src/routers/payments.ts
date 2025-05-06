@@ -89,4 +89,42 @@ export const paymentsRouter = {
 
       return { ...subs, items: mappedItems };
     }),
+
+  getById: protectedProcedure
+    .input(z.object({ paymentId: z.string().min(1) }))
+    .query(async ({ ctx, input }) => {
+      const payment = await ctx.db.query.payments.findFirst({
+        where: eq(schema.payments.id, input.paymentId),
+        with: {
+          subscribersToBatches: {
+            with: {
+              subscriber: true,
+            },
+          },
+        },
+      });
+
+      if (!payment)
+        throw new TRPCError({
+          message: "Payment Not Found",
+          code: "NOT_FOUND",
+        });
+
+      const subscriber = await ctx.clerk.users.getUser(
+        payment.subscribersToBatches.subscriberId
+      );
+
+      return {
+        ...payment,
+        subscribersToBatches: {
+          ...payment.subscribersToBatches,
+          subscriber: {
+            ...payment.subscribersToBatches.subscriber,
+            imageUrl: subscriber.imageUrl,
+            firstName: subscriber.firstName,
+            lastName: subscriber.lastName,
+          },
+        },
+      };
+    }),
 };

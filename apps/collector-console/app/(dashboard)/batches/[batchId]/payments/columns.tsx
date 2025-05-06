@@ -112,28 +112,29 @@ export const columns: ColumnDef<
   {
     id: "more-actions",
     cell(props) {
-      return (
-        <div className="text-right px-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size={"icon"} variant={"ghost"}>
-                <MoreHorizontal />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <ViewPaymentDialog>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  <ScrollTextIcon /> View Details
+      if (props.row.original.payment.id)
+        return (
+          <div className="text-right px-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size={"icon"} variant={"ghost"}>
+                  <MoreHorizontal />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <ViewPaymentDialog paymentId={props.row.original.payment.id}>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <ScrollTextIcon /> View Details
+                  </DropdownMenuItem>
+                </ViewPaymentDialog>
+                <DropdownMenuItem variant="destructive">
+                  <DeleteIcon />
+                  Remove
                 </DropdownMenuItem>
-              </ViewPaymentDialog>
-              <DropdownMenuItem variant="destructive">
-                <DeleteIcon />
-                Remove
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      );
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
     },
   },
 ];
