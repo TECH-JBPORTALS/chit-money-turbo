@@ -119,7 +119,7 @@ export const columns: ColumnDef<
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <ViewPayoutDialog>
+              <ViewPayoutDialog payoutId={props.row.original.id}>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                   <ScrollTextIcon /> View Details
                 </DropdownMenuItem>

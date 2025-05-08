@@ -189,7 +189,7 @@ export const payoutsRouter = {
       };
     }),
 
-  /** Get payment details by paymentID
+  /** Get payout details by payoutId
    * @context collector
    */
   getById: protectedProcedure
