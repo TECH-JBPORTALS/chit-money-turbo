@@ -75,29 +75,13 @@ export const payoutsRouter = {
         .then((v) => v.at(0));
     }),
 
-  /** Delete payment for paymentId
+  /** Delete payout for payoutId
    * @context collector
    */
   delete: protectedProcedure
-    .input(z.object({ paymentId: z.string().min(1) }))
+    .input(z.object({ payoutId: z.string().min(1) }))
     .mutation(({ ctx, input }) =>
-      ctx.db
-        .delete(schema.payouts)
-        .where(eq(schema.payouts.id, input.paymentId))
-    ),
-
-  /** Update payout for payoutId
-   * @context collector
-   */
-  update: protectedProcedure
-    .input(payoutUpdateSchema.and(z.object({ paymentId: z.string().min(1) })))
-    .mutation(({ ctx, input }) =>
-      ctx.db
-        .update(schema.payouts)
-        .set(input)
-        .where(eq(schema.payouts.id, input.paymentId))
-        .returning()
-        .then((v) => v.at(0))
+      ctx.db.delete(schema.payouts).where(eq(schema.payouts.id, input.payoutId))
     ),
 
   /** Get list subscribers who has approved or disubursed payouts

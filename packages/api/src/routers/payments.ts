@@ -135,6 +135,7 @@ export const paymentsRouter = {
 
       return { ...subs, items: mappedItems };
     }),
+
   /** Get payment details by paymentID
    * @context collector
    */

@@ -1,4 +1,5 @@
 "use client";
+import DeletePayoutAlertDialog from "@/components/alert-dialogs/delete-payout-alertdialog";
 import { AddPayoutDialog } from "@/components/dialogs/add-payout-dialog";
 import { ViewPayoutDialog } from "@/components/dialogs/view-payout-dialog";
 import { RouterOutputs } from "@cmt/api";
@@ -134,10 +135,15 @@ export const columns: ColumnDef<
                 </AddPayoutDialog>
               )}
 
-              <DropdownMenuItem variant="destructive">
-                <Trash2Icon />
-                Delete
-              </DropdownMenuItem>
+              <DeletePayoutAlertDialog payoutId={props.row.original.id}>
+                <DropdownMenuItem
+                  onSelect={(e) => e.preventDefault()}
+                  variant="destructive"
+                >
+                  <Trash2Icon />
+                  Delete
+                </DropdownMenuItem>
+              </DeletePayoutAlertDialog>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

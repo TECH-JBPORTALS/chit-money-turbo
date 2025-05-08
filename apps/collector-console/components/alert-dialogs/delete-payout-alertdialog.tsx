@@ -12,31 +12,30 @@ import {
 } from "@cmt/ui/components/alert-dialog";
 import { Button } from "@cmt/ui/components/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
-export default function DeletePaymentAlertDialog({
+export default function DeletePayoutAlertDialog({
   children,
-  paymentId,
+  payoutId,
 }: {
   children: React.ReactNode;
-  paymentId: string;
+  payoutId: string;
 }) {
   const [open, onOpenChange] = useState(false);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: deletePayment, isPending } = useMutation(
-    trpc.payments.delete.mutationOptions({
+  const { mutateAsync: deletepayout, isPending } = useMutation(
+    trpc.payouts.delete.mutationOptions({
       async onSuccess(d, v) {
-        await queryClient.invalidateQueries(
-          trpc.payments.ofBatchSelectedRunway.pathFilter()
-        );
-        toast.info("Payment details deleted");
+        await queryClient.invalidateQueries(trpc.payouts.ofBatch.pathFilter());
+        toast.info("payout details deleted");
         onOpenChange(false);
       },
       onError() {
-        toast.info("Unable to delete payment record", {
+        toast.info("Unable to delete payout record", {
           description: "Try again later sometime",
         });
       },
@@ -44,11 +43,7 @@ export default function DeletePaymentAlertDialog({
   );
 
   async function handleDelete() {
-    await deletePayment({ paymentId });
-
-    setTimeout(() => {
-      document.body.style.pointerEvents = "auto";
-    }, 300);
+    await deletepayout({ payoutId });
   }
 
   return (
@@ -57,10 +52,10 @@ export default function DeletePaymentAlertDialog({
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Payment</AlertDialogTitle>
+          <AlertDialogTitle>Delete payout</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete the payment?. Because, once you
-            delete the payment it's irreversable process. You can't undo this
+            Are you sure you want to delete the payout?. Because, once you
+            delete the payout it's irreversable process. You can't undo this
             action.
           </AlertDialogDescription>
         </AlertDialogHeader>
