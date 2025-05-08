@@ -115,8 +115,10 @@ export const payoutsRouter = {
         where: subIds
           ? and(
               eq(schema.subscribersToBatches.batchId, input.batchId),
-              inArray(schema.subscribersToBatches.subscriberId, subIds),
-              or(queryCond)
+              and(
+                inArray(schema.subscribersToBatches.subscriberId, subIds),
+                queryCond
+              )
             )
           : or(
               eq(schema.subscribersToBatches.batchId, input.batchId),
@@ -176,6 +178,7 @@ export const payoutsRouter = {
         pageSize,
       };
     }),
+
   /** Get payment details by paymentID
    * @context collector
    */
