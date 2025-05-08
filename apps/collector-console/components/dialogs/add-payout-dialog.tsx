@@ -40,7 +40,7 @@ import { ScrollArea } from "@cmt/ui/components/scroll-area";
 import { Separator } from "@cmt/ui/components/separator";
 import { RouterOutputs } from "@cmt/api";
 import { format, formatDate } from "date-fns";
-import { payoutInsertSchema } from "@cmt/db/schema";
+import { payoutInsertSchema, payoutUpdateSchema } from "@cmt/db/schema";
 import {
   Popover,
   PopoverContent,
@@ -58,7 +58,7 @@ import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import { SpinnerPage } from "../spinner-page";
 
-const payoutDetailsForm = payoutInsertSchema.pick({
+const payoutDetailsForm = payoutUpdateSchema.pick({
   amount: true,
   disbursedAt: true,
 });
@@ -126,7 +126,7 @@ function PayoutDetailsForm(
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={field.value}
+                      selected={field.value ?? new Date()}
                       onSelect={field.onChange}
                       disabled={(date) => date < new Date("1900-01-01")}
                       initialFocus
@@ -153,7 +153,7 @@ function PayoutDetailsForm(
   );
 }
 
-const payoutSummaryForm = payoutInsertSchema
+const payoutSummaryForm = payoutUpdateSchema
   .pick({
     paymentMode: true,
     transactionId: true,
@@ -172,7 +172,7 @@ function PayoutSummaryForm(
     amount: number;
     appliedCommissionRate: number;
     month: string;
-    disbursedAt: Date;
+    disbursedAt?: Date | null;
     payoutId: string;
   }
 ) {
@@ -207,7 +207,11 @@ function PayoutSummaryForm(
   );
 
   async function onSubmit(values: z.infer<typeof payoutSummaryForm>) {
-    await disburseAmount({ ...values, ...props });
+    await disburseAmount({
+      ...values,
+      ...props,
+      disbursedAt: props.disbursedAt ?? new Date(),
+    });
   }
 
   return (
@@ -391,6 +395,65 @@ export function AddPayoutDialog({
   );
 }
 
+type Subscriber =
+  RouterOutputs["payouts"]["getNextElligibleSubs"]["items"][number];
+
+function ApprovePayoutCard({
+  data: { subscriber, chitId, id: subscriberToBatchId, ...data },
+}: {
+  data: Subscriber;
+}) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: approvePayout, isPending } = useMutation(
+    trpc.payouts.approve.mutationOptions({
+      onSuccess: async (data) => {
+        await queryClient.invalidateQueries(trpc.payouts.pathFilter());
+        toast.success("Payout approved");
+      },
+      onError: async (d, v) => {
+        console.log(d.message);
+        toast.error("Couldn't able to approve payout at this time", {
+          description: "Try again later sometime",
+        });
+      },
+    })
+  );
+
+  return (
+    <div className="inline-flex py-2  w-full mt-2 items-center justify-between">
+      <div className="inline-flex gap-2">
+        <Avatar className="size-10 border-2">
+          <AvatarImage src={subscriber.imageUrl} />
+          <AvatarFallback>{subscriber.firstName?.charAt(0)}</AvatarFallback>
+        </Avatar>
+        <div>
+          <p className="font-bold text-sm">
+            {subscriber.firstName} {subscriber.lastName}
+          </p>
+          <p className="text-sm text-muted-foreground">{chitId}</p>
+        </div>
+      </div>
+      <Button
+        isLoading={isPending}
+        onClick={async () => {
+          await approvePayout({
+            ...data,
+            subscriberToBatchId,
+            appliedCommissionRate: data.commissionRate,
+          });
+        }}
+        variant={"secondary"}
+      >
+        Approve
+      </Button>
+    </div>
+  );
+}
+
+// month, amount, appliedCommissionRate, disbursedAt
+
 export function SelectPayoutPersonDialog({
   children,
 }: {
@@ -429,30 +492,8 @@ export function SelectPayoutPersonDialog({
           <SpinnerPage />
         ) : (
           <ScrollArea className="flex-1 flex overflow-auto flex-col px-4 max-h-[450px] h-[450px]">
-            {items?.map((sub) => (
-              <div
-                key={sub.id}
-                className="inline-flex py-2  w-full mt-2 items-center justify-between"
-              >
-                <div className="inline-flex gap-2">
-                  <Avatar className="size-10 border-2">
-                    <AvatarImage src={sub.subscriber.imageUrl} />
-                    <AvatarFallback>
-                      {sub.subscriber.firstName?.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-bold text-sm">
-                      {sub.subscriber.firstName} {sub.subscriber.lastName}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {sub.chitId}
-                    </p>
-                  </div>
-                </div>
-                <Button variant={"secondary"}>Approve</Button>
-              </div>
-            ))}
+            {items?.map((sub) => <ApprovePayoutCard key={sub.id} data={sub} />)}
+
             {hasNextPage ? (
               <div className="flex h-10 w-full items-center justify-center">
                 <Button

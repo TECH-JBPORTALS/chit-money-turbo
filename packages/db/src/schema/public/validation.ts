@@ -79,7 +79,6 @@ export const payoutInsertSchema = createInsertSchema(payouts, {
   amount: z.number({
     invalid_type_error: "Invalid amount value",
   }),
-  disbursedAt: z.date({ required_error: "Disbursed date is required" }),
   transactionId: z.string().optional(),
 }).omit({
   id: true,
@@ -98,9 +97,9 @@ export const payoutUpdateSchema = createUpdateSchema(payouts, {
   amount: z.number({
     invalid_type_error: "Invalid amount value",
   }),
-  disbursedAt: z.date({ required_error: "Disbursed date is required" }),
   transactionId: z.string().optional(),
   appliedCommissionRate: z.number(),
+  disbursedAt: z.date({ required_error: "Disbursed date is required" }),
 }).omit({
   id: true,
   deductions: true,

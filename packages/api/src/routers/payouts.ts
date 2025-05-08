@@ -8,9 +8,7 @@ import {
   inArray,
   lte,
   not,
-  notInArray,
   or,
-  sql,
 } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { z } from "zod";
@@ -71,7 +69,6 @@ export const payoutsRouter = {
           deductions,
           totalAmount: input.amount + deductions,
           payoutStatus: "disbursed",
-          disbursedAt: new Date(),
         })
         .where(eq(schema.payouts.id, input.payoutId))
         .returning()
@@ -295,10 +292,23 @@ export const payoutsRouter = {
       const nextSubsWithClerk = await Promise.all(
         nextSubs.map(async (sub) => {
           const user = await getClerkUser(sub.subscriberId);
+          const batch = await db.query.batches.findFirst({
+            columns: { fundAmount: true },
+            where: eq(schema.batches.id, sub.batchId),
+          });
+
+          if (!batch)
+            throw new TRPCError({
+              message: "No batch fount",
+              code: "NOT_FOUND",
+            });
 
           return {
             ...sub,
             subscriber: user,
+            /** @todo Fetch dynamicaly next month */
+            month: new Date().toDateString(),
+            amount: parseInt(batch.fundAmount),
           };
         })
       );
