@@ -31,7 +31,7 @@ import {
 } from "@cmt/ui/components/tabs";
 import { cn } from "@cmt/ui/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UIEventHandler, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Steps, useSteps } from "react-step-builder";
 import { z } from "zod";
@@ -40,17 +40,16 @@ import { ScrollArea } from "@cmt/ui/components/scroll-area";
 import { Separator } from "@cmt/ui/components/separator";
 import { RouterOutputs } from "@cmt/api";
 import { format, formatDate } from "date-fns";
-import { payoutInsertSchema, payoutUpdateSchema } from "@cmt/db/schema";
+import { payoutUpdateSchema } from "@cmt/db/schema";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@cmt/ui/components/popover";
-import { CalendarIcon, Loader2Icon } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import {
   useInfiniteQuery,
   useMutation,
-  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/react";
@@ -317,6 +316,9 @@ function PayoutSummaryForm(
   );
 }
 
+/**
+ * ### Disburse the payout for approved person
+ */
 export function AddPayoutDialog({
   children,
   data,
@@ -395,65 +397,9 @@ export function AddPayoutDialog({
   );
 }
 
-type Subscriber =
-  RouterOutputs["payouts"]["getNextElligibleSubs"]["items"][number];
-
-function ApprovePayoutCard({
-  data: { subscriber, chitId, id: subscriberToBatchId, ...data },
-}: {
-  data: Subscriber;
-}) {
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
-
-  const { mutateAsync: approvePayout, isPending } = useMutation(
-    trpc.payouts.approve.mutationOptions({
-      onSuccess: async (data) => {
-        await queryClient.invalidateQueries(trpc.payouts.pathFilter());
-        toast.success("Payout approved");
-      },
-      onError: async (d, v) => {
-        console.log(d.message);
-        toast.error("Couldn't able to approve payout at this time", {
-          description: "Try again later sometime",
-        });
-      },
-    })
-  );
-
-  return (
-    <div className="inline-flex py-2  w-full mt-2 items-center justify-between">
-      <div className="inline-flex gap-2">
-        <Avatar className="size-10 border-2">
-          <AvatarImage src={subscriber.imageUrl} />
-          <AvatarFallback>{subscriber.firstName?.charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div>
-          <p className="font-bold text-sm">
-            {subscriber.firstName} {subscriber.lastName}
-          </p>
-          <p className="text-sm text-muted-foreground">{chitId}</p>
-        </div>
-      </div>
-      <Button
-        isLoading={isPending}
-        onClick={async () => {
-          await approvePayout({
-            ...data,
-            subscriberToBatchId,
-            appliedCommissionRate: data.commissionRate,
-          });
-        }}
-        variant={"secondary"}
-      >
-        Approve
-      </Button>
-    </div>
-  );
-}
-
-// month, amount, appliedCommissionRate, disbursedAt
-
+/**
+ * ### Select person and approve for next payout
+ */
 export function SelectPayoutPersonDialog({
   children,
 }: {
@@ -510,5 +456,62 @@ export function SelectPayoutPersonDialog({
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+type Subscriber =
+  RouterOutputs["payouts"]["getNextElligibleSubs"]["items"][number];
+
+function ApprovePayoutCard({
+  data: { subscriber, chitId, id: subscriberToBatchId, ...data },
+}: {
+  data: Subscriber;
+}) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: approvePayout, isPending } = useMutation(
+    trpc.payouts.approve.mutationOptions({
+      onSuccess: async (data) => {
+        await queryClient.invalidateQueries(trpc.payouts.pathFilter());
+        toast.success("Payout approved");
+      },
+      onError: async (d, v) => {
+        console.log(d.message);
+        toast.error("Couldn't able to approve payout at this time", {
+          description: "Try again later sometime",
+        });
+      },
+    })
+  );
+
+  return (
+    <div className="inline-flex py-2  w-full mt-2 items-center justify-between">
+      <div className="inline-flex gap-2">
+        <Avatar className="size-10 border-2">
+          <AvatarImage src={subscriber.imageUrl} />
+          <AvatarFallback>{subscriber.firstName?.charAt(0)}</AvatarFallback>
+        </Avatar>
+        <div>
+          <p className="font-bold text-sm">
+            {subscriber.firstName} {subscriber.lastName}
+          </p>
+          <p className="text-sm text-muted-foreground">{chitId}</p>
+        </div>
+      </div>
+      <Button
+        isLoading={isPending}
+        onClick={async () => {
+          await approvePayout({
+            ...data,
+            subscriberToBatchId,
+            appliedCommissionRate: data.commissionRate,
+          });
+        }}
+        variant={"secondary"}
+      >
+        Approve
+      </Button>
+    </div>
   );
 }
