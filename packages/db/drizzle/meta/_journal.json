@@ -15,6 +15,13 @@
       "when": 1746448887971,
       "tag": "0001_free_jane_foster",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1746696583699,
+      "tag": "0002_flawless_warhawk",
+      "breakpoints": true
     }
   ]
 }
