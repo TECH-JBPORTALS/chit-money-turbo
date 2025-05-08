@@ -1,5 +1,5 @@
 import "../globals.css";
-import { Slot, useFocusEffect, useRouter, useSegments } from "expo-router";
+import { Stack, useFocusEffect, useRouter, useSegments } from "expo-router";
 import { tokenCache } from "~/lib/cache";
 import {
   useFonts,
@@ -45,16 +45,6 @@ const LIGHT_THEME: Theme = {
 const DARK_THEME: Theme = {
   ...DarkTheme,
   colors: NAV_THEME.dark,
-};
-
-export const unstable_settings = {
-  initialRouteName: "(home)",
-  home: {
-    initialRouteName: "(tabs)",
-    batch: {
-      initialRouteName: "[batchId]/index",
-    },
-  },
 };
 
 export {
@@ -108,6 +98,10 @@ function ThemeWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
+export const unstable_settings = {
+  initialRouteName: "(home)",
+};
+
 //Setting things app before loading the app
 function Outlet() {
   const [fontsLoaded, error] = useFonts({
@@ -128,7 +122,7 @@ function Outlet() {
   const { isSignedIn, isLoaded, user } = useUser();
   const segments = useSegments();
   const router = useRouter();
-  const onboardingComplete = user?.publicMetadata.onboardingComplete;
+  const onboardingComplete = user?.publicMetadata.onboardingComplete as boolean;
 
   useEffect(() => {
     (async () => {
@@ -155,31 +149,10 @@ function Outlet() {
 
   useFocusEffect(
     useCallback(() => {
-      if (isLoaded) {
-        const isAuthSegment = segments["0"] === "(auth)";
-        const isHomeSegment = segments["0"] === "(home)";
-        const isOnboardingSegment = segments["0"] === "(onboarding)";
-
-        if (!isSignedIn && isHomeSegment) {
-          router.replace("/(auth)");
-        } else if (
-          !onboardingComplete &&
-          isSignedIn &&
-          (isHomeSegment || isAuthSegment)
-        ) {
-          router.replace("/(onboarding)");
-        } else if (
-          isSignedIn &&
-          (isAuthSegment || isOnboardingSegment) &&
-          onboardingComplete
-        ) {
-          router.replace("/(home)/(tabs)");
-        }
-
-        if (isColorSchemeLoaded && fontsLoaded) {
-          SplashScreen.hideAsync();
-        }
+      if (!isLoaded || !isColorSchemeLoaded || !fontsLoaded) {
+        return;
       }
+      SplashScreen.hideAsync();
     }, [
       isLoaded,
       isSignedIn,
@@ -195,7 +168,17 @@ function Outlet() {
 
   return (
     <ThemeWrapper>
-      <Slot />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Protected guard={isSignedIn! && onboardingComplete}>
+          <Stack.Screen name="(home)" />
+        </Stack.Protected>
+        <Stack.Protected guard={!isSignedIn}>
+          <Stack.Screen name="(auth)" />
+        </Stack.Protected>
+        <Stack.Protected guard={isSignedIn! && !onboardingComplete}>
+          <Stack.Screen name="(onboarding)" />
+        </Stack.Protected>
+      </Stack>
     </ThemeWrapper>
   );
 }

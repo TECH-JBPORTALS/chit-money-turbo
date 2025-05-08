@@ -6,6 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Text } from "~/components/ui/text";
 import { cn } from "~/lib/utils";
 
+export const unstable_settings = {
+  initialRouteName: "index",
+};
+
 export default function TabsLayout() {
   const { user } = useUser();
   return (

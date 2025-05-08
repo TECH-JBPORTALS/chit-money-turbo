@@ -1,13 +1,10 @@
-import { Redirect, Stack } from "expo-router";
-import { useAuth } from "@clerk/clerk-expo";
+import { Stack } from "expo-router";
+
+export const unstable_settings = {
+  initialRouteName: "index",
+};
 
 export default function AuthRoutesLayout() {
-  const { isSignedIn } = useAuth();
-
-  if (isSignedIn) {
-    return <Redirect href={"/"} />;
-  }
-
   return (
     <Stack
       screenOptions={{
@@ -18,6 +15,7 @@ export default function AuthRoutesLayout() {
         headerShadowVisible: false,
       }}
     >
+      <Stack.Screen name="index" options={{ title: "" }} />
       <Stack.Screen name="sign-up" options={{ title: "Create Account" }} />
       <Stack.Screen name="sign-in" options={{ title: "Sign In" }} />
     </Stack>
