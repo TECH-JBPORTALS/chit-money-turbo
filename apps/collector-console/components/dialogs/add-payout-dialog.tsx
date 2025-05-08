@@ -31,7 +31,7 @@ import {
 } from "@cmt/ui/components/tabs";
 import { cn } from "@cmt/ui/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { UIEventHandler, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Steps, useSteps } from "react-step-builder";
 import { z } from "zod";
@@ -46,10 +46,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@cmt/ui/components/popover";
-import { CalendarIcon } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CalendarIcon, Loader2Icon } from "lucide-react";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/react";
 import { toast } from "sonner";
+import { useParams } from "next/navigation";
+import { SpinnerPage } from "../spinner-page";
 
 const payoutDetailsForm = payoutInsertSchema.pick({
   amount: true,
@@ -389,6 +396,19 @@ export function SelectPayoutPersonDialog({
 }: {
   children: React.ReactNode;
 }) {
+  const [query, setQuery] = useState("");
+  const { batchId } = useParams<{ batchId: string }>();
+  const trpc = useTRPC();
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useInfiniteQuery(
+      trpc.payouts.getNextElligibleSubs.infiniteQueryOptions(
+        { batchId, query },
+        { getNextPageParam: (pageParam) => pageParam.nextCursor }
+      )
+    );
+
+  const items = data?.pages.flatMap((p) => p.items);
+
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -396,32 +416,57 @@ export function SelectPayoutPersonDialog({
         <DialogHeader>
           <DialogTitle>Select Subscriber</DialogTitle>
           <DialogDescription>
-            All subscribers eligible for <b>3. Mar 2024</b> payout
+            All subscribers eligible for next payout
           </DialogDescription>
-          <SearchInput placeholder="Search..." className="w-full" />
         </DialogHeader>
-        <ScrollArea className="flex-1 flex flex-col px-4 max-h-[450px] h-[450px]">
-          {Array.from({ length: 9 }).map((_, i) => (
-            <div
-              key={i}
-              className="inline-flex py-2  w-full mt-2 items-center justify-between"
-            >
-              <div className="inline-flex gap-2">
-                <Avatar className="size-10 border-2">
-                  <AvatarImage src="https://github.com/linear.png" />
-                  <AvatarFallback>N</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-bold text-sm">Ada Shelby</p>
-                  <p className="text-sm text-muted-foreground">#CHIT002</p>
+        <SearchInput
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search..."
+          className="w-full"
+        />
+        {isLoading ? (
+          <SpinnerPage />
+        ) : (
+          <ScrollArea className="flex-1 flex overflow-auto flex-col px-4 max-h-[450px] h-[450px]">
+            {items?.map((sub) => (
+              <div
+                key={sub.id}
+                className="inline-flex py-2  w-full mt-2 items-center justify-between"
+              >
+                <div className="inline-flex gap-2">
+                  <Avatar className="size-10 border-2">
+                    <AvatarImage src={sub.subscriber.imageUrl} />
+                    <AvatarFallback>
+                      {sub.subscriber.firstName?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-bold text-sm">
+                      {sub.subscriber.firstName} {sub.subscriber.lastName}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {sub.chitId}
+                    </p>
+                  </div>
                 </div>
+                <Button variant={"secondary"}>Approve</Button>
               </div>
-              {/* <AddPayoutDialog> */}
-              <Button variant={"secondary"}>Make Payout</Button>
-              {/* </AddPayoutDialog> */}
-            </div>
-          ))}
-        </ScrollArea>
+            ))}
+            {hasNextPage ? (
+              <div className="flex h-10 w-full items-center justify-center">
+                <Button
+                  variant={"outline"}
+                  size={"sm"}
+                  onClick={() => fetchNextPage()}
+                  isLoading={isFetchingNextPage}
+                >
+                  Load more
+                </Button>
+              </div>
+            ) : null}
+          </ScrollArea>
+        )}
       </DialogContent>
     </Dialog>
   );

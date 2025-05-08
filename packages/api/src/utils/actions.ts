@@ -64,7 +64,7 @@ export async function getSubscriberBatchesWithPagination({
     },
   });
 
-  const nextCursor = items.length > 1 ? items.pop()?.id : undefined;
+  const nextCursor = items.length === limit ? items.pop()?.id : undefined;
 
   return {
     nextCursor,

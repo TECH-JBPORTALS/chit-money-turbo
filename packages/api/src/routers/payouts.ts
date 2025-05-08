@@ -1,11 +1,24 @@
-import { and, count, desc, eq, ilike, inArray, or } from "@cmt/db";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  exists,
+  ilike,
+  inArray,
+  lte,
+  not,
+  notInArray,
+  or,
+  sql,
+} from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { schema } from "@cmt/db/client";
+import { db, schema } from "@cmt/db/client";
 import { paginateInputSchema } from "../utils/paginate";
 import { payoutInsertSchema, payoutUpdateSchema } from "@cmt/db/schema";
-import { getQueryUserIds } from "../utils/clerk";
+import { getClerkUser, getQueryUserIds } from "../utils/clerk";
 
 export const payoutsRouter = {
   /** Create payout for subscribersToBatchId with approved status
@@ -218,5 +231,83 @@ export const payoutsRouter = {
           },
         },
       };
+    }),
+
+  /**
+   * ### Get Next Eligible Subscribers
+   * @context collector
+   */
+  getNextElligibleSubs: protectedProcedure
+    .input(
+      z.object({
+        cursor: z.string().optional(),
+        limit: z.number().default(10),
+        query: z.string().optional(),
+        batchId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const cursor = input.cursor;
+      const limit = input.limit + 1;
+
+      const clerkSubsIds = await getQueryUserIds(ctx.clerk, input.query);
+
+      const queryCond =
+        input.query && clerkSubsIds
+          ? or(
+              ilike(schema.subscribersToBatches.chitId, input.query),
+              inArray(schema.subscribersToBatches.subscriberId, clerkSubsIds)
+            )
+          : undefined;
+
+      const cursorCond = cursor
+        ? lte(schema.subscribersToBatches.id, cursor)
+        : undefined;
+
+      // List out the not paid subscribers
+      const notPaidCond = and(
+        ...(cursorCond ? [cursorCond] : []),
+        not(
+          exists(
+            db
+              .select()
+              .from(schema.payouts)
+              .where(
+                eq(
+                  schema.subscribersToBatches.id,
+                  schema.payouts.subscriberToBatchId
+                )
+              )
+          )
+        ),
+        eq(schema.subscribersToBatches.batchId, input.batchId),
+        ...(queryCond ? [queryCond] : [])
+      );
+
+      const nextSubs = await ctx.db
+        .select()
+        .from(schema.subscribersToBatches)
+        .where(notPaidCond)
+        .limit(limit)
+        .orderBy(({ id }) => [desc(id)]);
+
+      // Attach the clerk user object
+      const nextSubsWithClerk = await Promise.all(
+        nextSubs.map(async (sub) => {
+          const user = await getClerkUser(sub.subscriberId);
+
+          return {
+            ...sub,
+            subscriber: user,
+          };
+        })
+      );
+
+      const nextCursor =
+        nextSubsWithClerk.length === limit
+          ? nextSubsWithClerk.pop()?.id
+          : undefined;
+
+      return { items: nextSubsWithClerk, nextCursor };
     }),
 };
