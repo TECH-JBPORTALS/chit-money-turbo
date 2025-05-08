@@ -16,6 +16,11 @@ import { PayoutStatusBadge } from "~/lib/payout-badge";
 import { Separator } from "~/components/ui/separator";
 import { Button } from "~/components/ui/button";
 import { ScrollView } from "react-native-gesture-handler";
+import { useQuery } from "@tanstack/react-query";
+import { trpc } from "~/utils/api";
+import { useSearchParams } from "expo-router/build/hooks";
+import { SpinnerView } from "~/components/spinner-view";
+import { cn } from "~/lib/utils";
 
 const t = {
   id: "s987t654-u321v098-w765x432",
@@ -29,61 +34,6 @@ const t = {
   status: "cancelled",
   created_at: new Date(2024, 4, 20),
 };
-
-function PaymentDetails() {
-  return (
-    <>
-      <Small className="font-bold">Payment Details</Small>
-
-      <View className="gap-3">
-        <View className="justify-between flex-row">
-          <Muted>Payment ID</Muted>
-          <Code className="font-fira-bold">#123ADU839KID</Code>
-        </View>
-        <View className="justify-between flex-row">
-          <Muted>Credit Score Affected</Muted>
-          <Code className="font-fira-bold text-primary">+5</Code>
-        </View>
-        <View className="justify-between flex-row">
-          <Muted>Payment Date</Muted>
-          <Code className="font-fira-bold">23 Jan, 2025</Code>
-        </View>
-        <View className="justify-between flex-row">
-          <Muted>Payment Mode</Muted>
-          <Code className="font-fira-bold">Online</Code>
-        </View>
-        <View className="justify-between flex-row">
-          <Muted>Online Transaction ID</Muted>
-          <Code className="font-fira-bold">AB8393NJKDIE92392</Code>
-        </View>
-      </View>
-
-      <Small className="font-bold">Summary</Small>
-
-      <View className="gap-3">
-        <View className="justify-between flex-row">
-          <Muted>{"Subscription Amount (#CHIT001)"}</Muted>
-          <Code className="font-fira-bold">₹4,000</Code>
-        </View>
-        <View className="justify-between flex-row">
-          <Muted>Total Interest</Muted>
-          <Code className="font-fira-bold text-primary">₹1,000</Code>
-        </View>
-        <View className="justify-between flex-row">
-          <Muted>Penalty Charges</Muted>
-          <Code className="font-fira-bold">None</Code>
-        </View>
-
-        <Separator />
-
-        <View className="justify-between flex-row">
-          <Muted>Total Payment Amount</Muted>
-          <Code className="font-fira-bold">₹5,000</Code>
-        </View>
-      </View>
-    </>
-  );
-}
 
 function PayoutDetails({ status }: { status: string }) {
   switch (status) {
@@ -266,17 +216,28 @@ function PayoutDetails({ status }: { status: string }) {
 }
 
 export default function TransactionDetails() {
+  const searchParams = useSearchParams();
+  const transactionId = searchParams.get("id") as string;
+
+  const { data, isLoading } = useQuery(
+    trpc.payments.getById.queryOptions({ paymentId: transactionId })
+  );
+
+  if (isLoading) return <SpinnerView />;
+
   return (
     <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-      <View className="flex-1 items-center py-6 px-4 justify-between">
+      <View className="flex-1 items-center pb-6 px-4 justify-between">
         <View className="flex-1 w-full gap-6">
           {/** Transaction Top Card */}
-          <View className="gap-3">
+          <View className="gap-3 py-3">
             <View className="flex-row justify-between items-center">
-              <Lead className="text-foreground">JNANA 2024</Lead>
+              <Lead className="text-foreground">
+                {data?.subscribersToBatches.batch.name}
+              </Lead>
               <View className="flex-row items-center gap-1">
                 <Large className="font-bold">
-                  {t.amount.toLocaleString("en-IN", {
+                  {data?.totalAmount.toLocaleString("en-IN", {
                     currency: "INR",
                     currencyDisplay: "narrowSymbol",
                     currencySign: "standard",
@@ -300,29 +261,109 @@ export default function TransactionDetails() {
             <View className="flex-row justify-between items-center">
               <View className="flex-row items-center gap-2">
                 <Avatar className="size-5" alt={t.chit_fund_name}>
-                  <AvatarImage source={{ uri: t.chit_fund_image }} />
+                  <AvatarImage source={{ uri: "" }} />
                   <AvatarFallback>
                     <Text className="text-[8px]">
-                      {t.chit_fund_name.charAt(0).toUpperCase()}
+                      {data?.subscribersToBatches.batch.collector?.orgName
+                        .charAt(0)
+                        .toUpperCase()}
                     </Text>
                   </AvatarFallback>
                 </Avatar>
-                <Small className="text-xs">{t.chit_fund_name}</Small>
+                <Small className="text-xs">
+                  {data?.subscribersToBatches.batch.collector?.orgName}
+                </Small>
               </View>
-              {t.type === "payout" && (
-                <PayoutStatusBadge status={t.status ?? ""} />
-              )}
             </View>
           </View>
 
           {/** Content */}
-          {t.type === "payment" ? (
-            <PaymentDetails />
-          ) : (
-            <PayoutDetails status={t.status ?? ""} />
-          )}
+          <Small className="font-bold">Payment Details</Small>
+
+          <View className="gap-3">
+            <View className="justify-between items-center flex-row">
+              <Muted>Payment ID</Muted>
+              <Code className="font-fira-bold w-2/4 text-right">
+                {data?.id}
+              </Code>
+            </View>
+            <View className="justify-between flex-row">
+              <Muted>Credit Score Affected</Muted>
+              <Code className="font-fira-bold text-primary">
+                {data?.creditScoreAffected}
+              </Code>
+            </View>
+            <View className="justify-between flex-row">
+              <Muted>Payment Date</Muted>
+              <Code className="font-fira-bold">
+                {data?.paidOn?.toDateString()}
+              </Code>
+            </View>
+            <View className="justify-between flex-row">
+              <Muted>Payment Mode</Muted>
+              <Code className="font-fira-bold uppercase">
+                {data?.paymentMode}
+              </Code>
+            </View>
+            <View className="justify-between flex-row">
+              <Muted>Online Transaction ID</Muted>
+              <Code className="font-fira-bold">{data?.transactionId}</Code>
+            </View>
+          </View>
+
+          <Small className="font-bold">Summary</Small>
+
+          {/** @todo */}
+          <View className="gap-3">
+            <View className="justify-between flex-row">
+              <Muted>{`Subscription Amount (${data?.subscribersToBatches.chitId})`}</Muted>
+              <Code className="font-fira-bold">
+                {data?.subscriptionAmount.toLocaleString("en-IN", {
+                  style: "currency",
+                  currency: "INR",
+                })}
+              </Code>
+            </View>
+            {/* <View className="justify-between flex-row">
+              <Muted>Total Interest</Muted>
+              <Code className="font-fira-bold text-primary">
+                ₹{data?.penalty}
+              </Code>
+            </View> */}
+            <View className="justify-between flex-row">
+              <Muted>Penalty Charges</Muted>
+              <Code
+                className={cn(
+                  "font-fira-bold text-destructive",
+                  data?.penalty === 0
+                    ? "text-muted-foreground"
+                    : "text-destructive"
+                )}
+              >
+                -
+                {data?.penalty === 0
+                  ? "NONE"
+                  : data?.penalty.toLocaleString("en-IN", {
+                      style: "currency",
+                      currency: "INR",
+                    })}
+              </Code>
+            </View>
+
+            <Separator />
+
+            <View className="justify-between flex-row">
+              <Muted>Total Payment Amount</Muted>
+              <Code className="font-fira-bold">
+                {data?.totalAmount.toLocaleString("en-IN", {
+                  style: "currency",
+                  currency: "INR",
+                })}
+              </Code>
+            </View>
+          </View>
         </View>
-        <H3 className="text-muted-foreground">Chit.Money</H3>
+        <H3 className="mt-20 text-muted-foreground">Chit.Money</H3>
       </View>
     </ScrollView>
   );
