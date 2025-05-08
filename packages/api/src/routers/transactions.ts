@@ -2,6 +2,7 @@ import { schema } from "@cmt/db/client";
 import { protectedProcedure } from "../trpc";
 import { desc, eq, inArray, sql, unionAll } from "@cmt/db";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 export const transactionsRouter = {
   /**
@@ -9,83 +10,111 @@ export const transactionsRouter = {
    *
    * @context subscriber
    */
-  getInfinitiyOfSubscriber: protectedProcedure.query(async ({ ctx }) => {
-    // Union query for mix up the payments and payouts
-    const subToBatch = await ctx.db.query.subscribersToBatches.findMany({
-      where: eq(schema.subscribersToBatches.subscriberId, ctx.session.userId),
-    });
+  getInfinitiyOfSubscriber: protectedProcedure
+    .input(
+      z
+        .object({
+          limit: z.number().optional(),
+          cursor: z.string().optional(),
+          type: z.enum(["payouts", "all"]).optional(),
+        })
+        .optional()
+    )
+    .query(async ({ ctx, input }) => {
+      const limit = input?.limit ?? 10;
+      const cursor = input?.cursor;
 
-    if (!subToBatch)
-      throw new TRPCError({ message: "No chit found", code: "NOT_FOUND" });
+      const subToBatch = await ctx.db.query.subscribersToBatches.findMany({
+        where: eq(schema.subscribersToBatches.subscriberId, ctx.session.userId),
+      });
 
-    const payments = ctx.db
-      .select({
-        transactionId: schema.payments.id,
-        type: sql<string>`'payment'`.mapWith(String).as("type"),
-        totalAmount: schema.payments.totalAmount,
-        creditScoreAffected: schema.payments.creditScoreAffected,
-        batch: schema.batches,
-        payoutStatus: sql<
-          "requested" | "rejected" | "disbursed" | "cancelled" | "approved"
-        >`NULL`.as("payoutStatus"),
-        collector: schema.collectors,
-        createdAt: sql`"payments"."created_at" as createdAt`,
-      })
-      .from(schema.payments)
-      .where(
-        inArray(
-          schema.payments.subscriberToBatchId,
-          subToBatch.map((s) => s.id)
+      if (!subToBatch)
+        throw new TRPCError({ message: "No chit found", code: "NOT_FOUND" });
+
+      const payments = ctx.db
+        .select({
+          transactionId: schema.payments.id,
+          type: sql<string>`'payment'`.mapWith(String).as("type"),
+          totalAmount: schema.payments.totalAmount,
+          creditScoreAffected: schema.payments.creditScoreAffected,
+          batch: schema.batches,
+          payoutStatus: sql<
+            "requested" | "rejected" | "disbursed" | "cancelled" | "approved"
+          >`NULL`.as("payoutStatus"),
+          collector: schema.collectors,
+          createdAt: sql`"payments"."created_at" as createdAt`,
+        })
+        .from(schema.payments)
+        .where(
+          inArray(
+            schema.payments.subscriberToBatchId,
+            subToBatch.map((s) => s.id)
+          )
         )
-      )
-      .leftJoin(
-        schema.subscribersToBatches,
-        eq(schema.subscribersToBatches.id, schema.payments.subscriberToBatchId)
-      )
-      .leftJoin(
-        schema.batches,
-        eq(schema.batches.id, schema.subscribersToBatches.batchId)
-      )
-      .leftJoin(
-        schema.collectors,
-        eq(schema.collectors.id, schema.batches.collectorId)
-      );
-
-    const payouts = ctx.db
-      .select({
-        transactionId: schema.payouts.id,
-        type: sql`'payout'`.mapWith(String).as("type"),
-        totalAmount: schema.payouts.totalAmount,
-        creditScoreAffected: sql<number>`NULL`
-          .mapWith(Number)
-          .as("creditScoreAffected"),
-        batch: schema.batches,
-        payoutStatus: schema.payouts.payoutStatus,
-        collector: schema.collectors,
-        createdAt: sql`"payouts"."created_at" as createdAt`,
-      })
-      .from(schema.payouts)
-      .where(
-        inArray(
-          schema.payouts.subscriberToBatchId,
-          subToBatch.map((s) => s.id)
+        .leftJoin(
+          schema.subscribersToBatches,
+          eq(
+            schema.subscribersToBatches.id,
+            schema.payments.subscriberToBatchId
+          )
         )
-      )
-      .leftJoin(
-        schema.subscribersToBatches,
-        eq(schema.subscribersToBatches.id, schema.payouts.subscriberToBatchId)
-      )
-      .leftJoin(
-        schema.batches,
-        eq(schema.batches.id, schema.subscribersToBatches.batchId)
-      )
-      .leftJoin(
-        schema.collectors,
-        eq(schema.collectors.id, schema.batches.collectorId)
-      );
+        .leftJoin(
+          schema.batches,
+          eq(schema.batches.id, schema.subscribersToBatches.batchId)
+        )
+        .leftJoin(
+          schema.collectors,
+          eq(schema.collectors.id, schema.batches.collectorId)
+        );
 
-    return unionAll(payments, payouts)
-      .limit(10)
-      .orderBy(desc(sql`createdAt`)); // 👈 for pagination
-  }),
+      const payouts = ctx.db
+        .select({
+          transactionId: schema.payouts.id,
+          type: sql`'payout'`.mapWith(String).as("type"),
+          totalAmount: schema.payouts.totalAmount,
+          creditScoreAffected: sql<number>`NULL`
+            .mapWith(Number)
+            .as("creditScoreAffected"),
+          batch: schema.batches,
+          payoutStatus: schema.payouts.payoutStatus,
+          collector: schema.collectors,
+          createdAt: sql`"payouts"."created_at" as createdAt`,
+        })
+        .from(schema.payouts)
+        .where(
+          inArray(
+            schema.payouts.subscriberToBatchId,
+            subToBatch.map((s) => s.id)
+          )
+        )
+        .leftJoin(
+          schema.subscribersToBatches,
+          eq(schema.subscribersToBatches.id, schema.payouts.subscriberToBatchId)
+        )
+        .leftJoin(
+          schema.batches,
+          eq(schema.batches.id, schema.subscribersToBatches.batchId)
+        )
+        .leftJoin(
+          schema.collectors,
+          eq(schema.collectors.id, schema.batches.collectorId)
+        );
+
+      const transactions =
+        input?.type === "payouts"
+          ? await payouts
+          : await unionAll(payments, payouts)
+              .limit(limit + 1)
+              .orderBy(desc(sql`createdAt`)); // 👈 for pagination
+
+      const nextCursor =
+        transactions.length > limit
+          ? transactions.pop()?.transactionId
+          : undefined;
+
+      return {
+        items: transactions,
+        nextCursor: undefined,
+      };
+    }),
 };

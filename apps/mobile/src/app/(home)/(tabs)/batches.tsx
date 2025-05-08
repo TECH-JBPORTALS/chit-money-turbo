@@ -48,7 +48,6 @@ export default function Batches() {
     refetch,
     isRefetching,
     hasNextPage,
-    isFetchedAfterMount,
     fetchNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(
