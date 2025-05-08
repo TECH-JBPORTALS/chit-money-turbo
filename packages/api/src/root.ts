@@ -4,6 +4,7 @@ import { helloRotuer } from "./routers/hello";
 import { paymentsRouter } from "./routers/payments";
 import { payoutsRouter } from "./routers/payouts";
 import { subscribersRouter } from "./routers/subscribers";
+import { transactionsRouter } from "./routers/transactions";
 import { createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
@@ -13,6 +14,7 @@ export const appRouter = createTRPCRouter({
   subscribers: subscribersRouter,
   payments: paymentsRouter,
   payouts: payoutsRouter,
+  transactions: transactionsRouter,
 });
 
 // export type definition of API

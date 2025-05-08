@@ -40,7 +40,10 @@ export const columns: ColumnDef<
             </AvatarFallback>
           </Avatar>
           <div>
-            <Link className="hover:underline" href={`/s/${row.id}`}>
+            <Link
+              className="hover:underline"
+              href={`/s/${row.subscribersToBatches.subscriberId}`}
+            >
               <span>
                 {row.subscriber.firstName} {row.subscriber.lastName}
               </span>

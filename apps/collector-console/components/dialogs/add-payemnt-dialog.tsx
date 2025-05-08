@@ -39,10 +39,17 @@ import { ScrollArea } from "@cmt/ui/components/scroll-area";
 import { Separator } from "@cmt/ui/components/separator";
 import { paymentInsertSchema } from "@cmt/db/schema";
 import { RouterOutputs } from "@cmt/api";
-import { formatDate } from "date-fns";
+import { format, formatDate } from "date-fns";
 import { useTRPC } from "@/trpc/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@cmt/ui/components/popover";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@cmt/ui/components/calendar";
 
 const paymentDetailsForm = paymentInsertSchema.pick({
   subscriptionAmount: true,
@@ -109,7 +116,35 @@ function PaymentDetailsForm(
             <FormItem>
               <FormLabel>Payment Date</FormLabel>
               <FormControl>
-                <Input type="date" {...field} />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value ?? new Date()}
+                      onSelect={field.onChange}
+                      disabled={(date) => date < new Date("1900-01-01")}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -150,7 +185,7 @@ function PaymentSummaryForm(
     penalty: number;
     runwayDate: string;
     subscriberToBatchId: string;
-    paidOn: string;
+    paidOn: Date;
   }
 ) {
   const form = useForm<z.infer<typeof paymentSummaryForm>>({
@@ -311,7 +346,7 @@ export function AddPaymentDialog({
     subscriptionAmount: data.payment.subscriptionAmount,
     penalty: data.payment.penalty ?? 0,
     paymentMode: data.payment.paymentMode ?? "cash",
-    paidOn: data.payment.paidOn ?? "",
+    paidOn: data.payment.paidOn ?? new Date(),
     transactionId: data.payment.transactionId ?? "",
   });
 

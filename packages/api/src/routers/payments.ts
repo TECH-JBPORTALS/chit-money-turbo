@@ -23,7 +23,8 @@ export const paymentsRouter = {
         .values({
           ...input,
           totalAmount: input.subscriptionAmount + input.penalty,
-          creditScoreAffected: input.paidOn > input.runwayDate ? -10 : 10,
+          creditScoreAffected:
+            input.paidOn > new Date(input.runwayDate) ? -10 : 10,
         })
         .returning()
         .then((v) => v.at(0))

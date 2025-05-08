@@ -108,7 +108,7 @@ export const payments = pgTable(
     transactionId: t.text(),
     creditScoreAffected: t.integer().notNull(),
     /** Special paid on to explicitly define the paid date */
-    paidOn: t.date().defaultNow().notNull(),
+    paidOn: t.timestamp(),
     updatedAt: t.timestamp().$onUpdate(() => new Date()),
     createdAt: t.timestamp().defaultNow().notNull(),
   }),

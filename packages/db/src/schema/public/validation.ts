@@ -53,7 +53,7 @@ export const paymentInsertSchema = createInsertSchema(payments, {
   subscriptionAmount: z.number({
     invalid_type_error: "Invalid subscription amount",
   }),
-  paidOn: z.string().min(1, "Payment date is required"),
+  paidOn: z.date({ required_error: "Payment date is required" }),
   transactionId: z.string().optional(),
 }).omit({
   id: true,
@@ -66,7 +66,7 @@ export const paymentUpdateSchema = createUpdateSchema(payments, {
   subscriptionAmount: z.number({
     invalid_type_error: "Invalid subscription amount",
   }),
-  paidOn: z.string().min(1, "Payment date is required"),
+  paidOn: z.date({ required_error: "Payment date is required" }),
   transactionId: z.string().optional(),
 }).omit({
   id: true,
