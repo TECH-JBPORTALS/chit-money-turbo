@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@cmt/ui/components/dialog";
+import { Calendar } from "@cmt/ui/components/calendar";
 import {
   Form,
   FormControl,
@@ -37,10 +38,22 @@ import { z } from "zod";
 import SearchInput from "../search-input";
 import { ScrollArea } from "@cmt/ui/components/scroll-area";
 import { Separator } from "@cmt/ui/components/separator";
+import { RouterOutputs } from "@cmt/api";
+import { format, formatDate } from "date-fns";
+import { payoutInsertSchema } from "@cmt/db/schema";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@cmt/ui/components/popover";
+import { CalendarIcon } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/react";
+import { toast } from "sonner";
 
-const payoutDetailsForm = z.object({
-  amount: z.number().min(1, "Amount must be greater than 0"),
-  payout_date: z.string().nonempty("Required"),
+const payoutDetailsForm = payoutInsertSchema.pick({
+  amount: true,
+  disbursedAt: true,
 });
 
 function PayoutDetailsForm(
@@ -79,12 +92,40 @@ function PayoutDetailsForm(
         />
         <FormField
           control={form.control}
-          name="payout_date"
+          name="disbursedAt"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Payout Date</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => date < new Date("1900-01-01")}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -97,7 +138,7 @@ function PayoutDetailsForm(
             </Button>
           </DialogClose>
           <Button type="submit" size={"lg"}>
-            Create
+            Next
           </Button>
         </DialogFooter>
       </form>
@@ -105,13 +146,28 @@ function PayoutDetailsForm(
   );
 }
 
-const payoutSummaryForm = z.object({
-  method: z.enum(["Cash", "UPI", "Cheque"]),
-  transaction_id: z.string().nonempty("Required"),
-});
+const payoutSummaryForm = payoutInsertSchema
+  .pick({
+    paymentMode: true,
+    transactionId: true,
+  })
+  .superRefine((v, ctx) => {
+    if (v.paymentMode === "upi/bank" && !v.transactionId)
+      ctx.addIssue({
+        path: ["transactionId"],
+        code: "custom",
+        message: "Transation ID required for payment mode UPI/Bank",
+      });
+  });
 
 function PayoutSummaryForm(
-  props: StepProps<z.infer<typeof payoutSummaryForm>> & { amount: number }
+  props: StepProps<z.infer<typeof payoutSummaryForm>> & {
+    amount: number;
+    appliedCommissionRate: number;
+    month: string;
+    disbursedAt: Date;
+    payoutId: string;
+  }
 ) {
   const form = useForm<z.infer<typeof payoutSummaryForm>>({
     resolver: zodResolver(payoutSummaryForm),
@@ -119,11 +175,32 @@ function PayoutSummaryForm(
   });
 
   const { prev } = useSteps();
-  const commisonAmount = Math.floor((2 / 100) * props.amount);
+  const commisonAmount = Math.floor(
+    (props.appliedCommissionRate / 100) * props.amount
+  );
+
   const totalAmountPayable = props.amount - commisonAmount;
 
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: disburseAmount, isPending } = useMutation(
+    trpc.payouts.disburseAmount.mutationOptions({
+      onSuccess: async (data) => {
+        await queryClient.invalidateQueries(trpc.payouts.pathFilter());
+        toast.info("Payout disbused");
+      },
+      onError: async (d, v) => {
+        console.log(d.message);
+        toast.error("Couldn't able to add payment at this time", {
+          description: "Try again later sometime",
+        });
+      },
+    })
+  );
+
   async function onSubmit(values: z.infer<typeof payoutSummaryForm>) {
-    console.log(values);
+    await disburseAmount({ ...values, ...props });
   }
 
   return (
@@ -148,7 +225,7 @@ function PayoutSummaryForm(
             </div>
             <div className="inline-flex justify-between w-full">
               <small className="text-muted-foreground text-sm">
-                Your Commision (2%)
+                Your Commision ({props.appliedCommissionRate}%)
               </small>
 
               <p className="text-sm text-right  text-destructive">
@@ -178,23 +255,23 @@ function PayoutSummaryForm(
         </div>
 
         <FormField
-          name="method"
+          name="paymentMode"
           control={form.control}
           render={({ field }) => (
             <FormItem className="w-full">
               <Tabs value={field.value} onValueChange={field.onChange}>
                 <TabsList className="w-full">
-                  <TabsTrigger value="Cash">Cash</TabsTrigger>
-                  <TabsTrigger value="UPI">UPI/Bank</TabsTrigger>
-                  <TabsTrigger value="Cheque">Cheque</TabsTrigger>
+                  <TabsTrigger value="cash">Cash</TabsTrigger>
+                  <TabsTrigger value="upi/bank">UPI/Bank</TabsTrigger>
+                  <TabsTrigger value="cheque">Cheque</TabsTrigger>
                 </TabsList>
                 <TabsContent
                   className="border px-3 py-5 rounded-md"
-                  value="UPI"
+                  value="upi/bank"
                 >
                   <FormField
                     control={form.control}
-                    name="transaction_id"
+                    name="transactionId"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Transactoin ID</FormLabel>
@@ -220,18 +297,31 @@ function PayoutSummaryForm(
           >
             Back
           </Button>
-          <Button size={"lg"}>Complete</Button>
+          <Button isLoading={isPending} size={"lg"}>
+            Complete
+          </Button>
         </DialogFooter>
       </form>
     </Form>
   );
 }
 
-export function AddPayoutDialog({ children }: { children: React.ReactNode }) {
+export function AddPayoutDialog({
+  children,
+  data,
+}: {
+  children: React.ReactNode;
+  data: RouterOutputs["payouts"]["ofBatch"]["items"][number];
+}) {
   const { current: currentStep, total } = useSteps();
   const [globalState, setGlobalState] = useState<
     z.infer<typeof payoutDetailsForm & typeof payoutSummaryForm>
-  >({ amount: 40000, method: "Cash", payout_date: "", transaction_id: "" });
+  >({
+    amount: data.amount,
+    paymentMode: "cash",
+    disbursedAt: new Date(),
+    transactionId: "",
+  });
 
   return (
     <Dialog>
@@ -239,14 +329,20 @@ export function AddPayoutDialog({ children }: { children: React.ReactNode }) {
       <DialogContent className="gap-0">
         <DialogHeader className="flex flex-col items-center">
           <Avatar className="size-16">
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>S</AvatarFallback>
+            <AvatarImage src={data.subscriber.imageUrl} />
+            <AvatarFallback>
+              {data.subscriber.firstName?.charAt(0)}
+            </AvatarFallback>
           </Avatar>
-          <DialogTitle>Ada Shelby</DialogTitle>
-          <DialogDescription>#CHIT00</DialogDescription>
+          <DialogTitle>
+            {data.subscriber.firstName} {data.subscriber.lastName}
+          </DialogTitle>
+          <DialogDescription>
+            {data.subscribersToBatches.chitId}
+          </DialogDescription>
           <span className="inline-flex gap-1.5 text-lg text-muted-foreground font-semibold">
             <Badge variant={"secondary"} className="border-primary">
-              3. Mar 2004
+              {formatDate(data.month, "MMM yyyy")}
             </Badge>
             Payout
           </span>
@@ -276,7 +372,11 @@ export function AddPayoutDialog({ children }: { children: React.ReactNode }) {
             setState={(state) =>
               setGlobalState((prev) => ({ ...prev, ...state }))
             }
+            appliedCommissionRate={data.subscribersToBatches.commissionRate}
             amount={globalState.amount}
+            disbursedAt={globalState.disbursedAt}
+            month={data.month}
+            payoutId={data.id}
           />
         </Steps>
       </DialogContent>
@@ -302,7 +402,10 @@ export function SelectPayoutPersonDialog({
         </DialogHeader>
         <ScrollArea className="flex-1 flex flex-col px-4 max-h-[450px] h-[450px]">
           {Array.from({ length: 9 }).map((_, i) => (
-            <div className="inline-flex py-2  w-full mt-2 items-center justify-between">
+            <div
+              key={i}
+              className="inline-flex py-2  w-full mt-2 items-center justify-between"
+            >
               <div className="inline-flex gap-2">
                 <Avatar className="size-10 border-2">
                   <AvatarImage src="https://github.com/linear.png" />
@@ -313,9 +416,9 @@ export function SelectPayoutPersonDialog({
                   <p className="text-sm text-muted-foreground">#CHIT002</p>
                 </div>
               </div>
-              <AddPayoutDialog>
-                <Button variant={"secondary"}>Make Payout</Button>
-              </AddPayoutDialog>
+              {/* <AddPayoutDialog> */}
+              <Button variant={"secondary"}>Make Payout</Button>
+              {/* </AddPayoutDialog> */}
             </div>
           ))}
         </ScrollArea>

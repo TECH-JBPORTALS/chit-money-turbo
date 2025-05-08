@@ -31,10 +31,12 @@ export const columns: ColumnDef<
     cell(props) {
       const row = props.row.original;
       return (
-        <div className="inline-flex gap-2">
+        <div className="inline-flex gap-2 h-12">
           <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>S</AvatarFallback>
+            <AvatarImage src={row.subscriber.imageUrl} />
+            <AvatarFallback>
+              {row.subscriber.firstName?.charAt(0)}
+            </AvatarFallback>
           </Avatar>
           <div>
             <Link className="hover:underline" href={`/s/${row.id}`}>
@@ -124,7 +126,7 @@ export const columns: ColumnDef<
               </ViewPayoutDialog>
 
               {props.row.original.payoutStatus === "approved" && (
-                <AddPayoutDialog>
+                <AddPayoutDialog data={props.row.original}>
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     <ArrowUpRightIcon />
                     Make Payout

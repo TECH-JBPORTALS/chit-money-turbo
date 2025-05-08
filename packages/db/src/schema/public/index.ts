@@ -8,6 +8,7 @@ import {
   paymentModeEnum,
   payoutStatusEnum,
 } from "../enums";
+import { sql } from "drizzle-orm";
 
 /************************************* Batches ***************************************/
 
@@ -138,10 +139,17 @@ export const payouts = pgTable(
       .notNull(),
     paymentMode: paymentModeEnum("payment_mode").default("cash").notNull(),
     transactionId: t.text(),
+    appliedCommissionRate: t
+      .numeric({
+        precision: 3,
+        scale: 1,
+        mode: "number",
+      })
+      .notNull(),
 
     /** Special paid on to explicitly define the paid date */
     requestedAt: t.timestamp(),
-    acceptedAt: t.timestamp(),
+    approvedAt: t.timestamp(),
     cancelledAt: t.timestamp(),
     rejectionReason: t.text(),
     disbursedAt: t.timestamp(),

@@ -20,7 +20,6 @@ export const paymentModeEnum = pgEnum("payment_mode_enum", [
 
 export const payoutStatusEnum = pgEnum("payout_status_enum", [
   "requested",
-  "accepted",
   "rejected",
   "disbursed",
   "cancelled",

@@ -5,6 +5,7 @@ import { reset } from "drizzle-seed";
 import { schema } from "@/client";
 import { addMonths } from "date-fns";
 import { eq } from "drizzle-orm";
+import { subscribersToBatches } from "./schema/public";
 
 async function main() {
   //Check for seed mode
@@ -249,8 +250,10 @@ async function main() {
         });
 
       runwayDates.map(async (rd, i) => {
-        const deductions = f.helpers.arrayElement([200, 400, 1000, 2000]);
         const amount = parseInt(batch.fundAmount);
+        const deductions = Math.ceil(
+          (subscribersToBatcheData.at(i)!.commissionRate / 100) * amount
+        );
         const payoutStatus = f.helpers.arrayElement([
           // "requested",
           // "accepted",
@@ -268,6 +271,7 @@ async function main() {
           totalAmount: amount - deductions,
           payoutStatus,
           paymentMode: "cash",
+          appliedCommissionRate: subscribersToBatcheData.at(i)!.commissionRate,
         });
       });
       //Payments

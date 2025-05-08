@@ -83,8 +83,14 @@ export const payoutInsertSchema = createInsertSchema(payouts, {
   transactionId: z.string().optional(),
 }).omit({
   id: true,
+  deductions: true,
   createdAt: true,
   updatedAt: true,
+  payoutStatus: true,
+  approvedAt: true,
+  cancelledAt: true,
+  rejectedAt: true,
+  requestedAt: true,
 });
 
 export const payoutUpdateSchema = createUpdateSchema(payouts, {
@@ -94,8 +100,16 @@ export const payoutUpdateSchema = createUpdateSchema(payouts, {
   }),
   disbursedAt: z.date({ required_error: "Disbursed date is required" }),
   transactionId: z.string().optional(),
+  appliedCommissionRate: z.number(),
 }).omit({
   id: true,
+  deductions: true,
   createdAt: true,
   updatedAt: true,
+  payoutStatus: true,
+  subscriberToBatchId: true,
+  approvedAt: true,
+  cancelledAt: true,
+  rejectedAt: true,
+  requestedAt: true,
 });

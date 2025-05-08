@@ -7945,7 +7945,7 @@ snapshots:
 
   '@babel/helper-wrap-function@7.25.9':
     dependencies:
-      '@babel/template': 7.27.0
+      '@babel/template': 7.27.1
       '@babel/traverse': 7.27.0
       '@babel/types': 7.27.1
     transitivePeerDependencies:

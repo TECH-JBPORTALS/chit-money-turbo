@@ -1,35 +1,69 @@
-import { and, count, desc, eq, ilike, inArray, or, sql } from "@cmt/db";
+import { and, count, desc, eq, ilike, inArray, or } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { schema } from "@cmt/db/client";
-import { addMonths, format, sub } from "date-fns";
 import { paginateInputSchema } from "../utils/paginate";
-import { getSubscribersByBatchId } from "../utils/actions";
-import { generateChitId } from "@cmt/db/utils";
-import {
-  paymentInsertSchema,
-  paymentUpdateSchema,
-  payoutInsertSchema,
-} from "@cmt/db/schema";
+import { payoutInsertSchema, payoutUpdateSchema } from "@cmt/db/schema";
 import { getQueryUserIds } from "../utils/clerk";
 
 export const payoutsRouter = {
-  /** Create payment for subscribersToBatchId
+  /** Create payout for subscribersToBatchId with approved status
    * @context collector
    */
-  create: protectedProcedure
+  approve: protectedProcedure
     .input(payoutInsertSchema.omit({ totalAmount: true }))
-    .mutation(({ ctx, input }) =>
-      ctx.db
+    .mutation(async ({ ctx, input }) => {
+      const deductions = (input.appliedCommissionRate / 100) * input.amount;
+
+      return await ctx.db
         .insert(schema.payouts)
         .values({
           ...input,
-          totalAmount: input.amount + input.deductions,
+          totalAmount: input.amount + deductions,
+          payoutStatus: "approved",
+          approvedAt: new Date(),
+        })
+        .onConflictDoUpdate({
+          set: {
+            ...input,
+            totalAmount: input.amount + deductions,
+            payoutStatus: "approved",
+            approvedAt: new Date(),
+          },
+          target: schema.payouts.id,
         })
         .returning()
-        .then((v) => v.at(0))
-    ),
+        .then((v) => v.at(0));
+    }),
+
+  /** Update payout for subscribersToBatchId with disbursed status
+   * @context collector
+   */
+  disburseAmount: protectedProcedure
+    .input(
+      payoutUpdateSchema
+        .omit({ totalAmount: true })
+        .and(z.object({ payoutId: z.string() }))
+    )
+    .mutation(async ({ ctx, input }) => {
+      const deductions = Math.floor(
+        (input.appliedCommissionRate / 100) * input.amount
+      );
+
+      return await ctx.db
+        .update(schema.payouts)
+        .set({
+          ...input,
+          deductions,
+          totalAmount: input.amount + deductions,
+          payoutStatus: "disbursed",
+          disbursedAt: new Date(),
+        })
+        .where(eq(schema.payouts.id, input.payoutId))
+        .returning()
+        .then((v) => v.at(0));
+    }),
 
   /** Delete payment for paymentId
    * @context collector
@@ -42,11 +76,11 @@ export const payoutsRouter = {
         .where(eq(schema.payouts.id, input.paymentId))
     ),
 
-  /** Update payment for paymentId
+  /** Update payout for payoutId
    * @context collector
    */
   update: protectedProcedure
-    .input(paymentUpdateSchema.and(z.object({ paymentId: z.string().min(1) })))
+    .input(payoutUpdateSchema.and(z.object({ paymentId: z.string().min(1) })))
     .mutation(({ ctx, input }) =>
       ctx.db
         .update(schema.payouts)
@@ -55,33 +89,6 @@ export const payoutsRouter = {
         .returning()
         .then((v) => v.at(0))
     ),
-
-  /** Get runway for specific brach based batch schema and starts on date
-   * @context collector
-   */
-  getRunway: protectedProcedure
-    .input(z.object({ batchId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const batch = await ctx.db.query.batches.findFirst({
-        where: eq(schema.batches.id, input.batchId),
-      });
-
-      if (!batch)
-        throw new TRPCError({ message: "Batch Not Found", code: "NOT_FOUND" });
-
-      const scheme = batch.scheme;
-      const startsOn = new Date(batch.startsOn);
-
-      const months = Array.from({ length: scheme }, (_, index) => {
-        const date = addMonths(startsOn, index);
-        return {
-          value: format(date, "yyyy-MM-dd"),
-          label: format(date, "MMM yyyy"),
-        };
-      });
-
-      return { batch, months };
-    }),
 
   /** Get list subscribers who has approved or disubursed payouts
    * @context collector
@@ -108,10 +115,8 @@ export const payoutsRouter = {
         where: subIds
           ? and(
               eq(schema.subscribersToBatches.batchId, input.batchId),
-              or(
-                inArray(schema.subscribersToBatches.subscriberId, subIds),
-                queryCond
-              )
+              inArray(schema.subscribersToBatches.subscriberId, subIds),
+              or(queryCond)
             )
           : or(
               eq(schema.subscribersToBatches.batchId, input.batchId),
