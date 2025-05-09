@@ -1,6 +1,6 @@
 import { schema } from "@cmt/db/client";
 import { protectedProcedure } from "../trpc";
-import { and, desc, eq, inArray, lte, sql, unionAll } from "@cmt/db";
+import { and, desc, eq, inArray, lt, lte, sql, unionAll } from "@cmt/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -109,6 +109,7 @@ export const transactionsRouter = {
       const cursorCond = cursor
         ? lte(unionTransaction.transactionId, cursor)
         : undefined;
+
       const filtersCond =
         input?.type === "payouts"
           ? eq(unionTransaction.type, "payout")
@@ -118,11 +119,11 @@ export const transactionsRouter = {
         .select()
         .from(unionTransaction)
         .where(and(cursorCond, filtersCond))
-        .limit(limit + 1)
         .orderBy(
-          desc(unionTransaction.transactionId),
-          desc(unionTransaction.updatedAt)
-        );
+          desc(unionTransaction.updatedAt),
+          desc(unionTransaction.transactionId)
+        )
+        .limit(limit + 1);
 
       const nextCursor =
         transactions.length > limit
