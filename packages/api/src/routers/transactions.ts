@@ -1,6 +1,6 @@
 import { schema } from "@cmt/db/client";
 import { protectedProcedure } from "../trpc";
-import { desc, eq, inArray, sql, unionAll } from "@cmt/db";
+import { and, desc, eq, inArray, lte, sql, unionAll } from "@cmt/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -37,12 +37,14 @@ export const transactionsRouter = {
           type: sql<string>`'payment'`.mapWith(String).as("type"),
           totalAmount: schema.payments.totalAmount,
           creditScoreAffected: schema.payments.creditScoreAffected,
-          batch: schema.batches,
+          batchName: schema.batches.name,
+          orgName: schema.collectors.orgName,
           payoutStatus: sql<
             "requested" | "rejected" | "disbursed" | "cancelled" | "approved"
           >`NULL`.as("payoutStatus"),
-          collector: schema.collectors,
-          createdAt: sql`"payments"."created_at" as createdAt`,
+          updatedAt: sql<
+            typeof schema.payments.$inferSelect.updatedAt
+          >`${schema.payments.updatedAt}`.as("updatedAt"),
         })
         .from(schema.payments)
         .where(
@@ -75,10 +77,12 @@ export const transactionsRouter = {
           creditScoreAffected: sql<number>`NULL`
             .mapWith(Number)
             .as("creditScoreAffected"),
-          batch: schema.batches,
+          batchName: schema.batches.name,
+          orgName: schema.collectors.orgName,
           payoutStatus: schema.payouts.payoutStatus,
-          collector: schema.collectors,
-          createdAt: sql`"payouts"."created_at" as createdAt`,
+          updatedAt: sql<
+            typeof schema.payouts.$inferSelect.updatedAt
+          >`${schema.payouts.updatedAt}`.as("updatedAt"),
         })
         .from(schema.payouts)
         .where(
@@ -100,12 +104,25 @@ export const transactionsRouter = {
           eq(schema.collectors.id, schema.batches.collectorId)
         );
 
-      const transactions =
+      const unionTransaction = unionAll(payments, payouts).as("transaction");
+
+      const cursorCond = cursor
+        ? lte(unionTransaction.transactionId, cursor)
+        : undefined;
+      const filtersCond =
         input?.type === "payouts"
-          ? await payouts
-          : await unionAll(payments, payouts)
-              .limit(limit + 1)
-              .orderBy(desc(sql`createdAt`)); // 👈 for pagination
+          ? eq(unionTransaction.type, "payout")
+          : undefined;
+
+      const transactions = await ctx.db
+        .select()
+        .from(unionTransaction)
+        .where(and(cursorCond, filtersCond))
+        .limit(limit + 1)
+        .orderBy(
+          desc(unionTransaction.transactionId),
+          desc(unionTransaction.updatedAt)
+        );
 
       const nextCursor =
         transactions.length > limit
@@ -114,7 +131,7 @@ export const transactionsRouter = {
 
       return {
         items: transactions,
-        nextCursor: undefined,
+        nextCursor,
       };
     }),
 };

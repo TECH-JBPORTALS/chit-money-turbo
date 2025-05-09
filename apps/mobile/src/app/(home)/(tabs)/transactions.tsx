@@ -1,15 +1,7 @@
-import { Search } from "lucide-react-native";
-import {
-  RefreshControl,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { RefreshControl, TouchableOpacity, View } from "react-native";
 import { LinearBlurView } from "~/components/linear-blurview";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Button } from "~/components/ui/button";
 import { Card, CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
 import { H2, Large, Muted, Small } from "~/components/ui/typography";
 import { cn } from "~/lib/utils";
@@ -18,8 +10,8 @@ import { ArrowUpRight } from "~/lib/icons/ArrowUpRight";
 import { SearchX } from "~/lib/icons/SearchX";
 import { ArrowLeftRight } from "~/lib/icons/ArrowLeftRight";
 import { PayoutStatusBadge } from "~/lib/payout-badge";
-import { Link, useRouter } from "expo-router";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { trpc } from "~/utils/api";
 import { SpinnerView } from "~/components/spinner-view";
 import { FlashList } from "@shopify/flash-list";
@@ -29,6 +21,7 @@ import React, { memo, useState } from "react";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useDebounce } from "@uidotdev/usehooks";
 import Spinner from "~/components/ui/spinner";
+import { formatDistanceToNowStrict } from "date-fns";
 
 export default function Transactions() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -166,7 +159,7 @@ export default function Transactions() {
             <Card>
               <CardHeader className="gap-3">
                 <View className="gap-2 flex-row justify-between items-center">
-                  <CardTitle className="text-base">{t.batch?.name}</CardTitle>
+                  <CardTitle className="text-base">{t.batchName}</CardTitle>
 
                   <View className="flex-row items-center gap-1">
                     <Large>
@@ -198,11 +191,11 @@ export default function Transactions() {
                       <AvatarImage source={{ uri: "" }} />
                       <AvatarFallback>
                         <Text className="text-[8px]">
-                          {t.collector?.orgName.charAt(0).toUpperCase()}
+                          {t.orgName?.charAt(0).toUpperCase()}
                         </Text>
                       </AvatarFallback>
                     </Avatar>
-                    <Small className="text-xs">{t.collector?.orgName}</Small>
+                    <Small className="text-xs">{t?.orgName}</Small>
                   </View>
 
                   {t.type === "payment" ? (
@@ -221,7 +214,14 @@ export default function Transactions() {
                 </View>
               </CardHeader>
               <CardFooter>
-                <Muted className="text-xs">2 hours ago</Muted>
+                {t.updatedAt && (
+                  <Muted className="text-xs">
+                    Updated{" "}
+                    {formatDistanceToNowStrict(t.updatedAt, {
+                      addSuffix: true,
+                    })}
+                  </Muted>
+                )}
               </CardFooter>
             </Card>
           </TouchableOpacity>

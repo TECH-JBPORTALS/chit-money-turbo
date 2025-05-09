@@ -1,3 +1,3 @@
 export * from "drizzle-orm/sql";
-export { unionAll, union } from "drizzle-orm/pg-core";
-export { alias } from "drizzle-orm/pg-core";
+export { getTableColumns } from "drizzle-orm";
+export { unionAll, union, alias } from "drizzle-orm/pg-core";
