@@ -7,6 +7,11 @@ import { FlashList } from "@shopify/flash-list";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { ArrowRight } from "~/lib/icons/ArrowRight";
+import { useQuery } from "@tanstack/react-query";
+import { trpc } from "~/utils/api";
+import { useLocalSearchParams } from "expo-router";
+import { format } from "date-fns";
+import { SpinnerView } from "~/components/spinner-view";
 
 // Types for better type safety
 type PayoutStatus =
@@ -24,7 +29,7 @@ interface Transaction {
   payoutAmount?: number;
 }
 
-const getStatusElement = (status: PayoutStatus) => {
+const getStatusElement = (status: string | undefined) => {
   switch (status) {
     case "completed":
       return <SolarIcon size={16} name="CheckCircle" color="green" />;
@@ -49,7 +54,7 @@ const getStatusElement = (status: PayoutStatus) => {
           <ArrowRight size={14} className="text-primary-foreground" />
         </Badge>
       );
-    case "request":
+    case "available":
       return (
         <Button size="sm" className="bg-foreground dark:bg-foreground">
           <Text className="text-background dark:text-background">Request</Text>
@@ -61,42 +66,22 @@ const getStatusElement = (status: PayoutStatus) => {
 };
 
 export default function BatchRunwayScreen() {
-  // Memoized transaction data to prevent unnecessary re-renders
-  const transactions = useMemo<Transaction[]>(
-    () => [
-      { id: 1, date: "Jan 10, 2024", status: "completed" },
-      { id: 2, date: "Feb 10, 2024", status: "completed" },
-      { id: 3, date: "Mar 10, 2024", status: "requested" },
-      { id: 4, date: "Apr 10, 2024", status: "rejected" },
-      { id: 5, date: "May 10, 2024", status: undefined },
-      { id: 6, date: "Jun 10, 2024", status: undefined },
-      { id: 7, date: "Jul 10, 2024", status: "request" },
-      { id: 8, date: "Aug 10, 2024", status: undefined },
-      { id: 9, date: "Sep 10, 2024", status: "approved" },
-      { id: 10, date: "Oct 10, 2024", status: undefined },
-      { id: 11, date: "Oct 10, 2024", status: undefined },
-      { id: 12, date: "Oct 10, 2024", status: undefined },
-      { id: 13, date: "Oct 10, 2024", status: undefined },
-      { id: 14, date: "Oct 10, 2024", status: undefined },
-      { id: 15, date: "Oct 10, 2024", status: undefined },
-      { id: 16, date: "Oct 10, 2024", status: undefined },
-      { id: 17, date: "Oct 10, 2024", status: undefined },
-      { id: 18, date: "Oct 10, 2024", status: undefined },
-      { id: 19, date: "Oct 10, 2024", status: undefined },
-      { id: 20, date: "Oct 10, 2024", status: undefined },
-    ],
-    []
+  const { subToBatchId } = useLocalSearchParams<{ subToBatchId: string }>();
+  const { data, isLoading, isRefetching } = useQuery(
+    trpc.chits.getRunway.queryOptions({ subToBatchId })
   );
 
   const renderTransaction = React.useCallback(
-    ({ item }: { item: Transaction }) => {
-      const StatusElement = getStatusElement(item.status);
+    ({ item }: { item: (typeof transactions)[number] }) => {
+      const StatusElement = getStatusElement(item.payoutStatus);
 
       return (
         <View className="flex-row items-center justify-between py-3">
           <View className="flex-row items-center gap-3">
             <H3>{item.id}.</H3>
-            <Text className="text-base">{item.date}</Text>
+            <Text className="text-base">
+              {format(item.date, "MMM dd, yyyy")}
+            </Text>
           </View>
           <View className="flex-row items-center space-x-2">
             {StatusElement}
@@ -107,17 +92,17 @@ export default function BatchRunwayScreen() {
     []
   );
 
-  const keyExtractor = React.useCallback(
-    (item: Transaction) => item.id.toString(),
-    []
-  );
+  // Memoized transaction data to prevent unnecessary re-renders
+  const transactions = data ?? [];
+
+  if (isLoading || isRefetching) return <SpinnerView />;
 
   return (
     <View className="flex-1">
       <FlashList
         data={transactions}
         renderItem={renderTransaction}
-        keyExtractor={keyExtractor}
+        keyExtractor={(r) => r.id}
         showsVerticalScrollIndicator={false}
         estimatedItemSize={50}
         contentContainerStyle={{}}
