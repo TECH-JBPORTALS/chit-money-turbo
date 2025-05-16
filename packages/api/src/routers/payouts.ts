@@ -185,6 +185,11 @@ export const payoutsRouter = {
           subscribersToBatches: {
             with: {
               subscriber: true,
+              batch: {
+                with: {
+                  collector: true,
+                },
+              },
             },
           },
         },

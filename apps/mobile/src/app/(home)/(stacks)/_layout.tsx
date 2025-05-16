@@ -15,6 +15,8 @@ export default function HomeLayout() {
       >
         <Stack.Screen name="cfh/[id]" options={{ title: "" }} />
         <Stack.Screen name="transaction/[id]" options={{ title: "" }} />
+        <Stack.Screen name="payment/[paymentId]" options={{ title: "" }} />
+        <Stack.Screen name="payout/[payoutId]" options={{ title: "" }} />
         <Stack.Screen
           name="credit-score"
           options={{ title: "Credit Score History" }}

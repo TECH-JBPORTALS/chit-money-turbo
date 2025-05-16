@@ -12,9 +12,7 @@ import {
 } from "~/components/ui/typography";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Text } from "~/components/ui/text";
-import { PayoutStatusBadge } from "~/lib/payout-badge";
 import { Separator } from "~/components/ui/separator";
-import { Button } from "~/components/ui/button";
 import { ScrollView } from "react-native-gesture-handler";
 import { useQuery } from "@tanstack/react-query";
 import { trpc } from "~/utils/api";
@@ -22,30 +20,26 @@ import { useSearchParams } from "expo-router/build/hooks";
 import { SpinnerView } from "~/components/spinner-view";
 import { cn } from "~/lib/utils";
 
-const t = {
-  id: "s987t654-u321v098-w765x432",
-  name: "Freelancers Collective",
-  amount: 5000,
-  type: "payout",
-  subscription_amount: 8500,
-  credit_score_affected: -10,
-  chit_fund_name: "Surya Chit fund",
-  chit_fund_image: "https://github.com/x-sss-x.png",
-  status: "cancelled",
-  created_at: new Date(2024, 4, 20),
-};
-
-function PayoutDetails({ status }: { status: string }) {}
-
-export default function TransactionDetails() {
+export default function PaymentDetails() {
   const searchParams = useSearchParams();
-  const transactionId = searchParams.get("id") as string;
+  const paymentId = searchParams.get("paymentId") as string;
 
-  const { data, isLoading } = useQuery(
-    trpc.payments.getById.queryOptions({ paymentId: transactionId })
+  const { data, isLoading, isError } = useQuery(
+    trpc.payments.getById.queryOptions({ paymentId })
   );
 
   if (isLoading) return <SpinnerView />;
+
+  if (!data || isError)
+    return (
+      <View className="flex-1">
+        <Large>Something went wrong!</Large>
+        <Muted>
+          Payout details not exits, or may be our code breaks. Try again
+          sometime later
+        </Muted>
+      </View>
+    );
 
   return (
     <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
@@ -67,22 +61,21 @@ export default function TransactionDetails() {
                     maximumFractionDigits: 0,
                   })}
                 </Large>
-                {t.type === "payout" ? (
-                  <ArrowDownLeft
-                    strokeWidth={1}
-                    className="text-foreground size-6"
-                  />
-                ) : (
-                  <ArrowUpRight
-                    strokeWidth={1}
-                    className="text-foreground size-6"
-                  />
-                )}
+
+                <ArrowUpRight
+                  strokeWidth={1}
+                  className="text-foreground size-6"
+                />
               </View>
             </View>
             <View className="flex-row justify-between items-center">
               <View className="flex-row items-center gap-2">
-                <Avatar className="size-5" alt={t.chit_fund_name}>
+                <Avatar
+                  className="size-5"
+                  alt={
+                    data?.subscribersToBatches.batch.collector?.orgName ?? ""
+                  }
+                >
                   <AvatarImage source={{ uri: "" }} />
                   <AvatarFallback>
                     <Text className="text-[8px]">
@@ -127,10 +120,12 @@ export default function TransactionDetails() {
                 {data?.paymentMode}
               </Code>
             </View>
-            <View className="justify-between flex-row">
-              <Muted>Online Transaction ID</Muted>
-              <Code className="font-fira-bold">{data?.transactionId}</Code>
-            </View>
+            {data.paymentMode === "upi/bank" && (
+              <View className="justify-between flex-row">
+                <Muted>Online Transaction ID</Muted>
+                <Code className="font-fira-bold">{data?.transactionId}</Code>
+              </View>
+            )}
           </View>
 
           <Small className="font-bold">Summary</Small>
@@ -147,11 +142,11 @@ export default function TransactionDetails() {
               </Code>
             </View>
             {/* <View className="justify-between flex-row">
-              <Muted>Total Interest</Muted>
-              <Code className="font-fira-bold text-primary">
-                ₹{data?.penalty}
-              </Code>
-            </View> */}
+                <Muted>Total Interest</Muted>
+                <Code className="font-fira-bold text-primary">
+                  ₹{data?.penalty}
+                </Code>
+              </View> */}
             <View className="justify-between flex-row">
               <Muted>Penalty Charges</Muted>
               <Code

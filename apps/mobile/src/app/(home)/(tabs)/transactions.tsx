@@ -151,7 +151,13 @@ export default function Transactions() {
         }
         renderItem={({ item: t }) => (
           <TouchableOpacity
-            onPress={() => router.push(`/transaction/${t.transactionId}`)}
+            onPress={() =>
+              router.push(
+                t.type === "payout"
+                  ? `/payout/${t.transactionId}`
+                  : `/payment/${t.transactionId}`
+              )
+            }
             style={{
               marginBottom: 8,
             }}
