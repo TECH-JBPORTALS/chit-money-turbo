@@ -1,4 +1,4 @@
-import { and, eq, sql } from "@cmt/db";
+import { and, count, eq, gt, inArray, lt, sql, sum } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
@@ -182,4 +182,147 @@ export const paymentsRouter = {
         },
       };
     }),
+
+  /** Get credit score history of subscriber
+   * @context subscriber
+   */
+  getCreditScoreHistory: protectedProcedure.query(async ({ ctx }) => {
+    const subscriberToBatch = await ctx.db.query.subscribersToBatches.findMany({
+      where: eq(schema.subscribersToBatches.subscriberId, ctx.session.userId),
+    });
+
+    const items = await ctx.db.query.payments.findMany({
+      where: inArray(
+        schema.payments.subscriberToBatchId,
+        subscriberToBatch.flatMap((s) => s.id)
+      ),
+      columns: {
+        id: true,
+        paidOn: true,
+        creditScoreAffected: true,
+      },
+      orderBy: ({ paidOn }, { desc }) => [desc(paidOn)],
+      limit: 10,
+    });
+
+    const totalCreditScore = await ctx.db
+      .select({
+        total: sum(schema.payments.creditScoreAffected).mapWith(Number),
+      })
+      .from(schema.payments)
+      .where(
+        inArray(
+          schema.payments.subscriberToBatchId,
+          subscriberToBatch.flatMap((s) => s.id)
+        )
+      )
+      .then((r) => r.at(0)?.total ?? 0);
+
+    const prePaymentsCount = await ctx.db
+      .select({
+        count: count().mapWith(Number),
+      })
+      .from(schema.payments)
+      .where(
+        and(
+          inArray(
+            schema.payments.subscriberToBatchId,
+            subscriberToBatch.flatMap((s) => s.id)
+          ),
+          lt(schema.payments.paidOn, schema.payments.runwayDate)
+        )
+      )
+      .then((r) => r.at(0)?.count ?? 0);
+
+    const latePaymentsCount = await ctx.db
+      .select({
+        count: count().mapWith(Number),
+      })
+      .from(schema.payments)
+      .where(
+        and(
+          inArray(
+            schema.payments.subscriberToBatchId,
+            subscriberToBatch.flatMap((s) => s.id)
+          ),
+          gt(schema.payments.paidOn, schema.payments.runwayDate)
+        )
+      )
+      .then((r) => r.at(0)?.count ?? 0);
+
+    const onTimePaymentsCount = await ctx.db
+      .select({
+        count: count().mapWith(Number),
+      })
+      .from(schema.payments)
+      .where(
+        and(
+          inArray(
+            schema.payments.subscriberToBatchId,
+            subscriberToBatch.flatMap((s) => s.id)
+          ),
+          eq(schema.payments.paidOn, schema.payments.runwayDate)
+        )
+      )
+      .then((r) => r.at(0)?.count ?? 0);
+
+    const item = await ctx.db.query.payments.findFirst({
+      where: inArray(
+        schema.payments.subscriberToBatchId,
+        subscriberToBatch.flatMap((s) => s.id)
+      ),
+      columns: {
+        id: true,
+        paidOn: true,
+        creditScoreAffected: true,
+      },
+      orderBy: ({ paidOn }, { desc }) => [desc(paidOn)],
+    });
+
+    return {
+      items,
+      totalCreditScore,
+      prePaymentsCount,
+      latePaymentsCount,
+      onTimePaymentsCount,
+      lastUpdatedCreditScore: item?.creditScoreAffected,
+    };
+  }),
+
+  getTotalCreditScore: protectedProcedure.query(async ({ ctx }) => {
+    const subscriberToBatch = await ctx.db.query.subscribersToBatches.findMany({
+      where: eq(schema.subscribersToBatches.subscriberId, ctx.session.userId),
+    });
+
+    const totalCreditScore = await ctx.db
+      .select({
+        total: sum(schema.payments.creditScoreAffected).mapWith(Number),
+      })
+      .from(schema.payments)
+      .where(
+        inArray(
+          schema.payments.subscriberToBatchId,
+          subscriberToBatch.flatMap((s) => s.id)
+        )
+      )
+      .then((r) => r.at(0)?.total ?? 0);
+
+    const item = await ctx.db.query.payments.findFirst({
+      where: inArray(
+        schema.payments.subscriberToBatchId,
+        subscriberToBatch.flatMap((s) => s.id)
+      ),
+      columns: {
+        id: true,
+        paidOn: true,
+        creditScoreAffected: true,
+      },
+      orderBy: ({ paidOn }, { desc }) => [desc(paidOn)],
+    });
+
+    return {
+      totalCreditScore,
+      lastUpdatedCreditScore: item?.creditScoreAffected,
+    };
+  }),
 };
