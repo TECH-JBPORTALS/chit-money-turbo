@@ -34,6 +34,7 @@ import {
   RetryViewIcon,
   RetryViewTitle,
 } from "~/components/retry-view";
+import { Skeleton } from "~/components/ui/skeleton";
 
 export default function BatchDetailsLayout() {
   const { subToBatchId } = useLocalSearchParams<{ subToBatchId: string }>();
@@ -42,9 +43,7 @@ export default function BatchDetailsLayout() {
 
   const {
     data: chit,
-    refetch,
     isRefetching,
-    isError,
     isLoading,
   } = useQuery(trpc.chits.getById.queryOptions({ subToBatchId }));
 
@@ -63,26 +62,11 @@ export default function BatchDetailsLayout() {
     router.replace(`/${subToBatchId}/tranx`);
   }, [subToBatchId]);
 
-  if (isLoading || isRefetching) return <SpinnerView />;
-
-  if (!chit || isError)
-    return (
-      <RetryView>
-        <RetryViewIcon />
-        <RetryViewTitle />
-        <RetryViewDescription>
-          May be chit doesn't found, or our application got crashed, try again
-          sometimes later.
-        </RetryViewDescription>
-        <RetryViewButton onPress={() => refetch()}>
-          <Text>Retry</Text>
-        </RetryViewButton>
-      </RetryView>
-    );
+  if (isRefetching) return <SpinnerView />;
 
   // Render status component based on batch status
   const renderStatusComponent = () => {
-    switch (chit.batch.batchStatus) {
+    switch (chit?.batch.batchStatus) {
       case "completed":
         return (
           <View className="flex-row items-center">
@@ -122,76 +106,114 @@ export default function BatchDetailsLayout() {
           title: "",
           headerRight: () => (
             <Lead>
-              {0}/{chit.batch.scheme} Months
+              {0}/{chit?.batch.scheme} Months
             </Lead>
           ),
         }}
       />
 
-      <BatchCard className="border-0">
-        <BatchCardHeader className="px-0 pt-0 pb-3 justify-between">
-          <Muted className="text-xs">
-            Started on {format(chit.batch.startsOn, "MMM yyyy")}
-          </Muted>
-          {renderStatusComponent()}
-        </BatchCardHeader>
+      {isLoading || !chit ? (
+        <BatchCard className="border-0">
+          <BatchCardHeader className="px-0 pt-0 pb-3 justify-between">
+            <Skeleton className={"h-2 w-9"} />
+            <Skeleton className={"h-2 w-9"} />
+          </BatchCardHeader>
 
-        <BatchCardContent className="px-0 gap-3">
-          <BatchCardTitle className="text-xl">{chit.batch.name}</BatchCardTitle>
+          <BatchCardContent className="px-0 gap-3">
+            <Skeleton className={"h-5 w-40"} />
 
-          <BatchCardBadgeRow>
-            <BatchCardBadge>
-              <Text className="font-semibold text-sm">
-                {parseInt(chit.batch.fundAmount).toLocaleString("en-IN", {
-                  style: "currency",
-                  currency: "INR",
-                  maximumFractionDigits: 0,
-                })}
-              </Text>
-            </BatchCardBadge>
-            <BatchCardBadge>
-              <Text className="font-semibold text-sm capitalize">
-                {chit.batch.batchType}
-              </Text>
-            </BatchCardBadge>
-            <BatchCardBadge>
-              <Text className="font-semibold text-sm">
-                {(
-                  parseInt(chit.batch.fundAmount) / chit.batch.scheme
-                ).toLocaleString("en-IN", {
-                  style: "currency",
-                  currency: "INR",
-                  maximumFractionDigits: 0,
-                })}
-                /m
-              </Text>
-            </BatchCardBadge>
-          </BatchCardBadgeRow>
-        </BatchCardContent>
+            <BatchCardBadgeRow>
+              <Skeleton className={"h-6 w-20"} />
+              <Skeleton className={"h-6 w-20"} />
+              <Skeleton className={"h-6 w-20"} />
+              <Skeleton className={"h-6 w-20"} />
+            </BatchCardBadgeRow>
+          </BatchCardContent>
 
-        <BatchCardFooter className="px-0 pb-0">
-          <Link asChild href={`/cfh/2`}>
-            <Pressable>
-              <View className="flex-row items-center gap-2">
-                <Avatar
-                  alt="ChitFund Image"
-                  className="size-5 border border-border"
-                >
-                  <AvatarImage source={{ uri: "" }} />
-                  <AvatarFallback>
-                    <Text className="text-[8px]">
-                      {chit.batch.collector?.orgName.charAt(0).toUpperCase()}
-                    </Text>
-                  </AvatarFallback>
-                </Avatar>
-                <Small className="text-xs">
-                  {chit.batch.collector?.orgName}
-                </Small>
-              </View>
-            </Pressable>
-          </Link>
-        </BatchCardFooter>
-      </BatchCard>
+          <BatchCardFooter className="px-0 pb-0">
+            <Link asChild href={`/cfh/2`}>
+              <Pressable>
+                <View className="flex-row items-center gap-2">
+                  <Skeleton className={"size-5 rounded-full"} />
+                  <Skeleton className={"h-2 w-28"} />
+                </View>
+              </Pressable>
+            </Link>
+          </BatchCardFooter>
+        </BatchCard>
+      ) : (
+        <BatchCard className="border-0">
+          <BatchCardHeader className="px-0 pt-0 pb-3 justify-between">
+            <Muted className="text-xs">
+              Started on {format(chit?.batch.startsOn, "MMM yyyy")}
+            </Muted>
+            {renderStatusComponent()}
+          </BatchCardHeader>
+
+          <BatchCardContent className="px-0 gap-3">
+            <BatchCardTitle className="text-xl">
+              {chit?.batch.name}
+            </BatchCardTitle>
+
+            <BatchCardBadgeRow>
+              <BatchCardBadge>
+                <Text className="font-semibold text-sm capitalize">
+                  {chit?.chitId}
+                </Text>
+              </BatchCardBadge>
+              <BatchCardBadge>
+                <Text className="font-semibold text-sm">
+                  {parseInt(chit.batch.fundAmount).toLocaleString("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                    maximumFractionDigits: 0,
+                  })}
+                </Text>
+              </BatchCardBadge>
+              <BatchCardBadge>
+                <Text className="font-semibold text-sm capitalize">
+                  {chit?.batch.batchType}
+                </Text>
+              </BatchCardBadge>
+              <BatchCardBadge>
+                <Text className="font-semibold text-sm">
+                  {(
+                    parseInt(chit?.batch.fundAmount) / chit?.batch.scheme
+                  ).toLocaleString("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                    maximumFractionDigits: 0,
+                  })}
+                  /m
+                </Text>
+              </BatchCardBadge>
+            </BatchCardBadgeRow>
+          </BatchCardContent>
+
+          <BatchCardFooter className="px-0 pb-0">
+            <Link asChild href={`/cfh/2`}>
+              <Pressable>
+                <View className="flex-row items-center gap-2">
+                  <Avatar
+                    alt="ChitFund Image"
+                    className="size-5 border border-border"
+                  >
+                    <AvatarImage source={{ uri: "" }} />
+                    <AvatarFallback>
+                      <Text className="text-[8px]">
+                        {chit?.batch.collector?.orgName.charAt(0).toUpperCase()}
+                      </Text>
+                    </AvatarFallback>
+                  </Avatar>
+                  <Small className="text-xs">
+                    {chit?.batch.collector?.orgName}
+                  </Small>
+                </View>
+              </Pressable>
+            </Link>
+          </BatchCardFooter>
+        </BatchCard>
+      )}
 
       <View className="flex-1">
         <Tabs value={activeTab} onValueChange={() => {}}>

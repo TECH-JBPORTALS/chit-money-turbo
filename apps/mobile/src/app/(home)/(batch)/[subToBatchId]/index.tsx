@@ -13,22 +13,6 @@ import { useLocalSearchParams } from "expo-router";
 import { format } from "date-fns";
 import { SpinnerView } from "~/components/spinner-view";
 
-// Types for better type safety
-type PayoutStatus =
-  | "completed"
-  | "requested"
-  | "rejected"
-  | "approved"
-  | undefined
-  | "request";
-
-interface Transaction {
-  id: number;
-  date: string;
-  status: PayoutStatus;
-  payoutAmount?: number;
-}
-
 const getStatusElement = (status: string | undefined) => {
   switch (status) {
     case "completed":

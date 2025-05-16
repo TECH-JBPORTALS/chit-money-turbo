@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useState } from "react";
+import React, { memo, useCallback, useState } from "react";
 import { View, TouchableOpacity, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
@@ -28,7 +28,6 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { Badge } from "~/components/ui/badge";
 import SearchInput from "~/components/search-input";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { isEmpty } from "lodash";
 
 type Chit = RouterOutputs["chits"]["ofSubscriber"]["items"][number];
 
@@ -160,7 +159,7 @@ export default function Batches() {
         }
         estimatedItemSize={148}
         data={batchPageItems}
-        onEndReachedThreshold={1}
+        onEndReachedThreshold={0.5}
         onEndReached={() => hasNextPage && fetchNextPage()}
         ListEmptyComponent={() => (
           <View className="h-full gap-3.5 items-center justify-center">

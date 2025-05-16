@@ -17,6 +17,8 @@ export const transactionsRouter = {
           limit: z.number().optional(),
           cursor: z.string().optional(),
           type: z.enum(["payouts", "all"]).optional(),
+          /** Fetch transaction based on current chit */
+          subToBatchId: z.string().optional(),
         })
         .optional()
     )
@@ -24,11 +26,18 @@ export const transactionsRouter = {
       const limit = input?.limit ?? 10;
       const cursor = input?.cursor;
 
+      const subToBatchCond = input?.subToBatchId
+        ? eq(schema.subscribersToBatches.id, input.subToBatchId)
+        : undefined;
+
       const subToBatch = await ctx.db.query.subscribersToBatches.findMany({
-        where: eq(schema.subscribersToBatches.subscriberId, ctx.session.userId),
+        where: and(
+          eq(schema.subscribersToBatches.subscriberId, ctx.session.userId),
+          subToBatchCond
+        ),
       });
 
-      if (!subToBatch)
+      if (subToBatch.length === 0)
         throw new TRPCError({ message: "No chit found", code: "NOT_FOUND" });
 
       const payments = ctx.db
@@ -42,6 +51,7 @@ export const transactionsRouter = {
           payoutStatus: sql<
             "requested" | "rejected" | "disbursed" | "cancelled" | "approved"
           >`NULL`.as("payoutStatus"),
+          month: schema.payments.paidOn,
           updatedAt: sql<
             typeof schema.payments.$inferSelect.updatedAt
           >`${schema.payments.updatedAt}`.as("updatedAt"),
@@ -80,6 +90,7 @@ export const transactionsRouter = {
           batchName: schema.batches.name,
           orgName: schema.collectors.orgName,
           payoutStatus: schema.payouts.payoutStatus,
+          month: schema.payouts.month,
           updatedAt: sql<
             typeof schema.payouts.$inferSelect.updatedAt
           >`${schema.payouts.updatedAt}`.as("updatedAt"),

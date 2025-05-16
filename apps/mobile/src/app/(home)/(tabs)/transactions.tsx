@@ -106,7 +106,7 @@ export default function Transactions() {
         }
         estimatedItemSize={148}
         data={transactionItems}
-        onEndReachedThreshold={1}
+        onEndReachedThreshold={0.5}
         onEndReached={() => hasNextPage && fetchNextPage()}
         ListEmptyComponent={() => (
           <View className="h-full gap-3.5 items-center justify-center">

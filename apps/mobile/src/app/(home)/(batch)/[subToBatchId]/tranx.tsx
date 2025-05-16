@@ -8,6 +8,21 @@ import { cn } from "~/lib/utils";
 import { ArrowDownLeft } from "~/lib/icons/ArrowDownLeft";
 import { ArrowUpRight } from "~/lib/icons/ArrowUpRight";
 import { FlashList } from "@shopify/flash-list";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { trpc } from "~/utils/api";
+import { SpinnerView } from "~/components/spinner-view";
+import Spinner from "~/components/ui/spinner";
+import { format } from "date-fns";
+import { useLocalSearchParams } from "expo-router";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { ArrowLeftRight } from "~/lib/icons/ArrowLeftRight";
+import {
+  RetryView,
+  RetryViewButton,
+  RetryViewDescription,
+  RetryViewIcon,
+  RetryViewTitle,
+} from "~/components/retry-view";
 
 // Types for transaction
 type TransactionType = "payment" | "payout";
@@ -25,112 +40,132 @@ interface Transaction {
 }
 
 export default function Tranx() {
-  // Memoized transaction data
-  const transactions = useMemo<Transaction[]>(
-    () => [
+  const { subToBatchId } = useLocalSearchParams<{ subToBatchId: string }>();
+
+  const {
+    data: transactions,
+    isLoading,
+    refetch,
+    isError,
+    isRefetching,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery(
+    trpc.transactions.getInfinitiyOfSubscriber.infiniteQueryOptions(
+      { subToBatchId },
       {
-        id: 1,
-        type: "payment",
-        date: "24 Jan, 2025",
-        amount: 5000,
-        monthNumber: 2,
-        credit_score_affected: 5,
-      },
-      {
-        id: 2,
-        type: "payment",
-        date: "24 Jan, 2025",
-        amount: 5000,
-        monthNumber: 1,
-        credit_score_affected: -20,
-      },
-      {
-        id: 3,
-        type: "payout",
-        date: "24 Jan, 2025",
-        amount: 200000,
-        status: "requested",
-        monthNumber: 3,
-      },
-    ],
-    []
+        initialCursor: undefined,
+        getNextPageParam: ({ nextCursor }) => nextCursor,
+      }
+    )
   );
 
-  const renderTransaction = React.useCallback(
-    ({ item }: { item: Transaction }) => {
-      const isPayment = item.type === "payment";
-      const isPayout = item.type === "payout";
+  const transactionItems = isLoading
+    ? []
+    : transactions?.pages.flatMap((t) => t.items);
 
-      return (
-        <Card key={item.id} className=" my-1">
-          <CardHeader className="gap-3">
-            <View className="gap-2 flex-row justify-between items-center">
-              <CardTitle className="text-base">
-                {isPayment ? "Payment " : "Payout of month "}
-                {item.monthNumber}
-              </CardTitle>
+  if (isLoading || isRefetching) return <SpinnerView />;
 
-              <View className="flex-row items-center gap-1">
-                <Small className="font-bold">
-                  {item.amount.toLocaleString("en-IN", {
-                    currency: "INR",
-                    currencyDisplay: "narrowSymbol",
-                    currencySign: "standard",
-                    style: "currency",
-                    maximumFractionDigits: 0,
-                  })}
-                </Small>
-                {isPayout ? (
-                  <ArrowDownLeft
-                    strokeWidth={1}
-                    className="text-foreground size-5"
-                  />
-                ) : (
-                  <ArrowUpRight
-                    strokeWidth={1}
-                    className="text-foreground size-5"
-                  />
-                )}
-              </View>
-            </View>
-
-            <View className="flex-row justify-between items-center">
-              <Muted className="text-xs">2 hours ago</Muted>
-
-              {isPayment ? (
-                <Text
-                  className={cn(
-                    (item.credit_score_affected ?? 0 > 0)
-                      ? "text-primary"
-                      : "text-destructive"
-                  )}
-                >
-                  {item.credit_score_affected}
-                </Text>
-              ) : (
-                <PayoutStatusBadge status={item.status ?? ""} />
-              )}
-            </View>
-          </CardHeader>
-        </Card>
-      );
-    },
-    []
-  );
-
-  const keyExtractor = React.useCallback(
-    (item: Transaction) => item.id.toString(),
-    []
-  );
+  if (isError)
+    return (
+      <RetryView>
+        <RetryViewIcon />
+        <RetryViewTitle />
+        <RetryViewDescription>
+          Our application got crashed, try again sometimes later.
+        </RetryViewDescription>
+        <RetryViewButton onPress={() => refetch()}>
+          <Text>Retry</Text>
+        </RetryViewButton>
+      </RetryView>
+    );
 
   return (
-    <View className="flex-1 mt-5">
+    <View className="flex-1 h-svh mt-5">
       <FlashList
-        data={transactions}
-        renderItem={renderTransaction}
-        keyExtractor={keyExtractor}
+        data={transactionItems}
+        renderItem={({ item }) => (
+          <Card className=" my-1">
+            <CardHeader className="gap-3">
+              <View className="gap-2 flex-row justify-between items-center">
+                <CardTitle className="text-base">
+                  {item.type === "payment" ? "Payment " : "Payout "}
+                  {item.month ? format(item.month, "MMM yyyy") : null}
+                </CardTitle>
+
+                <View className="flex-row items-center gap-1">
+                  <Small className="font-bold">
+                    {item.totalAmount.toLocaleString("en-IN", {
+                      currency: "INR",
+                      currencyDisplay: "narrowSymbol",
+                      currencySign: "standard",
+                      style: "currency",
+                      maximumFractionDigits: 0,
+                    })}
+                  </Small>
+                  {item.type === "payout" ? (
+                    <ArrowDownLeft
+                      strokeWidth={1}
+                      className="text-foreground size-5"
+                    />
+                  ) : (
+                    <ArrowUpRight
+                      strokeWidth={1}
+                      className="text-foreground size-5"
+                    />
+                  )}
+                </View>
+              </View>
+
+              <View className="flex-row justify-between items-center">
+                <Muted className="text-xs">2 hours ago</Muted>
+
+                {item.type === "payment" ? (
+                  <Text
+                    className={cn(
+                      (item.creditScoreAffected ?? 0 > 0)
+                        ? "text-primary"
+                        : "text-destructive"
+                    )}
+                  >
+                    {item.creditScoreAffected}
+                  </Text>
+                ) : (
+                  <PayoutStatusBadge status={item.payoutStatus ?? ""} />
+                )}
+              </View>
+            </CardHeader>
+          </Card>
+        )}
         showsVerticalScrollIndicator={false}
-        estimatedItemSize={50}
+        onEndReachedThreshold={1}
+        onEndReached={() => hasNextPage && fetchNextPage()}
+        ListEmptyComponent={() => (
+          <View className="items-center flex-1 py-20 justify-center gap-3.5">
+            <Animated.View entering={FadeInDown.duration(360).springify()}>
+              <ArrowLeftRight
+                size={48}
+                strokeWidth={1.25}
+                className="text-muted-foreground"
+              />
+            </Animated.View>
+            <Large>No Transactions, Yet</Large>
+            <Muted className="text-center px-16">
+              No transactions within this chit, If you have any transactions
+              done you can see here
+            </Muted>
+          </View>
+        )}
+        estimatedItemSize={100}
+        keyExtractor={(t) => t.transactionId}
+        ListFooterComponent={() =>
+          isFetchingNextPage ? (
+            <View className="justify-center items-center pb-3">
+              <Spinner size={28} />
+            </View>
+          ) : null
+        }
       />
     </View>
   );

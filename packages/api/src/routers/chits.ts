@@ -82,7 +82,7 @@ export const chitsRouter = {
           // Check if any other requests made by this chit already have requested, approved, rejected for this month
           const payoutOfMonth = await ctx.db.query.payouts.findFirst({
             where: and(
-              eq(schema.payouts.month, date.toDateString()),
+              eq(schema.payouts.month, date),
               inArray(schema.payouts.payoutStatus, [
                 "requested",
                 "approved",
@@ -96,7 +96,7 @@ export const chitsRouter = {
           if (!payoutOfMonth) {
             const othersPayoutOfMonth = await ctx.db.query.payouts.findFirst({
               where: and(
-                eq(schema.payouts.month, date.toDateString()),
+                eq(schema.payouts.month, date),
                 inArray(schema.payouts.payoutStatus, ["approved", "disbursed"]),
                 eq(schema.payouts.subscriberToBatchId, subToBatch.id)
               ),

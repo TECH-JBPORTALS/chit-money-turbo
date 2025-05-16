@@ -59,16 +59,16 @@ export async function getSubscriberBatchesWithPagination({
       batch: getTableColumns(schema.batches),
       collector: getTableColumns(schema.collectors),
     })
-    .from(schema.batches)
+    .from(schema.subscribersToBatches)
     .innerJoin(
-      schema.subscribersToBatches,
-      eq(schema.subscribersToBatches.batchId, schema.batches.id)
+      schema.batches,
+      eq(schema.batches.id, schema.subscribersToBatches.batchId)
     )
     .innerJoin(
       schema.collectors,
       eq(schema.collectors.id, schema.batches.collectorId)
     )
-    .orderBy(desc(schema.batches))
+    .orderBy(desc(schema.subscribersToBatches.createdAt))
     .limit(limit + 1)
     .where(
       and(
@@ -79,7 +79,7 @@ export async function getSubscriberBatchesWithPagination({
       )
     );
 
-  const nextCursor = items.length === limit ? items.pop()?.id : undefined;
+  const nextCursor = items.length > limit ? items.pop()?.id : undefined;
 
   return {
     nextCursor,

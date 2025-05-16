@@ -264,7 +264,7 @@ async function main() {
 
         await db.insert(schema.payouts).values({
           amount,
-          month: rd.toDateString(),
+          month: rd,
           subscriberToBatchId: subscribersToBatcheData.at(i)!.id,
           deductions,
           totalAmount: amount - deductions,
@@ -320,7 +320,7 @@ async function main() {
               return db.insert(schema.payments).values({
                 runwayDate: runwayDate.toDateString(),
                 creditScoreAffected,
-                paidOn: paidOn.toDateString(),
+                paidOn: paidOn,
                 subscriptionAmount,
                 subscriberToBatchId: subscribersToBatch.at(0)!.id,
                 totalAmount,
