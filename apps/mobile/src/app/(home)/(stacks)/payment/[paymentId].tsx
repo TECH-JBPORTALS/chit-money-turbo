@@ -1,6 +1,5 @@
 import { View } from "react-native";
 import React from "react";
-import { ArrowDownLeft } from "~/lib/icons/ArrowDownLeft";
 import { ArrowUpRight } from "~/lib/icons/ArrowUpRight";
 import {
   Code,
@@ -19,26 +18,36 @@ import { trpc } from "~/utils/api";
 import { useSearchParams } from "expo-router/build/hooks";
 import { SpinnerView } from "~/components/spinner-view";
 import { cn } from "~/lib/utils";
+import {
+  RetryView,
+  RetryViewButton,
+  RetryViewDescription,
+  RetryViewIcon,
+  RetryViewTitle,
+} from "~/components/retry-view";
 
 export default function PaymentDetails() {
   const searchParams = useSearchParams();
   const paymentId = searchParams.get("paymentId") as string;
 
-  const { data, isLoading, isError } = useQuery(
+  const { data, isRefetching, refetch, isLoading, isError } = useQuery(
     trpc.payments.getById.queryOptions({ paymentId })
   );
 
-  if (isLoading) return <SpinnerView />;
+  if (isLoading || isRefetching) return <SpinnerView />;
 
   if (!data || isError)
     return (
-      <View className="flex-1">
-        <Large>Something went wrong!</Large>
-        <Muted>
-          Payout details not exits, or may be our code breaks. Try again
-          sometime later
-        </Muted>
-      </View>
+      <RetryView>
+        <RetryViewIcon />
+        <RetryViewTitle />
+        <RetryViewDescription className="text-center">
+          {`May be poyout details doesn't exits, or may be our code broke. Try again sometime later`}
+        </RetryViewDescription>
+        <RetryViewButton onPress={() => refetch()}>
+          <Text>Try again</Text>
+        </RetryViewButton>
+      </RetryView>
     );
 
   return (

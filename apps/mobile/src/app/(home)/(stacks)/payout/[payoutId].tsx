@@ -19,13 +19,39 @@ import { trpc } from "~/utils/api";
 import { useSearchParams } from "expo-router/build/hooks";
 import { SpinnerView } from "~/components/spinner-view";
 
+import { PayoutStatusBadge } from "~/lib/payout-badge";
+import { format } from "date-fns";
+import {
+  RetryView,
+  RetryViewButton,
+  RetryViewDescription,
+  RetryViewIcon,
+  RetryViewTitle,
+} from "~/components/retry-view";
+
 export default function TransactionDetails() {
   const searchParams = useSearchParams();
-  const transactionId = searchParams.get("payoutId") as string;
+  const payoutId = searchParams.get("payoutId") as string;
 
-  const { data, isError, isLoading } = useQuery(
-    trpc.payouts.getById.queryOptions({ payoutId: transactionId })
+  const { data, isError, isRefetching, refetch, isLoading } = useQuery(
+    trpc.payouts.getById.queryOptions({ payoutId })
   );
+
+  if (isLoading || isRefetching) return <SpinnerView />;
+
+  if (!data || isError)
+    return (
+      <RetryView>
+        <RetryViewIcon />
+        <RetryViewTitle />
+        <RetryViewDescription className="text-center">
+          {`May be poyout details doesn't exits, or may be our code broke. Try again sometime later`}
+        </RetryViewDescription>
+        <RetryViewButton onPress={() => refetch()}>
+          <Text>Try again</Text>
+        </RetryViewButton>
+      </RetryView>
+    );
 
   const renderPayoutDetailsView = ({ status }: { status: string }) => {
     switch (status) {
@@ -37,11 +63,17 @@ export default function TransactionDetails() {
             <View className="gap-3">
               <View className="justify-between flex-row">
                 <Muted>Requested Payout Month</Muted>
-                <Code className="font-fira-bold">Month 2</Code>
+                <Code className="font-fira-bold">
+                  {format(data.month, "MMM yyyy")}
+                </Code>
               </View>
               <View className="justify-between flex-row">
                 <Muted>Requested Date</Muted>
-                <Code className="font-fira-bold">28 Jan, 2025</Code>
+                <Code className="font-fira-bold">
+                  {data.requestedAt
+                    ? format(data.requestedAt, "dd MMM, yyyy")
+                    : "Not Specified"}
+                </Code>
               </View>
             </View>
 
@@ -59,15 +91,25 @@ export default function TransactionDetails() {
             <View className="gap-3">
               <View className="justify-between flex-row">
                 <Muted>Requested Payout Month</Muted>
-                <Code className="font-fira-bold">Month 2</Code>
+                <Code className="font-fira-bold">
+                  {format(data.month, "MMM yyyy")}
+                </Code>
               </View>
               <View className="justify-between flex-row">
                 <Muted>Requested Date</Muted>
-                <Code className="font-fira-bold">28 Jan, 2025</Code>
+                <Code className="font-fira-bold">
+                  {data.requestedAt
+                    ? format(data.requestedAt, "dd MMM, yyyy")
+                    : "Not Specified"}
+                </Code>
               </View>
               <View className="justify-between flex-row">
                 <Muted>Rejected Date</Muted>
-                <Code className="font-fira-bold">30 Jan, 2025</Code>
+                <Code className="font-fira-bold">
+                  {data.rejectedAt
+                    ? format(data.rejectedAt, "dd MMM, yyyy")
+                    : "Not Specified"}
+                </Code>
               </View>
             </View>
 
@@ -86,15 +128,25 @@ export default function TransactionDetails() {
             <View className="gap-3">
               <View className="justify-between flex-row">
                 <Muted>Requested Payout Month</Muted>
-                <Code className="font-fira-bold">Month 2</Code>
+                <Code className="font-fira-bold">
+                  {format(data.month, "MMM yyyy")}
+                </Code>
               </View>
               <View className="justify-between flex-row">
                 <Muted>Requested Date</Muted>
-                <Code className="font-fira-bold">28 Jan, 2025</Code>
+                <Code className="font-fira-bold">
+                  {data.requestedAt
+                    ? format(data.requestedAt, "dd MMM, yyyy")
+                    : "Not Specified"}
+                </Code>
               </View>
               <View className="justify-between flex-row">
                 <Muted>Cancelled Date</Muted>
-                <Code className="font-fira-bold">30 Jan, 2025</Code>
+                <Code className="font-fira-bold">
+                  {data.cancelledAt
+                    ? format(data.cancelledAt, "dd MMM, yyyy")
+                    : "Not Specified"}
+                </Code>
               </View>
             </View>
           </>
@@ -108,15 +160,26 @@ export default function TransactionDetails() {
             <View className="gap-3">
               <View className="justify-between flex-row">
                 <Muted>Requested Payout Month</Muted>
-                <Code className="font-fira-bold">Month 2</Code>
+                <Code className="font-fira-bold">
+                  {format(data.month, "MMM yyyy")}
+                </Code>
               </View>
               <View className="justify-between flex-row">
                 <Muted>Requested Date</Muted>
-                <Code className="font-fira-bold">28 Jan, 2025</Code>
+
+                <Code className="font-fira-bold">
+                  {data.requestedAt
+                    ? format(data.requestedAt, "dd MMM, yyyy")
+                    : "Not Specified"}
+                </Code>
               </View>
               <View className="justify-between flex-row">
                 <Muted>Approved Date</Muted>
-                <Code className="font-fira-bold">30 Jan, 2025</Code>
+                <Code className="font-fira-bold">
+                  {data.approvedAt
+                    ? format(data.approvedAt, "dd MMM, yyyy")
+                    : "Not Specified"}
+                </Code>
               </View>
             </View>
 
@@ -125,23 +188,42 @@ export default function TransactionDetails() {
             <View className="gap-3">
               <View className="justify-between flex-row">
                 <Muted>Payout Amount</Muted>
-                <Code className="font-fira-bold">₹2,00,000</Code>
-              </View>
-              <View className="justify-between flex-row">
-                <Muted>Collector Cut - 2%</Muted>
-                <Code className="font-fira-bold text-destructive">
-                  - ₹4,000
+                <Code className="font-fira-bold">
+                  {data.amount.toLocaleString("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                    maximumFractionDigits: 0,
+                  })}
                 </Code>
               </View>
               <View className="justify-between flex-row">
-                <Muted>Penalty Charges</Muted>
-                <Code className="font-fira-bold">None</Code>
+                <Muted>
+                  Collector Cut - {"( "}
+                  <Text className="font-bold text-xs text-primary">
+                    {data.appliedCommissionRate}%
+                  </Text>
+                  {" )"}
+                </Muted>
+                <Code className="font-fira-bold text-destructive">
+                  -{" "}
+                  {data.deductions.toLocaleString("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                    maximumFractionDigits: 0,
+                  })}
+                </Code>
               </View>
 
               <Separator />
               <View className="justify-between flex-row">
                 <Muted>You will recieve</Muted>
-                <Code className="font-fira-bold">₹1,96,000</Code>
+                <Code className="font-fira-bold">
+                  {data.totalAmount.toLocaleString("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                    maximumFractionDigits: 0,
+                  })}
+                </Code>
               </View>
             </View>
           </>
@@ -153,29 +235,45 @@ export default function TransactionDetails() {
             <Small className="font-bold">Payment Details</Small>
 
             <View className="gap-3">
-              <View className="justify-between flex-row">
+              <View className="justify-between items-center flex-row">
                 <Muted>Payout ID</Muted>
-                <Code className="font-fira-bold">#JD829KD9220392</Code>
+                <Code className="font-fira-bold">{data.id}</Code>
               </View>
               <View className="justify-between flex-row">
                 <Muted>Requested Payout Month</Muted>
-                <Code className="font-fira-bold">Month 2</Code>
+                <Code className="font-fira-bold">
+                  {format(data.month, "MMM yyyy")}
+                </Code>
               </View>
               <View className="justify-between flex-row">
                 <Muted>Requested Date</Muted>
-                <Code className="font-fira-bold">28 Jan, 2025</Code>
+                <Code className="font-fira-bold">
+                  {data.requestedAt
+                    ? format(data.requestedAt, "dd MMM, yyyy")
+                    : "Not Specified"}
+                </Code>
               </View>
               <View className="justify-between flex-row">
                 <Muted>Approved Date</Muted>
-                <Code className="font-fira-bold">30 Jan, 2025</Code>
+                <Code className="font-fira-bold">
+                  {data.approvedAt
+                    ? format(data.approvedAt, "dd MMM, yyyy")
+                    : "Not Specified"}
+                </Code>
               </View>
               <View className="justify-between flex-row">
                 <Muted>Payment Mode</Muted>
-                <Code className="font-fira-bold">Online</Code>
+                <Code className="font-fira-bold capitalize">
+                  {data.paymentMode}
+                </Code>
               </View>
               <View className="justify-between flex-row">
                 <Muted>Disbursed Date</Muted>
-                <Code className="font-fira-bold">10 Feb, 2025</Code>
+                <Code className="font-fira-bold">
+                  {data.disbursedAt
+                    ? format(data.disbursedAt, "dd MMM, yyyy")
+                    : "Not Specified"}
+                </Code>
               </View>
             </View>
 
@@ -184,23 +282,42 @@ export default function TransactionDetails() {
             <View className="gap-3">
               <View className="justify-between flex-row">
                 <Muted>Payout Amount</Muted>
-                <Code className="font-fira-bold">₹2,00,000</Code>
-              </View>
-              <View className="justify-between flex-row">
-                <Muted>Collector Cut - 2%</Muted>
-                <Code className="font-fira-bold text-destructive">
-                  - ₹4,000
+                <Code className="font-fira-bold">
+                  {data.amount.toLocaleString("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                    maximumFractionDigits: 0,
+                  })}
                 </Code>
               </View>
               <View className="justify-between flex-row">
-                <Muted>Penalty Charges</Muted>
-                <Code className="font-fira-bold">None</Code>
+                <Muted>
+                  Collector Cut - {"( "}
+                  <Text className="font-bold text-xs text-primary">
+                    {data.appliedCommissionRate}%
+                  </Text>
+                  {" )"}
+                </Muted>
+                <Code className="font-fira-bold text-destructive">
+                  -{" "}
+                  {data.deductions.toLocaleString("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                    maximumFractionDigits: 0,
+                  })}
+                </Code>
               </View>
 
               <Separator />
               <View className="justify-between flex-row">
-                <Muted>Final Amount Disbursed</Muted>
-                <Code className="font-fira-bold">₹1,96,000</Code>
+                <Muted>You will recieve</Muted>
+                <Code className="font-fira-bold">
+                  {data.totalAmount.toLocaleString("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                    maximumFractionDigits: 0,
+                  })}
+                </Code>
               </View>
             </View>
           </>
@@ -210,19 +327,6 @@ export default function TransactionDetails() {
         return null;
     }
   };
-
-  if (isLoading) return <SpinnerView />;
-
-  if (!data || isError)
-    return (
-      <View className="flex-1">
-        <Large>Something went wrong!</Large>
-        <Muted>
-          Payout details not exits, or may be our code breaks. Try again
-          sometime later
-        </Muted>
-      </View>
-    );
 
   return (
     <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
@@ -271,6 +375,8 @@ export default function TransactionDetails() {
                   {data?.subscribersToBatches.batch.collector?.orgName}
                 </Small>
               </View>
+
+              <PayoutStatusBadge status={data.payoutStatus} />
             </View>
           </View>
 
