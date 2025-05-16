@@ -1,7 +1,7 @@
-import { ScrollView, View } from "react-native";
-import { H1, Muted, P, Small } from "~/components/ui/typography";
+import { RefreshControl, View } from "react-native";
+import { Large, Muted, Small } from "~/components/ui/typography";
 import { cn } from "~/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { trpc } from "~/utils/api";
 import { format } from "date-fns";
 import { SpinnerView } from "~/components/spinner-view";
@@ -13,18 +13,34 @@ import {
   RetryViewTitle,
 } from "~/components/retry-view";
 import { Text } from "~/components/ui/text";
-import Animated from "react-native-reanimated";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import React from "react";
+import { CircleDivide } from "~/lib/icons/CircleDivide";
+import { FlashList } from "@shopify/flash-list";
+import { CreditScoreMeta } from "~/components/credit-score-meta";
+import Spinner from "~/components/ui/spinner";
 
 export default function CreditScore() {
-  const { data, isLoading, isRefetching, refetch } = useQuery(
-    trpc.payments.getCreditScoreHistory.queryOptions()
+  const {
+    data,
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    isError,
+    isRefetching,
+    refetch,
+  } = useInfiniteQuery(
+    trpc.payments.getCreditScoreHistory.infiniteQueryOptions(undefined, {
+      getNextPageParam: ({ nextCursor }) => nextCursor,
+    })
   );
 
-  const items = data?.items;
+  const items = data?.pages.flatMap((p) => p.items);
 
   if (isLoading || isRefetching) return <SpinnerView />;
 
-  if (!data)
+  if (isError)
     return (
       <RetryView>
         <RetryViewIcon />
@@ -38,108 +54,74 @@ export default function CreditScore() {
       </RetryView>
     );
 
-  const total =
-    data.prePaymentsCount + data.onTimePaymentsCount + data.latePaymentsCount;
-
-  const preRatio = data.prePaymentsCount / total || 0.01;
-  const onTimeRatio = data.onTimePaymentsCount / total || 0.01;
-  const lateRatio = data.latePaymentsCount / total || 0.01;
-
   return (
-    <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-      <View className="gap-6 flex-1 px-4 py-6">
-        <View className="flex-row justify-center items-center gap-3 ">
-          <H1
-            className={cn(
-              "text-6xl",
-              (data?.totalCreditScore ?? 0) >= 0
-                ? "text-foreground"
-                : "text-destructive"
+    <View className="flex-1">
+      <FlashList
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={() => refetch()}
+          />
+        }
+        progressViewOffset={12}
+        showsVerticalScrollIndicator={false}
+        centerContent
+        ListHeaderComponent={<CreditScoreMeta />}
+        estimatedItemSize={148}
+        data={items}
+        onEndReachedThreshold={0.5}
+        onEndReached={() => hasNextPage && fetchNextPage()}
+        ListEmptyComponent={() => (
+          <View className="h-[100vh] pb-20 flex-1 gap-3.5 items-center justify-center">
+            {isLoading ? (
+              <SpinnerView />
+            ) : (
+              <View className="items-center flex-1 justify-center gap-3.5">
+                <Animated.View entering={FadeInDown.duration(360).springify()}>
+                  <CircleDivide
+                    size={48}
+                    strokeWidth={1.25}
+                    className="text-muted-foreground"
+                  />
+                </Animated.View>
+                <Large>No credit score history, yet</Large>
+                <Muted className="text-center px-16">
+                  If you make any payments towards any chit payment based on
+                  that credit score will be defined, either pre, on-time, late.
+                  Those affected history will be shown here.
+                </Muted>
+              </View>
             )}
-          >
-            {data?.totalCreditScore}
-          </H1>
-          <Animated.View>
-            <P
-              className={cn(
-                data.lastUpdatedCreditScore && data.lastUpdatedCreditScore < 0
-                  ? "text-destructive"
-                  : "text-primary"
-              )}
-            >
-              {data.lastUpdatedCreditScore?.toLocaleString("en-IN", {
-                signDisplay: "exceptZero",
-              })}
-            </P>
-          </Animated.View>
-        </View>
-
-        {/** Overview Bar */}
-
-        {data.totalCreditScore !== 0 && (
-          <View className="flex-row gap-0.5 w-full h-9">
-            <View
-              style={{ flex: preRatio }}
-              className="w-full h-full bg-primary opacity-50 rounded-sm"
-            />
-            <View
-              style={{ flex: onTimeRatio }}
-              className="w-full h-full bg-primary rounded-sm"
-            />
-            <View
-              style={{ flex: lateRatio }}
-              className="w-full h-full bg-destructive rounded-sm"
-            />
           </View>
         )}
-
-        <View className="flex-row justify-between">
-          <View className="flex-row items-center gap-1">
-            <View className="size-1 rounded-full opacity-50 bg-primary" />
-            <Small className="text-xs">
-              {data?.prePaymentsCount} Pre-Payments
-            </Small>
-          </View>
-          <View className="flex-row items-center gap-1">
-            <View className="size-1 rounded-full  bg-primary" />
-            <Small className="text-xs">
-              {data?.onTimePaymentsCount} On-time Payments
-            </Small>
-          </View>
-          <View className="flex-row items-center gap-1">
-            <View className="size-1 rounded-full opacity-50 bg-destructive" />
-            <Small className="text-xs">
-              {data?.latePaymentsCount} Late Payments
-            </Small>
-          </View>
-        </View>
-
-        {/** History List */}
-        <View>
-          {items?.map((item, index) => (
-            <View
-              key={index}
-              className="flex-row py-2 items-center justify-between"
-            >
-              {item.paidOn ? (
-                <Muted>{format(item.paidOn, "dd MMM, yyyy")}</Muted>
-              ) : null}
-              <Small
-                className={cn(
-                  "text-base",
-                  item.creditScoreAffected > 0
-                    ? "text-primary"
-                    : "text-destructive"
-                )}
-              >
-                {item.creditScoreAffected.toLocaleString("en-IN", {
-                  signDisplay: "exceptZero",
-                })}
-              </Small>
+        keyExtractor={(b) => b.id}
+        ListFooterComponent={() =>
+          isFetchingNextPage ? (
+            <View className="justify-center items-center pb-3">
+              <Spinner size={28} />
             </View>
-          ))}
-        </View>
-      </View>
-    </ScrollView>
+          ) : null
+        }
+        renderItem={({ item }) => (
+          <View className="flex-row py-2 items-center justify-between">
+            {item.paidOn ? (
+              <Muted>{format(item.paidOn, "dd MMM, yyyy")}</Muted>
+            ) : null}
+            <Small
+              className={cn(
+                "text-base",
+                item.creditScoreAffected > 0
+                  ? "text-primary"
+                  : "text-destructive"
+              )}
+            >
+              {item.creditScoreAffected.toLocaleString("en-IN", {
+                signDisplay: "exceptZero",
+              })}
+            </Small>
+          </View>
+        )}
+      />
+    </View>
   );
 }

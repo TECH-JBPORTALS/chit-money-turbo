@@ -37,9 +37,6 @@ export const transactionsRouter = {
         ),
       });
 
-      if (subToBatch.length === 0)
-        throw new TRPCError({ message: "No chit found", code: "NOT_FOUND" });
-
       const payments = ctx.db
         .select({
           transactionId: schema.payments.id,

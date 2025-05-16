@@ -186,23 +186,54 @@ export const paymentsRouter = {
   /** Get credit score history of subscriber
    * @context subscriber
    */
-  getCreditScoreHistory: protectedProcedure.query(async ({ ctx }) => {
+  getCreditScoreHistory: protectedProcedure
+    .input(
+      z
+        .object({ limit: z.number().optional(), cursor: z.string().optional() })
+        .optional()
+    )
+    .query(async ({ ctx, input }) => {
+      const limit = input?.limit ?? 10;
+      const cursorCond = input?.cursor
+        ? lt(schema.payments.id, input.cursor)
+        : undefined;
+
+      const subscriberToBatch =
+        await ctx.db.query.subscribersToBatches.findMany({
+          where: eq(
+            schema.subscribersToBatches.subscriberId,
+            ctx.session.userId
+          ),
+        });
+
+      const items = await ctx.db.query.payments.findMany({
+        where: and(
+          inArray(
+            schema.payments.subscriberToBatchId,
+            subscriberToBatch.flatMap((s) => s.id)
+          ),
+          cursorCond
+        ),
+        columns: {
+          id: true,
+          paidOn: true,
+          creditScoreAffected: true,
+        },
+        orderBy: ({ paidOn }, { desc }) => [desc(paidOn)],
+        limit: limit + 1,
+      });
+
+      const nextCursor = items.length > limit ? items.pop()?.id : undefined;
+
+      return {
+        items,
+        nextCursor,
+      };
+    }),
+
+  getCreditScoreMeta: protectedProcedure.query(async ({ ctx }) => {
     const subscriberToBatch = await ctx.db.query.subscribersToBatches.findMany({
       where: eq(schema.subscribersToBatches.subscriberId, ctx.session.userId),
-    });
-
-    const items = await ctx.db.query.payments.findMany({
-      where: inArray(
-        schema.payments.subscriberToBatchId,
-        subscriberToBatch.flatMap((s) => s.id)
-      ),
-      columns: {
-        id: true,
-        paidOn: true,
-        creditScoreAffected: true,
-      },
-      orderBy: ({ paidOn }, { desc }) => [desc(paidOn)],
-      limit: 10,
     });
 
     const totalCreditScore = await ctx.db
@@ -280,48 +311,10 @@ export const paymentsRouter = {
     });
 
     return {
-      items,
       totalCreditScore,
       prePaymentsCount,
       latePaymentsCount,
       onTimePaymentsCount,
-      lastUpdatedCreditScore: item?.creditScoreAffected,
-    };
-  }),
-
-  getTotalCreditScore: protectedProcedure.query(async ({ ctx }) => {
-    const subscriberToBatch = await ctx.db.query.subscribersToBatches.findMany({
-      where: eq(schema.subscribersToBatches.subscriberId, ctx.session.userId),
-    });
-
-    const totalCreditScore = await ctx.db
-      .select({
-        total: sum(schema.payments.creditScoreAffected).mapWith(Number),
-      })
-      .from(schema.payments)
-      .where(
-        inArray(
-          schema.payments.subscriberToBatchId,
-          subscriberToBatch.flatMap((s) => s.id)
-        )
-      )
-      .then((r) => r.at(0)?.total ?? 0);
-
-    const item = await ctx.db.query.payments.findFirst({
-      where: inArray(
-        schema.payments.subscriberToBatchId,
-        subscriberToBatch.flatMap((s) => s.id)
-      ),
-      columns: {
-        id: true,
-        paidOn: true,
-        creditScoreAffected: true,
-      },
-      orderBy: ({ paidOn }, { desc }) => [desc(paidOn)],
-    });
-
-    return {
-      totalCreditScore,
       lastUpdatedCreditScore: item?.creditScoreAffected,
     };
   }),

@@ -13,30 +13,48 @@ import {
 } from "~/components/ui/card";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { trpc } from "~/utils/api";
 import { SpinnerView } from "~/components/spinner-view";
+import { cn } from "~/lib/utils";
 const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
 
 export default function Page() {
-  const { data, isLoading } = useQuery(
-    trpc.subscribers.getPersonalDetails.queryOptions()
-  );
+  const [personalInfo, creditScore] = useQueries({
+    queries: [
+      trpc.subscribers.getPersonalDetails.queryOptions(),
+      trpc.payments.getCreditScoreMeta.queryOptions(),
+    ],
+  });
 
-  if (isLoading) return <SpinnerView />;
+  if (personalInfo.isLoading || creditScore.isLoading) return <SpinnerView />;
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
       <LinearBlurView>
-        <H2>Hey, {data?.firstName} 🙏</H2>
+        <H2>Hey, {personalInfo.data?.firstName} 🙏</H2>
 
         {/** Credit Score */}
         <View className="gap-4">
           <Lead>Your Credit Score</Lead>
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-3 ">
-              <H1 className="text-6xl">764</H1>
-              <P className="text-destructive">-20</P>
+              <H1 className="text-6xl">{creditScore.data?.totalCreditScore}</H1>
+              <P
+                className={cn(
+                  creditScore.data?.lastUpdatedCreditScore &&
+                    creditScore.data?.lastUpdatedCreditScore < 0
+                    ? "text-destructive"
+                    : "text-primary"
+                )}
+              >
+                {creditScore.data?.lastUpdatedCreditScore?.toLocaleString(
+                  "en-IN",
+                  {
+                    signDisplay: "exceptZero",
+                  }
+                )}
+              </P>
             </View>
 
             <Link href={"/credit-score"} asChild>
