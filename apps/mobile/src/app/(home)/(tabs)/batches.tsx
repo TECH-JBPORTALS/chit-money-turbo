@@ -30,7 +30,7 @@ import SearchInput from "~/components/search-input";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { isEmpty } from "lodash";
 
-type Batch = RouterOutputs["batches"]["ofSubscriber"]["items"][number];
+type Chit = RouterOutputs["chits"]["ofSubscriber"]["items"][number];
 
 export default function Batches() {
   const router = useRouter();
@@ -43,7 +43,7 @@ export default function Batches() {
   const debouncedQuery = useDebounce(searchQuery, 800);
 
   const {
-    data: batches,
+    data: chits,
     isLoading,
     refetch,
     isRefetching,
@@ -51,7 +51,7 @@ export default function Batches() {
     fetchNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(
-    trpc.batches.ofSubscriber.infiniteQueryOptions(
+    trpc.chits.ofSubscriber.infiniteQueryOptions(
       {
         query: debouncedQuery,
         batchStatus: selectedFilterType,
@@ -63,13 +63,11 @@ export default function Batches() {
     )
   );
 
-  const batchPageItems = isLoading
-    ? []
-    : batches?.pages.flatMap((p) => p.items);
+  const batchPageItems = isLoading ? [] : chits?.pages.flatMap((p) => p.items);
 
   // Render batch status
-  const renderBatchStatus = useCallback((batch: Batch) => {
-    if (batch.batchStatus === "completed") {
+  const renderBatchStatus = useCallback((chit: Chit) => {
+    if (chit.batch.batchStatus === "completed") {
       return (
         <View className="flex-row items-center">
           <Small className="text-xs inline-flex flex-row items-center">
@@ -85,7 +83,7 @@ export default function Batches() {
       );
     }
 
-    if (new Date(batch.startsOn).getUTCSeconds() > Date.now()) {
+    if (new Date(chit.batch.startsOn).getUTCSeconds() > Date.now()) {
       return (
         <View className="flex-row items-center">
           <Small className="text-xs inline-flex flex-row items-center">
@@ -99,7 +97,7 @@ export default function Batches() {
     return (
       <View className="flex-row justify-end gap-1 flex-1 items-center">
         <Muted className="text-sm">
-          {0}/{batch.scheme} Months
+          {0}/{chit.batch.scheme} Months
         </Muted>
       </View>
     );
@@ -206,25 +204,28 @@ export default function Batches() {
             </View>
           ) : null
         }
-        renderItem={({ item: batch }) => (
+        renderItem={({ item: chit }) => (
           <TouchableOpacity
-            onPress={() => router.push(`/(batch)/${batch.id}`)}
+            onPress={() => router.push(`/(batch)/${chit.id}`)}
             style={{
-              opacity: batch.batchStatus === "completed" ? 0.6 : 1,
+              opacity: chit.batch.batchStatus === "completed" ? 0.6 : 1,
               marginBottom: 8,
             }}
           >
             <BatchCard className="mb-2">
               <BatchCardHeader className="justify-between">
                 <Muted className="text-xs">Started on 2 Jan, 2024</Muted>
-                {renderBatchStatus(batch)}
+                {renderBatchStatus(chit)}
               </BatchCardHeader>
               <BatchCardContent>
-                <BatchCardTitle>{batch.name}</BatchCardTitle>
+                <BatchCardTitle>{chit.batch.name}</BatchCardTitle>
                 <BatchCardBadgeRow>
                   <BatchCardBadge>
+                    <Text className="capitalize">{chit.chitId}</Text>
+                  </BatchCardBadge>
+                  <BatchCardBadge>
                     <Text>
-                      {parseInt(batch.fundAmount).toLocaleString("en-IN", {
+                      {parseInt(chit.batch.fundAmount).toLocaleString("en-IN", {
                         style: "currency",
                         currency: "INR",
                         maximumFractionDigits: 0,
@@ -232,12 +233,12 @@ export default function Batches() {
                     </Text>
                   </BatchCardBadge>
                   <BatchCardBadge>
-                    <Text className="capitalize">{batch.batchType}</Text>
+                    <Text className="capitalize">{chit.batch.batchType}</Text>
                   </BatchCardBadge>
                   <BatchCardBadge>
                     <Text>
                       {(
-                        parseInt(batch.fundAmount) / batch.scheme
+                        parseInt(chit.batch.fundAmount) / chit.batch.scheme
                       ).toLocaleString("en-IN", {
                         style: "currency",
                         currency: "INR",
@@ -252,16 +253,16 @@ export default function Batches() {
                 <View className="flex-row items-center gap-2">
                   <Avatar
                     className="size-6"
-                    alt={batch.collector?.orgName ?? ""}
+                    alt={chit.collector?.orgName ?? ""}
                   >
                     <AvatarImage source={{ uri: undefined }} />
                     <AvatarFallback>
                       <Text className="text-[8px]">
-                        {batch.collector?.orgName.charAt(0).toUpperCase()}
+                        {chit.collector?.orgName.charAt(0).toUpperCase()}
                       </Text>
                     </AvatarFallback>
                   </Avatar>
-                  <Small className="text-xs">{batch.collector?.orgName}</Small>
+                  <Small className="text-xs">{chit.collector?.orgName}</Small>
                 </View>
               </BatchCardFooter>
             </BatchCard>

@@ -1,4 +1,16 @@
-import { and, count, eq, exists, gt, ilike, inArray, lte, or } from "@cmt/db";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  exists,
+  getTableColumns,
+  gt,
+  ilike,
+  inArray,
+  lte,
+  or,
+} from "@cmt/db";
 import { schema } from "@cmt/db/client";
 import { AuthedContext } from "../trpc";
 import { getPagination, paginateInputSchema } from "./paginate";
@@ -21,7 +33,9 @@ export async function getSubscriberBatchesWithPagination({
   const cursor = input?.cursor;
   const limit = input?.limit ?? 10;
   const query = input?.query;
-  const cursorCond = cursor ? lte(schema.batches.id, cursor) : undefined;
+  const cursorCond = cursor
+    ? lte(schema.subscribersToBatches.id, cursor)
+    : undefined;
 
   const statusCond = () => {
     switch (input?.batchStatus) {
@@ -39,30 +53,31 @@ export async function getSubscriberBatchesWithPagination({
     }
   };
 
-  const items = await ctx.db.query.batches.findMany({
-    limit: limit + 1,
-    orderBy: ({ id }, { desc }) => [desc(id)],
-    // Go down we go.. go.. with cursor of decending order page
-    where: and(
-      cursorCond,
-      statusCond(),
-      query ? ilike(schema.batches.name, `%${query}%`) : undefined,
-      exists(
-        ctx.db
-          .select()
-          .from(schema.subscribersToBatches)
-          .where(
-            and(
-              eq(schema.subscribersToBatches.batchId, schema.batches.id),
-              eq(schema.subscribersToBatches.subscriberId, ctx.session.userId)
-            )
-          )
+  const items = await ctx.db
+    .select({
+      ...getTableColumns(schema.subscribersToBatches),
+      batch: getTableColumns(schema.batches),
+      collector: getTableColumns(schema.collectors),
+    })
+    .from(schema.batches)
+    .innerJoin(
+      schema.subscribersToBatches,
+      eq(schema.subscribersToBatches.batchId, schema.batches.id)
+    )
+    .innerJoin(
+      schema.collectors,
+      eq(schema.collectors.id, schema.batches.collectorId)
+    )
+    .orderBy(desc(schema.batches))
+    .limit(limit + 1)
+    .where(
+      and(
+        cursorCond,
+        statusCond(),
+        query ? ilike(schema.batches.name, `%${query}%`) : undefined,
+        eq(schema.subscribersToBatches.subscriberId, ctx.session.userId)
       )
-    ),
-    with: {
-      collector: true,
-    },
-  });
+    );
 
   const nextCursor = items.length === limit ? items.pop()?.id : undefined;
 

@@ -1,29 +1,12 @@
 import { batchInsertSchema } from "@cmt/db/schema";
-import {
-  and,
-  count,
-  eq,
-  exists,
-  gt,
-  gte,
-  ilike,
-  inArray,
-  lte,
-  or,
-  sql,
-} from "@cmt/db";
+import { eq, sql } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { addMonths } from "date-fns";
 import { z } from "zod";
-import { TRPCError } from "@trpc/server";
 import { schema } from "@cmt/db/client";
 import { generateChitId } from "@cmt/db/utils";
-import { getPagination, paginateInputSchema } from "../utils/paginate";
-import { getQueryUserIds } from "../utils/clerk";
-import {
-  getSubscriberBatchesWithPagination,
-  getSubscribersByBatchId,
-} from "../utils/actions";
+import { paginateInputSchema } from "../utils/paginate";
+import { getSubscribersByBatchId } from "../utils/actions";
 
 export const batchesRouter = {
   /** Create new batch only
@@ -107,28 +90,6 @@ export const batchesRouter = {
         },
       })
     ),
-
-  /**
-    Get's batches of subscriber withing the subscriber context
-    @context collector
-    @returns batches
-   */
-  ofSubscriber: protectedProcedure
-    .input(
-      z
-        .object({
-          cursor: z.string().optional(),
-          limit: z.number().default(10),
-          query: z.string().optional(),
-          batchStatus: z
-            .enum(["all", "active", "upcoming", "completed"])
-            .default("all"),
-        })
-        .optional()
-    )
-    .query(async ({ ctx, input }) => {
-      return getSubscriberBatchesWithPagination({ ctx, input });
-    }),
 
   /**
     Get's subscriber of given batch withing the collector context

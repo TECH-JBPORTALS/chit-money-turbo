@@ -1,4 +1,5 @@
 import { batchesRouter } from "./routers/batches";
+import { chitsRouter } from "./routers/chits";
 import { collectorsRouter } from "./routers/collectors";
 import { helloRotuer } from "./routers/hello";
 import { paymentsRouter } from "./routers/payments";
@@ -10,6 +11,7 @@ import { createTRPCRouter } from "./trpc";
 export const appRouter = createTRPCRouter({
   hello: helloRotuer,
   batches: batchesRouter,
+  chits: chitsRouter,
   collectors: collectorsRouter,
   subscribers: subscribersRouter,
   payments: paymentsRouter,

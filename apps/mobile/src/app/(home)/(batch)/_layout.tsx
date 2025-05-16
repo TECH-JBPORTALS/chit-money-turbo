@@ -22,69 +22,67 @@ import { Avatar, AvatarImage, AvatarFallback } from "~/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Text } from "~/components/ui/text";
 import { Lead, Muted, Small } from "~/components/ui/typography";
-import { Pressable, TouchableOpacity } from "react-native-gesture-handler";
+import { Pressable } from "react-native-gesture-handler";
 import { useQuery } from "@tanstack/react-query";
 import { trpc } from "~/utils/api";
 import { SpinnerView } from "~/components/spinner-view";
-import { SafeAreaView } from "~/components/safe-area-view";
-
-// Types
-interface BatchDetails {
-  id: string;
-  name: string;
-  targetAmount: number;
-  type: string;
-  subscriptionAmount: number;
-  chit_fund_name: string;
-  chit_fund_image: string;
-  startDate: string;
-  numberOfMonths: number;
-  completedMonths: number;
-  status: "ongoing" | "completed" | "upcoming";
-}
+import { format } from "date-fns";
+import {
+  RetryView,
+  RetryViewButton,
+  RetryViewDescription,
+  RetryViewIcon,
+  RetryViewTitle,
+} from "~/components/retry-view";
 
 export default function BatchDetailsLayout() {
-  // Simulated batch data - replace with actual data fetching
-  const batchDetails: BatchDetails = {
-    id: "batch-123",
-    name: "Vayu Samuha 2025",
-    targetAmount: 200000,
-    type: "Interest Chit",
-    subscriptionAmount: 5000,
-    chit_fund_name: "Surya Chit Fund",
-    chit_fund_image: "https://github.com/x-sss-x.png",
-    startDate: "2024-01-02",
-    numberOfMonths: 20,
-    completedMonths: 2,
-    status: "ongoing",
-  };
-
-  const { batchId } = useLocalSearchParams<{ batchId: string }>();
+  const { subToBatchId } = useLocalSearchParams<{ subToBatchId: string }>();
   const router = useRouter();
   const pathname = usePathname();
 
-  const { data: batch, isLoading } = useQuery(
-    trpc.batches.getById.queryOptions({ batchId })
-  );
+  const {
+    data: chit,
+    refetch,
+    isRefetching,
+    isError,
+    isLoading,
+  } = useQuery(trpc.chits.getById.queryOptions({ subToBatchId }));
 
   // Memoized active tab calculation
   const activeTab = React.useMemo(() => {
     // Logic to determine active tab based on current route
-    return pathname === `/${batchId}` ? "runway" : "transactions";
+    return pathname === `/${subToBatchId}` ? "runway" : "transactions";
   }, [pathname]);
 
   // Navigation handlers
   const handleRunwayPress = React.useCallback(() => {
-    router.replace(`/${batchId}`);
-  }, [batchId]);
+    router.replace(`/${subToBatchId}`);
+  }, [subToBatchId]);
 
   const handleTransactionsPress = React.useCallback(() => {
-    router.replace(`/${batchId}/tranx`);
-  }, [batchId]);
+    router.replace(`/${subToBatchId}/tranx`);
+  }, [subToBatchId]);
+
+  if (isLoading || isRefetching) return <SpinnerView />;
+
+  if (!chit || isError)
+    return (
+      <RetryView>
+        <RetryViewIcon />
+        <RetryViewTitle />
+        <RetryViewDescription>
+          May be chit doesn't found, or our application got crashed, try again
+          sometimes later.
+        </RetryViewDescription>
+        <RetryViewButton onPress={() => refetch()}>
+          <Text>Retry</Text>
+        </RetryViewButton>
+      </RetryView>
+    );
 
   // Render status component based on batch status
   const renderStatusComponent = () => {
-    switch (batch?.batchStatus) {
+    switch (chit.batch.batchStatus) {
       case "completed":
         return (
           <View className="flex-row items-center">
@@ -99,25 +97,23 @@ export default function BatchDetailsLayout() {
             />
           </View>
         );
+
       case "active":
         return (
           <View className="flex-row items-center">
             <Small className="text-xs inline-flex flex-row items-center">
-              Upcoming{" "}
+              Active{" "}
             </Small>
             <SolarIcon
               name="Record"
               size={14}
-              color="gray"
+              color="yellow"
               type="bold-duotone"
             />
           </View>
         );
     }
   };
-
-  if (isLoading) return <SpinnerView />;
-  if (!batch) return null;
 
   return (
     <View className="px-4 gap-6 flex-1">
@@ -126,7 +122,7 @@ export default function BatchDetailsLayout() {
           title: "",
           headerRight: () => (
             <Lead>
-              {0}/{batch.scheme} Months
+              {0}/{chit.batch.scheme} Months
             </Lead>
           ),
         }}
@@ -135,18 +131,18 @@ export default function BatchDetailsLayout() {
       <BatchCard className="border-0">
         <BatchCardHeader className="px-0 pt-0 pb-3 justify-between">
           <Muted className="text-xs">
-            Started on {new Date(batch.startsOn).toLocaleDateString()}
+            Started on {format(chit.batch.startsOn, "MMM yyyy")}
           </Muted>
           {renderStatusComponent()}
         </BatchCardHeader>
 
         <BatchCardContent className="px-0 gap-3">
-          <BatchCardTitle className="text-xl">{batch.name}</BatchCardTitle>
+          <BatchCardTitle className="text-xl">{chit.batch.name}</BatchCardTitle>
 
           <BatchCardBadgeRow>
             <BatchCardBadge>
               <Text className="font-semibold text-sm">
-                {parseInt(batch.fundAmount).toLocaleString("en-IN", {
+                {parseInt(chit.batch.fundAmount).toLocaleString("en-IN", {
                   style: "currency",
                   currency: "INR",
                   maximumFractionDigits: 0,
@@ -155,19 +151,18 @@ export default function BatchDetailsLayout() {
             </BatchCardBadge>
             <BatchCardBadge>
               <Text className="font-semibold text-sm capitalize">
-                {batch.batchType}
+                {chit.batch.batchType}
               </Text>
             </BatchCardBadge>
             <BatchCardBadge>
               <Text className="font-semibold text-sm">
-                {(parseInt(batch.fundAmount) / batch.scheme).toLocaleString(
-                  "en-IN",
-                  {
-                    style: "currency",
-                    currency: "INR",
-                    maximumFractionDigits: 0,
-                  }
-                )}
+                {(
+                  parseInt(chit.batch.fundAmount) / chit.batch.scheme
+                ).toLocaleString("en-IN", {
+                  style: "currency",
+                  currency: "INR",
+                  maximumFractionDigits: 0,
+                })}
                 /m
               </Text>
             </BatchCardBadge>
@@ -182,16 +177,16 @@ export default function BatchDetailsLayout() {
                   alt="ChitFund Image"
                   className="size-5 border border-border"
                 >
-                  <AvatarImage
-                    source={{ uri: batch.collector?.orgCertificateKey }}
-                  />
+                  <AvatarImage source={{ uri: "" }} />
                   <AvatarFallback>
                     <Text className="text-[8px]">
-                      {batch.collector?.orgName.charAt(0).toUpperCase()}
+                      {chit.batch.collector?.orgName.charAt(0).toUpperCase()}
                     </Text>
                   </AvatarFallback>
                 </Avatar>
-                <Small className="text-xs">{batch.collector?.orgName}</Small>
+                <Small className="text-xs">
+                  {chit.batch.collector?.orgName}
+                </Small>
               </View>
             </Pressable>
           </Link>
