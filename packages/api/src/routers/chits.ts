@@ -92,6 +92,7 @@ export const chitsRouter = {
                 "requested",
                 "approved",
                 "rejected",
+                "disbursed",
               ]),
               eq(schema.payouts.subscriberToBatchId, subToBatch.id)
             ),
