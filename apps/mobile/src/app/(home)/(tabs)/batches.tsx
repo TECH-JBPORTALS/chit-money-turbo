@@ -224,7 +224,7 @@ export default function Batches() {
                   </BatchCardBadge>
                   <BatchCardBadge>
                     <Text>
-                      {parseInt(chit.batch.fundAmount).toLocaleString("en-IN", {
+                      {chit.batch.fundAmount.toLocaleString("en-IN", {
                         style: "currency",
                         currency: "INR",
                         maximumFractionDigits: 0,
@@ -237,7 +237,7 @@ export default function Batches() {
                   <BatchCardBadge>
                     <Text>
                       {(
-                        parseInt(chit.batch.fundAmount) / chit.batch.scheme
+                        chit.batch.fundAmount / chit.batch.scheme
                       ).toLocaleString("en-IN", {
                         style: "currency",
                         currency: "INR",

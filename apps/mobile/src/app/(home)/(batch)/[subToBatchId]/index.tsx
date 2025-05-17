@@ -1,22 +1,49 @@
-import React, { useMemo } from "react";
 import { View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { SolarIcon } from "react-native-solar-icons";
-import { H3 } from "~/components/ui/typography";
+import { H4 } from "~/components/ui/typography";
 import { FlashList } from "@shopify/flash-list";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { ArrowRight } from "~/lib/icons/ArrowRight";
-import { useQuery } from "@tanstack/react-query";
-import { trpc } from "~/utils/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { RouterOutputs, trpc } from "~/utils/api";
 import { Link, useLocalSearchParams } from "expo-router";
 import { format } from "date-fns";
 import { SpinnerView } from "~/components/spinner-view";
 
-const getStatusElement = (
+type Runway = RouterOutputs["chits"]["getRunway"][number];
+
+function RequestButton({ month }: { month: Date }) {
+  const { subToBatchId } = useLocalSearchParams<{ subToBatchId: string }>();
+  const queryClient = useQueryClient();
+  const { mutate: requestPayout, isPending } = useMutation(
+    trpc.payouts.request.mutationOptions({
+      onSuccess() {
+        queryClient.invalidateQueries(trpc.chits.getRunway.queryFilter());
+      },
+    })
+  );
+
+  return (
+    <Button
+      isLoading={isPending}
+      onPress={() =>
+        requestPayout({ subscriberToBatchId: subToBatchId, month })
+      }
+      size="sm"
+      className="bg-foreground dark:bg-foreground"
+    >
+      <Text className="text-background dark:text-background">Request</Text>
+    </Button>
+  );
+}
+
+function getStatusElement(
   status: string | undefined,
-  payoutId: string | undefined
-) => {
+  payoutId: string | undefined,
+  month: Date
+) {
   switch (status) {
     case "completed":
       return <SolarIcon size={16} name="CheckCircle" color="green" />;
@@ -44,41 +71,34 @@ const getStatusElement = (
         </Link>
       );
     case "available":
-      return (
-        <Button size="sm" className="bg-foreground dark:bg-foreground">
-          <Text className="text-background dark:text-background">Request</Text>
-        </Button>
-      );
+      return <RequestButton month={month} />;
     default:
       return null;
   }
-};
+}
+
+function Runway({ item }: { item: Runway }) {
+  const StatusElement = getStatusElement(
+    item.payoutStatus,
+    item.payoutId,
+    item.date
+  );
+
+  return (
+    <View className="flex-row items-center justify-between py-3">
+      <View className="flex-row items-center gap-3">
+        <H4>{item.id}.</H4>
+        <Text className="text-base">{format(item.date, "MMM dd, yyyy")}</Text>
+      </View>
+      <View className="flex-row items-center space-x-2">{StatusElement}</View>
+    </View>
+  );
+}
 
 export default function BatchRunwayScreen() {
   const { subToBatchId } = useLocalSearchParams<{ subToBatchId: string }>();
   const { data, isLoading, isRefetching } = useQuery(
     trpc.chits.getRunway.queryOptions({ subToBatchId })
-  );
-
-  const renderTransaction = React.useCallback(
-    ({ item }: { item: (typeof transactions)[number] }) => {
-      const StatusElement = getStatusElement(item.payoutStatus, item.payoutId);
-
-      return (
-        <View className="flex-row items-center justify-between py-3">
-          <View className="flex-row items-center gap-3">
-            <H3>{item.id}.</H3>
-            <Text className="text-base">
-              {format(item.date, "MMM dd, yyyy")}
-            </Text>
-          </View>
-          <View className="flex-row items-center space-x-2">
-            {StatusElement}
-          </View>
-        </View>
-      );
-    },
-    []
   );
 
   // Memoized transaction data to prevent unnecessary re-renders
@@ -92,11 +112,10 @@ export default function BatchRunwayScreen() {
     <View className="flex-1">
       <FlashList
         data={transactions}
-        renderItem={renderTransaction}
+        renderItem={({ item }) => <Runway {...{ item }} />}
         keyExtractor={(r) => r.id}
         showsVerticalScrollIndicator={false}
         estimatedItemSize={50}
-        contentContainerStyle={{}}
       />
     </View>
   );

@@ -1,17 +1,10 @@
 import { z } from "zod";
 import { protectedProcedure } from "../trpc";
 import { getSubscriberBatchesWithPagination } from "../utils/actions";
-import { and, between, eq, gte, inArray, lte, sql } from "@cmt/db";
+import { and, eq, inArray, sql } from "@cmt/db";
 import { schema } from "@cmt/db/client";
 import { TRPCError } from "@trpc/server";
-import {
-  addMonths,
-  endOfMonth,
-  getMonth,
-  getYear,
-  setDate,
-  startOfMonth,
-} from "date-fns";
+import { addMonths, getMonth, getYear } from "date-fns";
 
 export const chitsRouter = {
   /**
@@ -83,12 +76,12 @@ export const chitsRouter = {
         Array.from({ length: scheme }, async (_, index) => {
           const date = addMonths(startsOn, index);
 
-          console.log(date);
+          // 26, Jan, 2026
 
           const id = `${index + 1}`;
 
-          const month = getMonth(date) + 1;
-          const year = getYear(date);
+          const month = getMonth(date) + 1; // 5
+          const year = getYear(date); // 2026
 
           // Check if any requests made by this chit already have requested, approved, rejected for this month
           const payoutOfMonth = await ctx.db.query.payouts.findFirst({
@@ -119,7 +112,7 @@ export const chitsRouter = {
           /** If there is no payout for the month for current chit, then look for others */
           const othersPayoutOfMonth = await ctx.db.query.payouts.findFirst({
             where: and(
-              sql`EXTRACT(MONTH FROM ${schema.payouts.month}) = ${month}`,
+              sql`EXTRACT(MONTH FROM ${schema.payouts.month}) = ${month}`, // 5
               sql`EXTRACT(YEAR FROM ${schema.payouts.month}) = ${year}`,
               inArray(schema.payouts.payoutStatus, ["approved", "disbursed"])
             ),
@@ -143,6 +136,7 @@ export const chitsRouter = {
               payoutStatus: "available",
             };
 
+          /** If there is already others pyout record exits return blank */
           return {
             id,
             date,

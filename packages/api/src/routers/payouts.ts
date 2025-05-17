@@ -48,6 +48,63 @@ export const payoutsRouter = {
         .then((v) => v.at(0));
     }),
 
+  /** Request the payout for the month
+   * @context subscriber
+   */
+  request: protectedProcedure
+    .input(z.object({ subscriberToBatchId: z.string(), month: z.date() }))
+    .mutation(async ({ ctx, input }) => {
+      const subToBatch = await ctx.db.query.subscribersToBatches.findFirst({
+        where: eq(schema.subscribersToBatches.id, input.subscriberToBatchId),
+        with: {
+          batch: true,
+        },
+      });
+
+      if (!subToBatch)
+        throw new TRPCError({ message: "No chit found", code: "BAD_REQUEST" });
+
+      const deductions =
+        (subToBatch.commissionRate / 100) * subToBatch.batch.fundAmount;
+
+      return await ctx.db
+        .insert(schema.payouts)
+        .values({
+          ...input,
+          amount: subToBatch.batch.fundAmount,
+          appliedCommissionRate: subToBatch.commissionRate,
+          totalAmount: subToBatch.batch.fundAmount + deductions,
+          payoutStatus: "approved",
+          requestedAt: new Date(),
+        })
+        .onConflictDoUpdate({
+          set: {
+            ...input,
+            amount: subToBatch.batch.fundAmount,
+            appliedCommissionRate: subToBatch.commissionRate,
+            totalAmount: subToBatch.batch.fundAmount + deductions,
+            payoutStatus: "approved",
+            requestedAt: new Date(),
+          },
+          target: schema.payouts.id,
+        })
+        .returning()
+        .then((v) => v.at(0));
+    }),
+
+  /** Cancell payout request
+   * @context subscriber
+   */
+  cancel: protectedProcedure
+    .input(z.object({ payoutId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db
+        .update(schema.payouts)
+        .set({ payoutStatus: "cancelled", cancelledAt: new Date() })
+        .returning()
+        .then((v) => v.at(0));
+    }),
+
   /** Update payout for subscribersToBatchId with disbursed status
    * @context collector
    */
@@ -299,7 +356,7 @@ export const payoutsRouter = {
             subscriber: user,
             /** @todo Fetch dynamicaly next month */
             month: new Date(),
-            amount: parseInt(batch.fundAmount),
+            amount: batch.fundAmount,
           };
         })
       );

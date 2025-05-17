@@ -99,9 +99,7 @@ export const paymentsRouter = {
       const subs = await getSubscribersByBatchId({ ctx, input });
       const runwayDate = new Date(input.runwayDate);
       const { batch } = await generateChitId(input.batchId);
-      const subscriptionAmount = Math.ceil(
-        parseInt(batch.fundAmount) / batch.scheme
-      );
+      const subscriptionAmount = Math.ceil(batch.fundAmount / batch.scheme);
 
       const mappedItems = await Promise.all(
         subs.items.flatMap(async (sub) => {

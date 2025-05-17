@@ -111,11 +111,9 @@ async function main() {
         startsOn: startsOn,
         endsOn: endsOn.toDateString(),
         scheme: scheme,
-        fundAmount: f.helpers
-          .arrayElement([
-            100000, 200000, 500000, 600000, 100000, 1500000, 200000,
-          ])
-          .toString(),
+        fundAmount: f.helpers.arrayElement([
+          100000, 200000, 500000, 600000, 100000, 1500000, 200000,
+        ]),
         batchStatus: "active",
         batchType: "interest",
         collectorId: user.id,
@@ -249,7 +247,7 @@ async function main() {
         });
 
       runwayDates.map(async (rd, i) => {
-        const amount = parseInt(batch.fundAmount);
+        const amount = batch.fundAmount;
         const deductions = Math.ceil(
           (subscribersToBatcheData.at(i)!.commissionRate / 100) * amount
         );
@@ -303,7 +301,7 @@ async function main() {
                   : 0;
 
               const subscriptionAmount = Math.ceil(
-                parseInt(batch.fundAmount) / batch.scheme
+                batch.fundAmount / batch.scheme
               );
 
               const totalAmount = subscriptionAmount + penalty;

@@ -44,7 +44,7 @@ export default function CreateBatchDialog({
       dueOn: "",
       batchType: "interest",
       defaultCommissionRate: 2,
-      fundAmount: "100000",
+      fundAmount: 100000,
     },
   });
   const queryClient = useQueryClient();

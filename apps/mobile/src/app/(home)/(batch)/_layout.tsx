@@ -25,15 +25,7 @@ import { Lead, Muted, Small } from "~/components/ui/typography";
 import { Pressable } from "react-native-gesture-handler";
 import { useQuery } from "@tanstack/react-query";
 import { trpc } from "~/utils/api";
-import { SpinnerView } from "~/components/spinner-view";
 import { format } from "date-fns";
-import {
-  RetryView,
-  RetryViewButton,
-  RetryViewDescription,
-  RetryViewIcon,
-  RetryViewTitle,
-} from "~/components/retry-view";
 import { Skeleton } from "~/components/ui/skeleton";
 
 export default function BatchDetailsLayout() {
@@ -41,11 +33,9 @@ export default function BatchDetailsLayout() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const {
-    data: chit,
-    isRefetching,
-    isLoading,
-  } = useQuery(trpc.chits.getById.queryOptions({ subToBatchId }));
+  const { data: chit, isLoading } = useQuery(
+    trpc.chits.getById.queryOptions({ subToBatchId })
+  );
 
   // Memoized active tab calculation
   const activeTab = React.useMemo(() => {
@@ -61,8 +51,6 @@ export default function BatchDetailsLayout() {
   const handleTransactionsPress = React.useCallback(() => {
     router.replace(`/${subToBatchId}/tranx`);
   }, [subToBatchId]);
-
-  if (isRefetching) return <SpinnerView />;
 
   // Render status component based on batch status
   const renderStatusComponent = () => {
@@ -163,7 +151,7 @@ export default function BatchDetailsLayout() {
               </BatchCardBadge>
               <BatchCardBadge>
                 <Text className="font-semibold text-sm">
-                  {parseInt(chit.batch.fundAmount).toLocaleString("en-IN", {
+                  {chit.batch.fundAmount.toLocaleString("en-IN", {
                     style: "currency",
                     currency: "INR",
                     maximumFractionDigits: 0,
@@ -177,13 +165,14 @@ export default function BatchDetailsLayout() {
               </BatchCardBadge>
               <BatchCardBadge>
                 <Text className="font-semibold text-sm">
-                  {(
-                    parseInt(chit?.batch.fundAmount) / chit?.batch.scheme
-                  ).toLocaleString("en-IN", {
-                    style: "currency",
-                    currency: "INR",
-                    maximumFractionDigits: 0,
-                  })}
+                  {(chit?.batch.fundAmount / chit?.batch.scheme).toLocaleString(
+                    "en-IN",
+                    {
+                      style: "currency",
+                      currency: "INR",
+                      maximumFractionDigits: 0,
+                    }
+                  )}
                   /m
                 </Text>
               </BatchCardBadge>

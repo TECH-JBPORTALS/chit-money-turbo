@@ -1,9 +1,10 @@
 - [ ] Request payout
 - [ ] Overall analytics on home screen
 - [ ] Upcoming payments
-- [ ] View transaction in batches
-- [ ] View runway list in batches
-- [ ] Request payout
-- [ ] Overall analytics on home screen
-- [ ] Upcoming payments
-- [ ] View credit score
+- [ ] Fix batch creating
+- [ ] View Requests for payout
+- [ ] Reject payout request
+- [ ] Accept payout request
+- [ ] Batch dashboard this month payments
+- [ ] Batch dashboard this month payouts
+- [ ] Batch dashboard analytics
