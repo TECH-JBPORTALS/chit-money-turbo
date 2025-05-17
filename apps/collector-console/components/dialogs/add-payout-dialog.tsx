@@ -170,7 +170,7 @@ function PayoutSummaryForm(
   props: StepProps<z.infer<typeof payoutSummaryForm>> & {
     amount: number;
     appliedCommissionRate: number;
-    month: string;
+    month: Date;
     disbursedAt?: Date | null;
     payoutId: string;
   }

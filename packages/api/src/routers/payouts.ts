@@ -296,7 +296,7 @@ export const payoutsRouter = {
             ...sub,
             subscriber: user,
             /** @todo Fetch dynamicaly next month */
-            month: new Date().toDateString(),
+            month: new Date(),
             amount: parseInt(batch.fundAmount),
           };
         })
