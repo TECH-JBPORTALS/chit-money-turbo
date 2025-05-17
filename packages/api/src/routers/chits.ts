@@ -1,10 +1,17 @@
 import { z } from "zod";
 import { protectedProcedure } from "../trpc";
 import { getSubscriberBatchesWithPagination } from "../utils/actions";
-import { and, eq, inArray } from "@cmt/db";
+import { and, between, eq, gte, inArray, lte, sql } from "@cmt/db";
 import { schema } from "@cmt/db/client";
 import { TRPCError } from "@trpc/server";
-import { addMonths, setDate } from "date-fns";
+import {
+  addMonths,
+  endOfMonth,
+  getMonth,
+  getYear,
+  setDate,
+  startOfMonth,
+} from "date-fns";
 
 export const chitsRouter = {
   /**
@@ -70,19 +77,24 @@ export const chitsRouter = {
         throw new TRPCError({ message: "No chit found", code: "NOT_FOUND" });
 
       const scheme = subToBatch.batch.scheme;
-      const dueDate = new Date(subToBatch.batch.dueOn).getDate();
       const startsOn = subToBatch.batch.startsOn;
 
       const months = await Promise.all(
         Array.from({ length: scheme }, async (_, index) => {
-          const date = setDate(addMonths(startsOn, index), dueDate);
+          const date = addMonths(startsOn, index);
+
+          console.log(date);
 
           const id = `${index + 1}`;
 
-          // Check if any other requests made by this chit already have requested, approved, rejected for this month
+          const month = getMonth(date) + 1;
+          const year = getYear(date);
+
+          // Check if any requests made by this chit already have requested, approved, rejected for this month
           const payoutOfMonth = await ctx.db.query.payouts.findFirst({
             where: and(
-              eq(schema.payouts.month, date),
+              sql`EXTRACT(MONTH FROM ${schema.payouts.month}) = ${month}`,
+              sql`EXTRACT(YEAR FROM ${schema.payouts.month}) = ${year}`,
               inArray(schema.payouts.payoutStatus, [
                 "requested",
                 "approved",
@@ -92,43 +104,50 @@ export const chitsRouter = {
             ),
           });
 
-          /** If there is no payout for the month for current chit, then look for others */
-          if (!payoutOfMonth) {
-            const othersPayoutOfMonth = await ctx.db.query.payouts.findFirst({
-              where: and(
-                eq(schema.payouts.month, date),
-                inArray(schema.payouts.payoutStatus, ["approved", "disbursed"]),
-                eq(schema.payouts.subscriberToBatchId, subToBatch.id)
-              ),
-            });
-
-            /** If there is no other chit's payouts exists for the month,
-             * then give option to raise request */
-            if (!othersPayoutOfMonth)
-              return {
-                id,
-                date,
-                payoutId: undefined,
-                payoutStatus: "available",
-              };
-
-            return {
-              id,
-              date,
-              payoutId: undefined,
-              payoutStatus: undefined,
-            };
-          }
-
           /**
            *  If there is a payout and that matches with the current chit,
            *  Then returns the payout with exact status and id
            * */
+          if (payoutOfMonth)
+            return {
+              id,
+              date,
+              payoutId: payoutOfMonth.id,
+              payoutStatus: payoutOfMonth.payoutStatus,
+            };
+
+          /** If there is no payout for the month for current chit, then look for others */
+          const othersPayoutOfMonth = await ctx.db.query.payouts.findFirst({
+            where: and(
+              sql`EXTRACT(MONTH FROM ${schema.payouts.month}) = ${month}`,
+              sql`EXTRACT(YEAR FROM ${schema.payouts.month}) = ${year}`,
+              inArray(schema.payouts.payoutStatus, ["approved", "disbursed"])
+            ),
+          });
+
+          console.log(
+            "month-year",
+            month,
+            year,
+            payoutOfMonth,
+            othersPayoutOfMonth
+          );
+
+          /** If there is no other chit's payouts exists for the month,
+           * then give option to raise request */
+          if (!othersPayoutOfMonth)
+            return {
+              id,
+              date,
+              payoutId: undefined,
+              payoutStatus: "available",
+            };
+
           return {
             id,
             date,
-            payoutId: payoutOfMonth.id,
-            payoutStatus: payoutOfMonth.payoutStatus,
+            payoutId: undefined,
+            payoutStatus: undefined,
           };
         })
       );

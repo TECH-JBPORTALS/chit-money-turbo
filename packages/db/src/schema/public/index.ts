@@ -24,7 +24,7 @@ export const batches = pgTable("batches", (t) => ({
   name: t.text().notNull(),
   batchType: batchTypeEnum("batch_type").default("interest").notNull(),
   dueOn: t.numeric().notNull(),
-  startsOn: t.date().notNull(),
+  startsOn: t.date({ mode: "date" }).notNull(),
   endsOn: t.date().notNull(),
   scheme: t.integer().notNull(),
   fundAmount: t.numeric().notNull(),

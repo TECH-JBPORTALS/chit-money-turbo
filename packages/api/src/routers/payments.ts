@@ -1,4 +1,4 @@
-import { and, count, eq, gt, inArray, lt, sql, sum } from "@cmt/db";
+import { and, count, eq, gt, inArray, lt, lte, sql, sum } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
@@ -195,7 +195,7 @@ export const paymentsRouter = {
     .query(async ({ ctx, input }) => {
       const limit = input?.limit ?? 10;
       const cursorCond = input?.cursor
-        ? lt(schema.payments.id, input.cursor)
+        ? lte(schema.payments.id, input.cursor)
         : undefined;
 
       const subscriberToBatch =

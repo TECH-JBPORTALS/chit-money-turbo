@@ -108,7 +108,7 @@ async function main() {
         name: `${f.company.buzzNoun()} ${f.date.between({ from: Date.now(), to: "2030-01-01" }).getFullYear()}`,
         defaultCommissionRate: f.number.float({ min: 2, max: 8 }),
         dueOn: f.helpers.arrayElement([10, 1, 5, 20]).toString(),
-        startsOn: startsOn.toDateString(),
+        startsOn: startsOn,
         endsOn: endsOn.toDateString(),
         scheme: scheme,
         fundAmount: f.helpers

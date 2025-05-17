@@ -31,9 +31,12 @@ export default function CreditScore() {
     isRefetching,
     refetch,
   } = useInfiniteQuery(
-    trpc.payments.getCreditScoreHistory.infiniteQueryOptions(undefined, {
-      getNextPageParam: ({ nextCursor }) => nextCursor,
-    })
+    trpc.payments.getCreditScoreHistory.infiniteQueryOptions(
+      { limit: 20 },
+      {
+        getNextPageParam: ({ nextCursor }) => nextCursor,
+      }
+    )
   );
 
   const items = data?.pages.flatMap((p) => p.items);
@@ -67,7 +70,7 @@ export default function CreditScore() {
         showsVerticalScrollIndicator={false}
         centerContent
         ListHeaderComponent={<CreditScoreMeta />}
-        estimatedItemSize={148}
+        estimatedItemSize={80}
         data={items}
         onEndReachedThreshold={0.5}
         onEndReached={() => hasNextPage && fetchNextPage()}

@@ -158,6 +158,7 @@ export const subscribersRouter = {
         .set(input)
         .where(eq(subscribers.id, ctx.session.userId));
     }),
+
   updateContactAddress: protectedProcedure
     .input(subscriberContactInfoSchema.and(subscriberAddressInfoSchema))
     .mutation(async ({ ctx, input }) => {
@@ -171,6 +172,7 @@ export const subscribersRouter = {
         .set(input)
         .where(eq(subscribersContacts.userId, ctx.session.userId));
     }),
+
   updateBankAccount: protectedProcedure
     .input(subscriberBankInfoSchema)
     .mutation(async ({ ctx, input }) =>

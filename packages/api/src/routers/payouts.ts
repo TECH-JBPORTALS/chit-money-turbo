@@ -14,7 +14,7 @@ import { protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { db, schema } from "@cmt/db/client";
-import { paginateInputSchema } from "../utils/paginate";
+import { getPagination, paginateInputSchema } from "../utils/paginate";
 import { payoutInsertSchema, payoutUpdateSchema } from "@cmt/db/schema";
 import { getClerkUser, getQueryUserIds } from "../utils/clerk";
 
@@ -101,6 +101,8 @@ export const payoutsRouter = {
       const pageIndex = input.pageIndex;
       const pageSize = input.pageSize;
 
+      const { offset } = getPagination(pageIndex, pageSize);
+
       const queryCond = input.query
         ? ilike(schema.subscribersToBatches.chitId, `%${input.query}%`)
         : undefined;
@@ -132,9 +134,9 @@ export const payoutsRouter = {
           with: {
             subscribersToBatches: true,
           },
-          limit: pageSize,
-          offset: pageIndex,
           orderBy: ({ month }) => [desc(month)],
+          limit: pageSize,
+          offset,
         }),
         ctx.db
           .select({ count: count() })

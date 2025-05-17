@@ -37,6 +37,13 @@ export async function getSubscriberBatchesWithPagination({
     ? lte(schema.subscribersToBatches.id, cursor)
     : undefined;
 
+  const queryCond = query
+    ? or(
+        ilike(schema.batches.name, `%${query}%`),
+        ilike(schema.subscribersToBatches.chitId, `%${query}%`)
+      )
+    : undefined;
+
   const statusCond = () => {
     switch (input?.batchStatus) {
       case "all":
@@ -49,7 +56,7 @@ export async function getSubscriberBatchesWithPagination({
         return eq(schema.batches.batchStatus, "completed");
 
       case "upcoming":
-        return gt(schema.batches.startsOn, new Date().toDateString());
+        return gt(schema.batches.startsOn, new Date());
     }
   };
 
@@ -74,7 +81,7 @@ export async function getSubscriberBatchesWithPagination({
       and(
         cursorCond,
         statusCond(),
-        query ? ilike(schema.batches.name, `%${query}%`) : undefined,
+        queryCond,
         eq(schema.subscribersToBatches.subscriberId, ctx.session.userId)
       )
     );
@@ -130,7 +137,7 @@ export async function getSubscribersByBatchId({
         payouts: true,
       },
       limit: pageSize,
-      offset: !query ? offset : undefined,
+      offset,
       orderBy: (t, { desc }) => [desc(t.createdAt)],
     }),
     ctx.db

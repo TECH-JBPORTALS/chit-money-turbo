@@ -40,10 +40,10 @@ export default function CreateBatchDialog({
     defaultValues: {
       name: "",
       scheme: 10,
-      startsOn: "",
+      startsOn: new Date(),
       dueOn: "",
       batchType: "interest",
-      defaultCommissionRate: "2",
+      defaultCommissionRate: 2,
       fundAmount: "100000",
     },
   });
