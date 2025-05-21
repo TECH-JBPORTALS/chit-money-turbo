@@ -11,6 +11,7 @@ import { trpc } from "@/trpc/server";
 import { createQueryClient } from "@/trpc/query-client";
 import { Loader2Icon } from "lucide-react";
 import React, { Suspense } from "react";
+import { RouterInputs } from "@cmt/api";
 
 async function GetTotalBatchesOfOrganization() {
   const client = createQueryClient();
@@ -158,6 +159,26 @@ async function GetTotalCollectedPaymentsFooter({
   );
 }
 
+async function GetTotalPayments(props: {
+  type: RouterInputs["metrics"]["getPaymentsMetricsForThisMonth"];
+}) {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getPaymentsMetricsForThisMonth.queryOptions(props.type)
+  );
+  return data.totalPayments;
+}
+
+async function GetPaymentsFromTotalBatches(props: {
+  type: RouterInputs["metrics"]["getPaymentsMetricsForThisMonth"];
+}) {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getPaymentsMetricsForThisMonth.queryOptions(props.type)
+  );
+  return data.fromTotalBatches;
+}
+
 export default async function Page() {
   const client = createQueryClient();
   const data = await client.fetchQuery(
@@ -277,12 +298,17 @@ export default async function Page() {
           <CardHeader className="relative">
             <CardDescription>Pre Payments</CardDescription>
             <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              2
+              <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+                <GetTotalPayments type="pre" />
+              </Suspense>
             </CardTitle>
           </CardHeader>
           <CardFooter className="flex-col items-start gap-1 text-sm">
             <div className="text-muted-foreground">
-              pre payments from 2 batches
+              <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+                pre payments from <GetPaymentsFromTotalBatches type="pre" />{" "}
+                batches
+              </Suspense>
             </div>
           </CardFooter>
         </Card>
@@ -291,12 +317,17 @@ export default async function Page() {
           <CardHeader className="relative">
             <CardDescription>Late Payments</CardDescription>
             <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              10
+              <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+                <GetTotalPayments type="late" />
+              </Suspense>
             </CardTitle>
           </CardHeader>
           <CardFooter className="flex-col items-start gap-1 text-sm">
             <div className="text-muted-foreground">
-              late payments from 8 batches
+              <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+                late payments from <GetPaymentsFromTotalBatches type="pre" />{" "}
+                batches
+              </Suspense>
             </div>
           </CardFooter>
         </Card>
@@ -305,12 +336,17 @@ export default async function Page() {
           <CardHeader className="relative">
             <CardDescription>On-Time Payments</CardDescription>
             <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              20
+              <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+                <GetTotalPayments type="on-time" />
+              </Suspense>
             </CardTitle>
           </CardHeader>
           <CardFooter className="flex-col items-start gap-1 text-sm">
             <div className="text-muted-foreground">
-              on time payments from 9 batches
+              <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+                on time payments from <GetPaymentsFromTotalBatches type="pre" />{" "}
+                batches
+              </Suspense>
             </div>
           </CardFooter>
         </Card>

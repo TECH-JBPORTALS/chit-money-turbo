@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { and, count, desc, eq, sql, sum } from "@cmt/db";
+import { and, count, desc, eq, gt, lt, lte, sql, sum } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { schema } from "@cmt/db/client";
 
@@ -166,5 +166,54 @@ export const metricsRouter = {
           totalTransaction: r.at(0)?.totalTransactions ?? 0,
         }));
       return response;
+    }),
+
+  /** Get Pre, On-Time, Late Payments Counts for this month in the current organization's all active batches */
+  getPaymentsMetricsForThisMonth: protectedProcedure
+    .input(z.enum(["pre", "on-time", "late"]))
+    .query(async ({ ctx, input }) => {
+      const paidOnCond = () => {
+        switch (input) {
+          case "pre":
+            return lt(schema.payments.paidOn, schema.payments.runwayDate);
+
+          case "on-time":
+            return eq(schema.payments.paidOn, schema.payments.runwayDate);
+
+          case "on-time":
+            return gt(schema.payments.paidOn, schema.payments.runwayDate);
+
+          default:
+            return undefined;
+        }
+      };
+
+      const paymentMetrics = await ctx.db
+        .select({
+          count: count(schema.payments.id),
+          numberOfBatches: count(schema.batches.id),
+        })
+        .from(schema.subscribersToBatches)
+        .leftJoin(
+          schema.batches,
+          eq(schema.batches.id, schema.subscribersToBatches.batchId)
+        )
+        .leftJoin(
+          schema.payments,
+          eq(
+            schema.payments.subscriberToBatchId,
+            schema.subscribersToBatches.id
+          )
+        )
+        .where(
+          and(eq(schema.batches.collectorId, ctx.session.userId), paidOnCond())
+        )
+        .groupBy(schema.batches.id)
+        .then((r) => ({
+          totalPayments: r.at(0)?.count ?? 0,
+          fromTotalBatches: r.at(0)?.numberOfBatches ?? 0,
+        }));
+
+      return paymentMetrics;
     }),
 };
