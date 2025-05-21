@@ -6,6 +6,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
+  DialogOverlay,
   DialogTitle,
   DialogTrigger,
 } from "@cmt/ui/components/dialog";
@@ -28,6 +29,22 @@ import { useTRPC } from "@/trpc/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { batchInsertSchema } from "@cmt/db/schema";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@cmt/ui/components/popover";
+import { Calendar } from "@cmt/ui/components/calendar";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@cmt/ui/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@cmt/ui/components/select";
 
 export default function CreateBatchDialog({
   children,
@@ -41,10 +58,10 @@ export default function CreateBatchDialog({
       name: "",
       scheme: 10,
       startsOn: new Date(),
-      dueOn: "",
+      dueOn: "10",
       batchType: "interest",
       defaultCommissionRate: 2,
-      fundAmount: 100000,
+      fundAmount: 10000,
     },
   });
   const queryClient = useQueryClient();
@@ -71,6 +88,7 @@ export default function CreateBatchDialog({
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
+        <DialogOverlay className="h-fit overflow-y-auto bg-red-200" />
         <DialogHeader>
           <DialogTitle>New Batch</DialogTitle>
           <DialogDescription>
@@ -101,7 +119,14 @@ export default function CreateBatchDialog({
                 <FormItem>
                   <FormLabel>Target Fund Amount</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        field.onChange(!Number.isNaN(value) ? value : "");
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                   <FormDescription>
@@ -141,7 +166,37 @@ export default function CreateBatchDialog({
                 <FormItem>
                   <FormLabel>Batch Start Month</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value ?? new Date()}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date.getDate() < new Date().getDate()
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </FormControl>
                   <FormMessage />
                   <FormDescription>
@@ -158,7 +213,21 @@ export default function CreateBatchDialog({
                 <FormItem>
                   <FormLabel>Batch Due Date</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={"1"}>Every month 1st</SelectItem>
+                        <SelectItem value={"5"}>Every month 5th</SelectItem>
+                        <SelectItem value={"10"}>Every month 10th</SelectItem>
+                        <SelectItem value={"15"}>Every month 15th</SelectItem>
+                        <SelectItem value={"20"}>Every month 20th</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                   <FormDescription>
