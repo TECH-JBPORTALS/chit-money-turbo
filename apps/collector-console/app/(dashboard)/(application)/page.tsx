@@ -9,6 +9,132 @@ import { Avatar, AvatarImage, AvatarFallback } from "@cmt/ui/components/avatar";
 import { Progress } from "@cmt/ui/components/progress";
 import { trpc } from "@/trpc/server";
 import { createQueryClient } from "@/trpc/query-client";
+import { Loader2Icon } from "lucide-react";
+import React, { Suspense } from "react";
+
+async function GetTotalBatchesOfOrganization() {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getTotalBatchesOfOrganization.queryOptions()
+  );
+  return data;
+}
+
+async function GetTotalSubscribersInInvolvedInOrganization() {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getTotalSubscribersInvolvedInOrganization.queryOptions()
+  );
+  return data;
+}
+
+async function GetLatestSubscribers() {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getLatestSubscribers.queryOptions()
+  );
+  const totalSubscribers = await client.fetchQuery(
+    trpc.metrics.getTotalSubscribersInvolvedInOrganization.queryOptions()
+  );
+  const totalBatches = await client.fetchQuery(
+    trpc.metrics.getTotalBatchesOfOrganization.queryOptions()
+  );
+
+  return (
+    <React.Fragment>
+      <div className="inline-flex -space-x-3">
+        {data.map((sub, i) => (
+          <Avatar className="border-3 border-card size-8" key={i}>
+            <AvatarImage
+              src={sub.user.imageUrl}
+              alt={sub.user.firstName ?? ""}
+            />
+            <AvatarFallback>
+              {sub.user.firstName?.charAt(0)}
+              {sub.user.lastName?.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+        ))}
+      </div>
+      <div className="text-muted-foreground">
+        {totalSubscribers} subscribers from {totalBatches} batches
+      </div>
+    </React.Fragment>
+  );
+}
+
+async function GetTotalPenaltyCollectedInOrganization() {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getTotalPenaltyCollectedInOrganization.queryOptions()
+  );
+  return data.totalPenalty.toLocaleString("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  });
+}
+
+async function GetTotalTransactionsCountForPenalty() {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getTotalPenaltyCollectedInOrganization.queryOptions()
+  );
+  return (
+    <div className="text-muted-foreground">
+      collected from {data.totalTransaction} transactions
+    </div>
+  );
+}
+
+async function GetTotalCollectedPayments() {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getTotalCollectionOfOrganization.queryOptions()
+  );
+
+  return (
+    <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+      {data.collectedAmount.toLocaleString("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0,
+      })}
+    </CardTitle>
+  );
+}
+
+async function GetTotalCollectedPaymentsFooter() {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getTotalCollectionOfOrganization.queryOptions()
+  );
+
+  const pendingAmount = data.totalAmountToBeCollected - data.collectedAmount;
+
+  return (
+    <CardFooter className="flex-col items-start gap-1 text-sm">
+      <div className="w-full">
+        <Progress
+          value={Math.floor(
+            (data.collectedAmount / data.totalAmountToBeCollected) * 100
+          )}
+        />
+      </div>
+      <div className="text-muted-foreground">
+        Still{" "}
+        <b>
+          {pendingAmount.toLocaleString("en-IN", {
+            style: "currency",
+            currency: "INR",
+            maximumFractionDigits: 0,
+          })}
+        </b>{" "}
+        payment pending this month
+      </div>
+    </CardFooter>
+  );
+}
 
 export default async function Page() {
   const client = createQueryClient();
@@ -33,31 +159,24 @@ export default async function Page() {
           <CardHeader className="relative">
             <CardDescription>Total Batches</CardDescription>
             <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              30
+              <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+                <GetTotalBatchesOfOrganization />
+              </Suspense>
             </CardTitle>
           </CardHeader>
           <CardFooter className="flex-col items-start gap-1 text-sm">
-            <div className="inline-flex -space-x-3">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Avatar className="border-3 border-card size-8" key={i}>
-                  <AvatarImage
-                    src="https://github.com/shadcn.png"
-                    alt="@shadcn"
-                  />
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
-              ))}
-            </div>
-            <div className="text-muted-foreground">
-              400 Subscribers from 30 batches
-            </div>
+            <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+              <GetLatestSubscribers />
+            </Suspense>
           </CardFooter>
         </Card>
         <Card className="@container/card">
           <CardHeader className="relative">
             <CardDescription>Total Subscriber</CardDescription>
             <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              70
+              <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+                <GetTotalSubscribersInInvolvedInOrganization />
+              </Suspense>
             </CardTitle>
           </CardHeader>
           <CardFooter className="flex-col items-start gap-1 text-sm">
@@ -70,31 +189,28 @@ export default async function Page() {
         <Card className="@container/card">
           <CardHeader className="relative">
             <CardDescription>Total Collection</CardDescription>
-            <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              ₹40,00,000
-            </CardTitle>
+            <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+              <GetTotalCollectedPayments />
+            </Suspense>
           </CardHeader>
-          <CardFooter className="flex-col items-start gap-1 text-sm">
-            <div className="w-full">
-              <Progress value={80} />
-            </div>
-            <div className="text-muted-foreground">
-              Still <b>₹10,00,000</b> payment pending this month
-            </div>
-          </CardFooter>
+          <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+            <GetTotalCollectedPaymentsFooter />
+          </Suspense>
         </Card>
 
         <Card className="@container/card">
           <CardHeader className="relative">
             <CardDescription>Total Penalty Collected</CardDescription>
             <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              ₹80,00,000
+              <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+                <GetTotalPenaltyCollectedInOrganization />
+              </Suspense>
             </CardTitle>
           </CardHeader>
           <CardFooter className="flex-col items-start gap-1 text-sm">
-            <div className="text-muted-foreground">
-              collected from 20 transactions
-            </div>
+            <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+              <GetTotalTransactionsCountForPenalty />
+            </Suspense>
           </CardFooter>
         </Card>
       </div>

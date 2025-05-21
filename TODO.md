@@ -1,10 +1,12 @@
 - [ ] Request payout
-- [ ] Overall analytics on home screen
-- [ ] Upcoming payments
-- [ ] Fix batch creating
+- [ ] Overall analytics on home screen (mobile)
+- [ ] Upcoming payments (mobile)
+- [x] Fix batch creating
 - [ ] View Requests for payout
 - [ ] Reject payout request
 - [ ] Accept payout request
 - [ ] Batch dashboard this month payments
 - [ ] Batch dashboard this month payouts
 - [ ] Batch dashboard analytics
+- [ ] Update commission rate for subscriber
+- [ ] Main dashboard analytics
