@@ -118,7 +118,7 @@ export async function getSubscribersByBatchId({
   if (!batch)
     throw new TRPCError({ message: "Batch not found", code: "NOT_FOUND" });
 
-  const userIds = await getQueryUserIds(ctx.clerk, query);
+  const userIds = await getQueryUserIds(query);
 
   const [subs, total] = await Promise.all([
     ctx.db.query.subscribersToBatches.findMany({

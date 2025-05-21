@@ -154,7 +154,7 @@ export const payoutsRouter = {
       )
     )
     .query(async ({ ctx, input }) => {
-      const subIds = await getQueryUserIds(ctx.clerk, input.query);
+      const subIds = await getQueryUserIds(input.query);
       const pageIndex = input.pageIndex;
       const pageSize = input.pageSize;
 
@@ -295,7 +295,7 @@ export const payoutsRouter = {
       const cursor = input.cursor;
       const limit = input.limit + 1;
 
-      const clerkSubsIds = await getQueryUserIds(ctx.clerk, input.query);
+      const clerkSubsIds = await getQueryUserIds(input.query);
 
       const queryCond =
         input.query && clerkSubsIds

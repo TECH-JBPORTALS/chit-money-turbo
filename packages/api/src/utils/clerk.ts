@@ -1,9 +1,6 @@
-import { clerkClient } from "@clerk/nextjs/server";
+import { clerk } from "../trpc";
 
-export async function getQueryUserIds(
-  clerk: Awaited<ReturnType<typeof clerkClient>>,
-  query?: string
-) {
+export async function getQueryUserIds(query?: string) {
   if (!query) return;
 
   const { data: users } = await clerk.users.getUserList({
@@ -16,7 +13,6 @@ export async function getQueryUserIds(
 }
 
 export async function getClerkUser(userId: string) {
-  const clerk = await clerkClient();
   const { primaryEmailAddress, id, imageUrl, firstName, lastName } =
     await clerk.users.getUser(userId);
 

@@ -193,7 +193,7 @@ export const subscribersRouter = {
 
       console.log("query", query);
       // Get usersId's from the clerk with matching query string
-      const userIds = await getQueryUserIds(ctx.clerk, query?.trim());
+      const userIds = await getQueryUserIds(query?.trim());
 
       // Match with the clerk userId's in the subscribers users table
       const subs = await ctx.db.query.subscribers.findMany({

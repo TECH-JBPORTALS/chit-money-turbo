@@ -1,7 +1,8 @@
-import { auth, clerkClient } from "@clerk/nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { z } from "zod";
+import { clerk } from "./trpc";
+import { auth } from "@clerk/nextjs/server";
 
 const f = createUploadthing();
 
@@ -48,7 +49,7 @@ export const ourFileRouter = {
 
       console.log("file url", file.ufsUrl);
       try {
-        const client = await clerkClient();
+        const client = clerk;
         const privateData = (await client.users.getUser(metadata.userId))
           .privateMetadata;
         await client.users.updateUserMetadata(metadata.userId, {

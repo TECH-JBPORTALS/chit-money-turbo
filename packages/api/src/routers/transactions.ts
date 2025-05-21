@@ -1,7 +1,6 @@
 import { schema } from "@cmt/db/client";
 import { protectedProcedure } from "../trpc";
 import { and, desc, eq, inArray, lt, lte, sql, unionAll } from "@cmt/db";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 export const transactionsRouter = {
