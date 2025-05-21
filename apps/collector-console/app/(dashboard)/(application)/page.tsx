@@ -63,10 +63,16 @@ async function GetLatestSubscribers() {
   );
 }
 
-async function GetTotalPenaltyCollectedInOrganization() {
+async function GetTotalPenaltyCollectedInOrganization({
+  forThisMonth = false,
+}: {
+  forThisMonth?: boolean;
+}) {
   const client = createQueryClient();
   const data = await client.fetchQuery(
-    trpc.metrics.getTotalPenaltyCollectedInOrganization.queryOptions()
+    trpc.metrics.getTotalPenaltyCollectedInOrganization.queryOptions({
+      forThisMonth,
+    })
   );
   return data.totalPenalty.toLocaleString("en-IN", {
     style: "currency",
@@ -75,10 +81,16 @@ async function GetTotalPenaltyCollectedInOrganization() {
   });
 }
 
-async function GetTotalTransactionsCountForPenalty() {
+async function GetTotalTransactionsCountForPenalty({
+  forThisMonth = false,
+}: {
+  forThisMonth?: boolean;
+}) {
   const client = createQueryClient();
   const data = await client.fetchQuery(
-    trpc.metrics.getTotalPenaltyCollectedInOrganization.queryOptions()
+    trpc.metrics.getTotalPenaltyCollectedInOrganization.queryOptions({
+      forThisMonth,
+    })
   );
   return (
     <div className="text-muted-foreground">
@@ -87,10 +99,16 @@ async function GetTotalTransactionsCountForPenalty() {
   );
 }
 
-async function GetTotalCollectedPayments() {
+async function GetTotalCollectedPayments({
+  forThisMonth = false,
+}: {
+  forThisMonth?: boolean;
+}) {
   const client = createQueryClient();
   const data = await client.fetchQuery(
-    trpc.metrics.getTotalCollectionOfOrganization.queryOptions()
+    trpc.metrics.getTotalCollectionOfOrganization.queryOptions({
+      forThisMonth,
+    })
   );
 
   return (
@@ -104,10 +122,14 @@ async function GetTotalCollectedPayments() {
   );
 }
 
-async function GetTotalCollectedPaymentsFooter() {
+async function GetTotalCollectedPaymentsFooter({
+  forThisMonth = false,
+}: {
+  forThisMonth?: boolean;
+}) {
   const client = createQueryClient();
   const data = await client.fetchQuery(
-    trpc.metrics.getTotalCollectionOfOrganization.queryOptions()
+    trpc.metrics.getTotalCollectionOfOrganization.queryOptions({ forThisMonth })
   );
 
   const pendingAmount = data.totalAmountToBeCollected - data.collectedAmount;
@@ -130,7 +152,7 @@ async function GetTotalCollectedPaymentsFooter() {
             maximumFractionDigits: 0,
           })}
         </b>{" "}
-        payment pending this month
+        payment pending in all active batches
       </div>
     </CardFooter>
   );
@@ -226,32 +248,28 @@ export default async function Page() {
         <Card className="@container/card">
           <CardHeader className="relative">
             <CardDescription>Total Collection</CardDescription>
-            <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              ₹8,00,000
-            </CardTitle>
+            <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+              <GetTotalCollectedPayments forThisMonth />
+            </Suspense>
           </CardHeader>
-          <CardFooter className="flex-col items-start gap-1 text-sm">
-            <div className="w-full">
-              <Progress value={80} />
-            </div>
-            <div className="text-muted-foreground">
-              Still <b>₹2,00,000</b> payment pending out of <b>₹10,00,000</b>{" "}
-              this month
-            </div>
-          </CardFooter>
+          <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+            <GetTotalCollectedPaymentsFooter forThisMonth />
+          </Suspense>
         </Card>
 
         <Card className="@container/card">
           <CardHeader className="relative">
             <CardDescription>Total Penalty Collected</CardDescription>
             <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              ₹6,000
+              <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+                <GetTotalPenaltyCollectedInOrganization forThisMonth />
+              </Suspense>
             </CardTitle>
           </CardHeader>
           <CardFooter className="flex-col items-start gap-1 text-sm">
-            <div className="text-muted-foreground">
-              collected from 8 transactions
-            </div>
+            <Suspense fallback={<Loader2Icon className="animate-spin" />}>
+              <GetTotalTransactionsCountForPenalty forThisMonth />
+            </Suspense>
           </CardFooter>
         </Card>
 

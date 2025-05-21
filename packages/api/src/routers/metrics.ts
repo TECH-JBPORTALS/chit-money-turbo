@@ -1,4 +1,5 @@
-import { count, desc, eq, sql, sum } from "@cmt/db";
+import { z } from "zod";
+import { and, count, desc, eq, sql, sum } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { schema } from "@cmt/db/client";
 
@@ -62,19 +63,31 @@ export const metricsRouter = {
   /** Total collection of payments from active batches
    * :TODO
    */
-  getTotalCollectionOfOrganization: protectedProcedure.query(
-    async ({ ctx }) => {
+  getTotalCollectionOfOrganization: protectedProcedure
+    .input(z.object({ forThisMonth: z.boolean() }).optional())
+    .query(async ({ ctx, input }) => {
+      const thisMonthCondForCollectedAmount = input?.forThisMonth
+        ? and(
+            eq(
+              sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate})`,
+              new Date().getMonth()
+            ),
+            eq(
+              sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate})`,
+              new Date().getFullYear()
+            )
+          )
+        : undefined;
+
       const totalAmountToBeCollected = await ctx.db
         .select({
-          sum: sql`${schema.batches.fundAmount}*${schema.batches.scheme}`.mapWith(
-            Number
-          ),
+          sum: input?.forThisMonth
+            ? sum(schema.batches.fundAmount).mapWith(Number)
+            : sql`SUM(${schema.batches.fundAmount}*${schema.batches.scheme})`.mapWith(
+                Number
+              ),
         })
-        .from(schema.subscribersToBatches)
-        .leftJoin(
-          schema.batches,
-          eq(schema.batches.id, schema.subscribersToBatches.batchId)
-        )
+        .from(schema.batches)
         .where(eq(schema.batches.collectorId, ctx.session.userId))
         .then((r) => r.at(0)?.sum ?? 0);
 
@@ -94,36 +107,64 @@ export const metricsRouter = {
             schema.subscribersToBatches.id
           )
         )
-        .where(eq(schema.batches.collectorId, ctx.session.userId))
+        .where(
+          and(
+            eq(schema.batches.collectorId, ctx.session.userId),
+            thisMonthCondForCollectedAmount
+          )
+        )
         .then((r) => r.at(0)?.sum ?? 0);
 
       return {
         totalAmountToBeCollected,
         collectedAmount,
       };
-    }
-  ),
+    }),
 
   /** Get total penalty collected from all batches payments in organization */
-  getTotalPenaltyCollectedInOrganization: protectedProcedure.query(({ ctx }) =>
-    ctx.db
-      .select({
-        sum: sum(schema.payments.penalty).mapWith(Number),
-        totalTransactions: count(schema.payments.id),
-      })
-      .from(schema.subscribersToBatches)
-      .leftJoin(
-        schema.batches,
-        eq(schema.batches.id, schema.subscribersToBatches.batchId)
-      )
-      .leftJoin(
-        schema.payments,
-        eq(schema.payments.subscriberToBatchId, schema.subscribersToBatches.id)
-      )
-      .where(eq(schema.batches.collectorId, ctx.session.userId))
-      .then((r) => ({
-        totalPenalty: r.at(0)?.sum ?? 0,
-        totalTransaction: r.at(0)?.totalTransactions ?? 0,
-      }))
-  ),
+  getTotalPenaltyCollectedInOrganization: protectedProcedure
+    .input(z.object({ forThisMonth: z.boolean() }).optional())
+    .query(async ({ ctx, input }) => {
+      const thisMonthCondForCollectedAmount = input?.forThisMonth
+        ? and(
+            eq(
+              sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate})`,
+              new Date().getMonth()
+            ),
+            eq(
+              sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate})`,
+              new Date().getFullYear()
+            )
+          )
+        : undefined;
+
+      const response = await ctx.db
+        .select({
+          sum: sum(schema.payments.penalty).mapWith(Number),
+          totalTransactions: count(schema.payments.id),
+        })
+        .from(schema.subscribersToBatches)
+        .leftJoin(
+          schema.batches,
+          eq(schema.batches.id, schema.subscribersToBatches.batchId)
+        )
+        .leftJoin(
+          schema.payments,
+          eq(
+            schema.payments.subscriberToBatchId,
+            schema.subscribersToBatches.id
+          )
+        )
+        .where(
+          and(
+            eq(schema.batches.collectorId, ctx.session.userId),
+            thisMonthCondForCollectedAmount
+          )
+        )
+        .then((r) => ({
+          totalPenalty: r.at(0)?.sum ?? 0,
+          totalTransaction: r.at(0)?.totalTransactions ?? 0,
+        }));
+      return response;
+    }),
 };
