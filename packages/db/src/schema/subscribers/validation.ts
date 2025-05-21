@@ -18,7 +18,7 @@ export const subscribersAddressUpdateSchema =
 export const subscribersBankAccountInsertSchema = createInsertSchema(
   subscribersBankAccounts,
   {
-    accountType: z.enum(["savings", "current"]).default("savings"),
+    accountType: z.enum(["savings", "current"]),
     upiId: z
       .string()
       .min(3, "UPI ID too short")
@@ -32,7 +32,7 @@ export const subscribersBankAccountInsertSchema = createInsertSchema(
 export const subscribersBankAccountUpdateSchema = createUpdateSchema(
   subscribersBankAccounts,
   {
-    accountType: z.enum(["savings", "current"]).default("savings"),
+    accountType: z.enum(["savings", "current"]),
     upiId: z
       .string()
       .min(3, "UPI ID too short")
