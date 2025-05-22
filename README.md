@@ -1,6 +1,6 @@
 ### Chit.Money
 
-## Modernize Your Chit Fund Management
+###### Modernize Your Chit Fund Management
 
 Streamline operations, build trust, and grow your chit fund business with our digital management platform designed specifically for collectors.
 
