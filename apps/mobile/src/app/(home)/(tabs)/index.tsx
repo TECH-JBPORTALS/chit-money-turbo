@@ -13,11 +13,69 @@ import {
 } from "~/components/ui/card";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { trpc } from "~/utils/api";
 import { SpinnerView } from "~/components/spinner-view";
 import { cn } from "~/lib/utils";
+import { Suspense } from "react";
+import Spinner from "~/components/ui/spinner";
 const GITHUB_AVATAR_URI = "https://github.com/mrzachnugent.png";
+
+function GetPaymentsDuesCount() {
+  const { data } = useSuspenseQuery(
+    trpc.metrics.getPaymentsDuesCount.queryOptions()
+  );
+
+  return (
+    <CardTitle className="text-3xl">
+      {data.toLocaleString("en-IN", {
+        style: "decimal",
+      })}
+    </CardTitle>
+  );
+}
+
+function GetPaymentsMadeCount() {
+  const { data } = useSuspenseQuery(
+    trpc.metrics.getPaymentsMadeCount.queryOptions()
+  );
+
+  return (
+    <CardTitle className="text-3xl">
+      {data.toLocaleString("en-IN", {
+        style: "decimal",
+      })}
+    </CardTitle>
+  );
+}
+
+function GetMissedPaymentsCount() {
+  const { data } = useSuspenseQuery(
+    trpc.metrics.getMissedPaymentsCount.queryOptions()
+  );
+
+  return (
+    <CardTitle className="text-3xl">
+      {data.toLocaleString("en-IN", {
+        style: "decimal",
+      })}
+    </CardTitle>
+  );
+}
+
+function GetLatePaymentsCount() {
+  const { data } = useSuspenseQuery(
+    trpc.metrics.getLatePaymentsCount.queryOptions()
+  );
+
+  return (
+    <CardTitle className="text-3xl">
+      {data.toLocaleString("en-IN", {
+        style: "decimal",
+      })}
+    </CardTitle>
+  );
+}
 
 export default function Page() {
   const [personalInfo, creditScore] = useQueries({
@@ -73,13 +131,17 @@ export default function Page() {
             <Card className="flex-1">
               <CardHeader className="gap-3">
                 <CardDescription>Payments Dues</CardDescription>
-                <CardTitle className="text-3xl">2</CardTitle>
+                <Suspense fallback={<Spinner />}>
+                  <GetPaymentsDuesCount />
+                </Suspense>
               </CardHeader>
             </Card>
             <Card className="flex-1">
               <CardHeader className="gap-3">
                 <CardDescription>Payments Made</CardDescription>
-                <CardTitle className="text-3xl">12</CardTitle>
+                <Suspense fallback={<Spinner />}>
+                  <GetPaymentsMadeCount />
+                </Suspense>
               </CardHeader>
             </Card>
           </View>
@@ -87,13 +149,17 @@ export default function Page() {
             <Card className="flex-1">
               <CardHeader className="gap-3">
                 <CardDescription>Missed Payments</CardDescription>
-                <CardTitle className="text-3xl">4</CardTitle>
+                <Suspense fallback={<Spinner />}>
+                  <GetMissedPaymentsCount />
+                </Suspense>
               </CardHeader>
             </Card>
             <Card className="flex-1">
               <CardHeader className="gap-3">
                 <CardDescription>Late Payments</CardDescription>
-                <CardTitle className="text-3xl">4</CardTitle>
+                <Suspense fallback={<Spinner />}>
+                  <GetLatePaymentsCount />
+                </Suspense>
               </CardHeader>
             </Card>
           </View>

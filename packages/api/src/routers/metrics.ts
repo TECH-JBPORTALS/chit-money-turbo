@@ -1,7 +1,21 @@
 import { z } from "zod";
-import { and, count, desc, eq, gt, lt, lte, sql, sum } from "@cmt/db";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gt,
+  gte,
+  lt,
+  lte,
+  notExists,
+  or,
+  sql,
+  sum,
+} from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { schema } from "@cmt/db/client";
+import { differenceInCalendarMonths } from "date-fns";
 
 export const metricsRouter = {
   /** Get total batches of organization */
@@ -216,4 +230,140 @@ export const metricsRouter = {
 
       return paymentMetrics;
     }),
+
+  /** Get payments dues count for subscriber from all active batches
+   * @context Subscriber
+   */
+  getPaymentsDuesCount: protectedProcedure.query(async ({ ctx }) => {
+    const currentRunwayMonth = new Date().getMonth();
+    const currentRunwayYear = new Date().getFullYear();
+
+    return await ctx.db
+      .select({ count: count(schema.subscribersToBatches.id) })
+      .from(schema.subscribersToBatches)
+      .innerJoin(
+        schema.batches,
+        and(
+          eq(schema.batches.id, schema.subscribersToBatches.batchId),
+          eq(schema.batches.batchStatus, "active")
+        )
+      )
+      .where(
+        and(
+          eq(schema.subscribersToBatches.subscriberId, ctx.session.userId),
+          notExists(
+            ctx.db
+              .select()
+              .from(schema.payments)
+              .where(
+                and(
+                  eq(
+                    schema.payments.subscriberToBatchId,
+                    schema.subscribersToBatches.id
+                  ),
+                  eq(
+                    sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate})`,
+                    currentRunwayMonth
+                  ),
+                  eq(
+                    sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate})`,
+                    currentRunwayYear
+                  )
+                )
+              )
+          )
+        )
+      )
+      .then((r) => r.at(0)?.count ?? 0);
+  }),
+
+  /** Get payments made count for subscriber from all active batches
+   * @context Subscriber
+   */
+  getPaymentsMadeCount: protectedProcedure.query(({ ctx }) =>
+    ctx.db
+      .select({ count: count(schema.payments.id) })
+      .from(schema.payments)
+      .leftJoin(
+        schema.subscribersToBatches,
+        eq(schema.subscribersToBatches.id, schema.payments.subscriberToBatchId)
+      )
+      .leftJoin(
+        schema.batches,
+        eq(schema.batches.id, schema.subscribersToBatches.batchId)
+      )
+      .where(
+        and(
+          eq(schema.subscribersToBatches.subscriberId, ctx.session.userId),
+          eq(schema.batches.batchStatus, "active")
+        )
+      )
+      .then((r) => r.at(0)?.count ?? 0)
+  ),
+
+  /** Get missed payments count for subscriber from all active batches
+   * @context Subscriber
+   */
+  getMissedPaymentsCount: protectedProcedure.query(async ({ ctx }) => {
+    // const userId = ctx.session.userId;
+    // const today = new Date();
+
+    const missedPayments = await ctx.db
+      .select({ count: count(schema.subscribersToBatches.id) })
+      .from(schema.subscribersToBatches)
+      .innerJoin(
+        schema.batches,
+        and(
+          eq(schema.batches.batchStatus, "active"),
+          eq(schema.batches.id, schema.subscribersToBatches.batchId)
+        )
+      )
+      .where(
+        and(
+          eq(schema.subscribersToBatches.subscriberId, ctx.session.userId),
+          notExists(
+            ctx.db
+              .select()
+              .from(schema.payments)
+              .where(
+                and(
+                  eq(
+                    schema.payments.subscriberToBatchId,
+                    schema.subscribersToBatches.id
+                  ),
+                  lte(schema.payments.runwayDate, new Date().toDateString())
+                )
+              )
+          )
+        )
+      )
+      .then((r) => r.at(0)?.count ?? 0);
+
+    return missedPayments;
+  }),
+
+  /** Get missed payments count for subscriber from all active batches
+   * @context Subscriber
+   */
+  getLatePaymentsCount: protectedProcedure.query(({ ctx }) =>
+    ctx.db
+      .select({ count: count(schema.payments.id) })
+      .from(schema.payments)
+      .leftJoin(
+        schema.subscribersToBatches,
+        eq(schema.subscribersToBatches.id, schema.payments.subscriberToBatchId)
+      )
+      .leftJoin(
+        schema.batches,
+        eq(schema.batches.id, schema.subscribersToBatches.batchId)
+      )
+      .where(
+        and(
+          eq(schema.subscribersToBatches.subscriberId, ctx.session.userId),
+          eq(schema.batches.batchStatus, "active"),
+          gt(schema.payments.paidOn, schema.payments.runwayDate)
+        )
+      )
+      .then((r) => r.at(0)?.count ?? 0)
+  ),
 };

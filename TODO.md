@@ -1,5 +1,5 @@
 - [ ] Request payout
-- [ ] Overall analytics on home screen (mobile)
+- [x] Overall analytics on home screen (mobile)
 - [ ] Upcoming payments (mobile)
 - [x] Fix batch creating
 - [ ] View Requests for payout
@@ -9,4 +9,6 @@
 - [ ] Batch dashboard this month payouts
 - [ ] Batch dashboard analytics
 - [ ] Update commission rate for subscriber
-- [ ] Main dashboard analytics
+- [x] Main dashboard analytics
+- [ ] Subscribers list in organization
+- [ ] Search subscribers in organization
