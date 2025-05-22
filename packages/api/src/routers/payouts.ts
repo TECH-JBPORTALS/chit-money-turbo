@@ -42,9 +42,49 @@ export const payoutsRouter = {
         .where(
           and(
             eq(schema.subscribersToBatches.batchId, input.batchId),
-            inArray(schema.payouts.payoutStatus, ["requested", "rejected"])
+            inArray(schema.payouts.payoutStatus, [
+              "requested",
+              "rejected",
+              "approved",
+            ])
           )
         )
+        .then((r) =>
+          Promise.all(
+            r.map(async (p) => {
+              const clerkUser = await getClerkUser(p.subscriber.id);
+
+              return {
+                ...p,
+                subscriber: {
+                  ...p.subscriber,
+                  ...clerkUser,
+                },
+              };
+            })
+          )
+        )
+    ),
+
+  /** Get total request count for batch */
+  getTotalRequestsCount: protectedProcedure
+    .input(z.object({ batchId: z.string() }))
+    .query(({ ctx, input }) =>
+      ctx.db
+        .select({ count: count() })
+        .from(schema.payouts)
+        .innerJoin(
+          schema.subscribersToBatches,
+          and(
+            eq(
+              schema.subscribersToBatches.id,
+              schema.payouts.subscriberToBatchId
+            ),
+            eq(schema.payouts.payoutStatus, "requested")
+          )
+        )
+        .where(eq(schema.subscribersToBatches.batchId, input.batchId))
+        .then((r) => r.at(0)?.count ?? 0)
     ),
 
   /** Create payout for subscribersToBatchId with approved status

@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@cmt/ui/components/button";
 import {
   Popover,
@@ -11,78 +12,38 @@ import {
   TooltipTrigger,
 } from "@cmt/ui/components/tooltip";
 import { ScrollArea } from "@cmt/ui/components/scroll-area";
-import { PayoutRequest, PayoutRequestCard } from "./payout-request-card";
-
-export const fakePayoutRequests: PayoutRequest[] = [
-  {
-    id: "pr_001",
-    chit_id: "chit_101",
-    full_name: "Ravi Kumar",
-    payout_month: "March 2025",
-    email: "ravi.kumar@example.com",
-    requested_on: new Date("2025-03-10"),
-    is_rejected: false,
-    is_approved: true,
-    rejected_on: "",
-    approved_on: "2025-03-15",
-  },
-  {
-    id: "pr_002",
-    chit_id: "chit_102",
-    full_name: "Meera Sharma",
-    payout_month: "April 2025",
-    email: "meera.sharma@example.com",
-    requested_on: new Date("2025-03-12"),
-    is_rejected: false,
-    is_approved: false,
-    rejected_on: "",
-    approved_on: "",
-  },
-  {
-    id: "pr_003",
-    chit_id: "chit_103",
-    full_name: "Sandeep Verma",
-    payout_month: "February 2025",
-    email: "sandeep.verma@example.com",
-    requested_on: new Date("2025-02-05"),
-    is_rejected: true,
-    is_approved: false,
-    rejected_on: "2025-02-10",
-    approved_on: "",
-  },
-  {
-    id: "pr_004",
-    chit_id: "chit_104",
-    full_name: "Priya Menon",
-    payout_month: "May 2025",
-    email: "priya.menon@example.com",
-    requested_on: new Date("2025-03-18"),
-    is_rejected: false,
-    is_approved: false,
-    rejected_on: "",
-    approved_on: "",
-  },
-  {
-    id: "pr_005",
-    chit_id: "chit_105",
-    full_name: "Arjun Nair",
-    payout_month: "January 2025",
-    email: "arjun.nair@example.com",
-    requested_on: new Date("2024-12-28"),
-    is_rejected: false,
-    is_approved: true,
-    rejected_on: "",
-    approved_on: "2025-01-02",
-  },
-];
+import { PayoutRequestCard } from "./payout-request-card";
+import { useQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/react";
+import { useParams } from "next/navigation";
+import { SpinnerPage } from "./spinner-page";
+import { useState } from "react";
+import { cn } from "@cmt/ui/lib/utils";
 
 export function PayoutRequestsButton() {
+  const [open, setOpen] = useState(false);
+  const trpc = useTRPC();
+  const { batchId } = useParams<{ batchId: string }>();
+  const { data: payoutRequests, isLoading } = useQuery(
+    trpc.payouts.getRequests.queryOptions({ batchId }, { enabled: open })
+  );
+
+  const { data: totalRequestCount, isLoading: isTotalRequestCountLoading } =
+    useQuery(trpc.payouts.getTotalRequestsCount.queryOptions({ batchId }));
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <Tooltip>
         <TooltipTrigger asChild>
           <PopoverTrigger asChild>
-            <Button size={"icon"} variant={"outline"}>
+            <Button
+              className={cn(
+                !isTotalRequestCountLoading && totalRequestCount
+                  ? `after:content-['${totalRequestCount}'] animate-in after:size-4 after:rounded-full after:text-xs after:flex after:items-center after:justify-center after:absolute after:-top-1.5 after:-right-1.5 after:z-50 after:bg-foreground after:font-semibold after:text-background relative`
+                  : "after:hidden"
+              )}
+              variant={"outline"}
+            >
               <BellIcon />
             </Button>
           </PopoverTrigger>
@@ -93,14 +54,18 @@ export function PayoutRequestsButton() {
         <div>
           <div className="text-lg font-semibold">Payout Requests</div>
         </div>
-        <ScrollArea className="w-full h-full pr-4 pb-4">
-          {fakePayoutRequests.map((payoutRequest) => (
-            <PayoutRequestCard
-              payoutRequest={payoutRequest}
-              key={payoutRequest.id}
-            />
-          ))}
-        </ScrollArea>
+        {isLoading ? (
+          <SpinnerPage />
+        ) : (
+          <ScrollArea className="w-full h-full pr-4 pb-4">
+            {payoutRequests?.map((payoutRequest) => (
+              <PayoutRequestCard
+                payoutRequest={payoutRequest}
+                key={payoutRequest.id}
+              />
+            ))}
+          </ScrollArea>
+        )}
       </PopoverContent>
     </Popover>
   );

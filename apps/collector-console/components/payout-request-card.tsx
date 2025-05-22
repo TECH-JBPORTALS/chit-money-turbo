@@ -1,23 +1,14 @@
 "use client";
+
+import React from "react";
+import { RouterOutputs } from "@cmt/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Button } from "@cmt/ui/components/button";
 import { Textarea } from "@cmt/ui/components/textarea";
-import { formatDistanceToNowStrict } from "date-fns";
+import { format, formatDistanceToNowStrict } from "date-fns";
 import { CheckCircle2, XCircleIcon } from "lucide-react";
-import React from "react";
 
-export type PayoutRequest = {
-  id: string;
-  chit_id: string;
-  full_name: string;
-  payout_month: string;
-  email: string;
-  requested_on: Date;
-  is_rejected: boolean;
-  is_approved: boolean;
-  rejected_on: string;
-  approved_on: string;
-};
+export type PayoutRequest = RouterOutputs["payouts"]["getRequests"][number];
 
 function PayoutRequestCardFooterActoin() {
   const [isCancelMode, setIsCancelMode] = React.useState(false);
@@ -70,46 +61,49 @@ export function PayoutRequestCard({
       <header className="flex justify-between">
         <div className="flex gap-2 items-center">
           <Avatar className="border-2">
-            <AvatarImage src="https://github.com/t3dotgg.png" />
+            <AvatarImage src={payoutRequest.subscriber.imageUrl} />
             <AvatarFallback>T</AvatarFallback>
           </Avatar>
           <div>
             <small className="text-sm font-medium leading-none">
-              {payoutRequest.full_name}
+              {payoutRequest.subscriber.firstName}{" "}
+              {payoutRequest.subscriber.lastName}
             </small>
             <p className="text-sm text-muted-foreground">
-              {payoutRequest.email}
+              {payoutRequest.subscriber.primaryEmailAddress?.emailAddress}
             </p>
           </div>
         </div>
         <p className="text-xs text-muted-foreground text-right">
-          {formatDistanceToNowStrict(payoutRequest.requested_on, {
+          {formatDistanceToNowStrict(payoutRequest.requestedAt!, {
             addSuffix: true,
           })}
         </p>
       </header>
       <main className="text-sm text-muted-foreground">
         Requested for{" "}
-        <b aria-label="Requested Month">{payoutRequest.payout_month}</b> payout
-        regarding chit ID of {payoutRequest.chit_id}
+        <b aria-label="Requested Month">
+          {format(payoutRequest.month, "MMMM yyyy")}
+        </b>{" "}
+        payout regarding chit ID of {payoutRequest.subscriberToBatch.chitId}
       </main>
-      {payoutRequest.is_rejected && (
+      {payoutRequest.payoutStatus === "rejected" && (
         <div className="text-xs text-muted-foreground text-right">
           <span className="inline-flex items-center gap-1">
             <XCircleIcon className="size-4" /> Rejected on{" "}
-            {payoutRequest.rejected_on}
+            {format(payoutRequest.rejectedAt!, "dd MMM, yyyy")}
           </span>
         </div>
       )}
-      {payoutRequest.is_approved && (
+      {payoutRequest.payoutStatus === "approved" && (
         <div className="text-xs text-right text-primary">
           <span className="inline-flex items-center gap-1">
             <CheckCircle2 className="size-4" /> Approved on{" "}
-            {payoutRequest.approved_on}
+            {format(payoutRequest.approvedAt!, "dd MMM, yyyy")}
           </span>
         </div>
       )}
-      {!payoutRequest.is_rejected && !payoutRequest.is_approved && (
+      {payoutRequest.payoutStatus === "requested" && (
         <PayoutRequestCardFooterActoin />
       )}
     </div>
