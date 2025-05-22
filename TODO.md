@@ -1,7 +1,7 @@
 ## On-Progress Tasks
 
-- [ ] Reject payout request
-- [ ] Accept payout request
+- [x] Reject payout request
+- [x] Accept payout request
 - [ ] Update commission rate for subscriber
 - [ ] Subscribers list in organization
 - [ ] Search subscribers in organization

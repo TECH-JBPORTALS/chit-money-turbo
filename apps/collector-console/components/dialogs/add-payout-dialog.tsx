@@ -470,8 +470,8 @@ function ApprovePayoutCard({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: approvePayout, isPending } = useMutation(
-    trpc.payouts.approve.mutationOptions({
+  const { mutateAsync: addPayout, isPending } = useMutation(
+    trpc.payouts.add.mutationOptions({
       onSuccess: async (data) => {
         await queryClient.invalidateQueries(trpc.payouts.pathFilter());
         toast.success("Payout approved");
@@ -502,7 +502,7 @@ function ApprovePayoutCard({
       <Button
         isLoading={isPending}
         onClick={async () => {
-          await approvePayout({
+          await addPayout({
             ...data,
             subscriberToBatchId,
             appliedCommissionRate: data.commissionRate,

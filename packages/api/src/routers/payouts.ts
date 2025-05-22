@@ -90,7 +90,7 @@ export const payoutsRouter = {
   /** Create payout for subscribersToBatchId with approved status
    * @context collector
    */
-  approve: protectedProcedure
+  add: protectedProcedure
     .input(payoutInsertSchema.omit({ totalAmount: true }))
     .mutation(async ({ ctx, input }) => {
       const deductions = (input.appliedCommissionRate / 100) * input.amount;
@@ -160,6 +160,60 @@ export const payoutsRouter = {
         .then((v) => v.at(0));
     }),
 
+  /** Reject the payout from the requests
+   * @context subscriber
+   */
+  approve: protectedProcedure
+    .input(z.object({ payoutId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const payout = await ctx.db.query.payouts.findFirst({
+        where: eq(schema.payouts.id, input.payoutId),
+      });
+
+      if (
+        payout &&
+        ["rejected", "disubursed", "cancelled"].includes(payout.payoutStatus)
+      )
+        throw new TRPCError({
+          message: "Can't approve payout request at this time",
+          code: "BAD_REQUEST",
+        });
+
+      return await ctx.db
+        .update(schema.payouts)
+        .set({ payoutStatus: "approved", approvedAt: new Date() })
+        .where(eq(schema.payouts.id, input.payoutId));
+    }),
+
+  /** Reject the payout from the requests
+   * @context subscriber
+   */
+  reject: protectedProcedure
+    .input(z.object({ payoutId: z.string(), rejectionReason: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const payout = await ctx.db.query.payouts.findFirst({
+        where: eq(schema.payouts.id, input.payoutId),
+      });
+
+      if (
+        payout &&
+        ["approved", "disubursed", "cancelled"].includes(payout.payoutStatus)
+      )
+        throw new TRPCError({
+          message: "Can't reject payout request at this time",
+          code: "BAD_REQUEST",
+        });
+
+      return await ctx.db
+        .update(schema.payouts)
+        .set({
+          payoutStatus: "rejected",
+          rejectedAt: new Date(),
+          rejectionReason: input.rejectionReason,
+        })
+        .where(eq(schema.payouts.id, input.payoutId));
+    }),
+
   /** Cancell payout request
    * @context subscriber
    */
@@ -169,6 +223,7 @@ export const payoutsRouter = {
       return await ctx.db
         .update(schema.payouts)
         .set({ payoutStatus: "cancelled", cancelledAt: new Date() })
+        .where(eq(schema.payouts.id, input.payoutId))
         .returning()
         .then((v) => v.at(0));
     }),

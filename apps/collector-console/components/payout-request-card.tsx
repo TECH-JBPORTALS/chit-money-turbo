@@ -7,15 +7,45 @@ import { Button } from "@cmt/ui/components/button";
 import { Textarea } from "@cmt/ui/components/textarea";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import { CheckCircle2, XCircleIcon } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/react";
+import { toast } from "sonner";
 
 export type PayoutRequest = RouterOutputs["payouts"]["getRequests"][number];
 
-function PayoutRequestCardFooterActoin() {
+function PayoutRequestCardFooterActoin({ payoutId }: { payoutId: string }) {
   const [isCancelMode, setIsCancelMode] = React.useState(false);
+  const [rejectionReason, setRejectionReason] = React.useState("");
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const { mutate: rejectRequest, isPending: isRejectingRequest } = useMutation(
+    trpc.payouts.reject.mutationOptions({
+      async onSettled() {
+        await queryClient.invalidateQueries(trpc.payouts.pathFilter());
+      },
+      onError(error) {
+        toast.error(error.message);
+      },
+    })
+  );
+
+  const { mutate: approveRequest, isPending: isApprovingRequest } = useMutation(
+    trpc.payouts.approve.mutationOptions({
+      async onSettled() {
+        await queryClient.invalidateQueries(trpc.payouts.pathFilter());
+      },
+      onError(error) {
+        toast.error(error.message);
+      },
+    })
+  );
+
   if (isCancelMode)
     return (
       <div className="space-y-4 px-2">
         <Textarea
+          value={rejectionReason}
+          onChange={(e) => setRejectionReason(e.target.value)}
           rows={4}
           placeholder="Type your rejection reason here..."
           className="resize-none"
@@ -28,7 +58,12 @@ function PayoutRequestCardFooterActoin() {
           >
             Cancel
           </Button>
-          <Button size={"sm"} variant={"destructive"}>
+          <Button
+            size={"sm"}
+            isLoading={isRejectingRequest}
+            onClick={() => rejectRequest({ payoutId, rejectionReason })}
+            variant={"destructive"}
+          >
             Reject
           </Button>
         </footer>
@@ -44,7 +79,12 @@ function PayoutRequestCardFooterActoin() {
       >
         Reject
       </Button>
-      <Button size={"sm"} variant={"secondary"}>
+      <Button
+        onClick={() => approveRequest({ payoutId })}
+        isLoading={isApprovingRequest}
+        size={"sm"}
+        variant={"secondary"}
+      >
         Approve
       </Button>
     </footer>
@@ -104,7 +144,7 @@ export function PayoutRequestCard({
         </div>
       )}
       {payoutRequest.payoutStatus === "requested" && (
-        <PayoutRequestCardFooterActoin />
+        <PayoutRequestCardFooterActoin payoutId={payoutRequest.id} />
       )}
     </div>
   );
