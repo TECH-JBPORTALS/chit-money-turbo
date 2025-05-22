@@ -115,7 +115,7 @@ export default function TransactionDetails() {
 
             <View className="gap-3">
               <Small className="font-bold">Reason for Rejection</Small>
-              <Muted>Sorry, Alloted to some other person</Muted>
+              <Muted>{data.rejectionReason}</Muted>
             </View>
           </>
         );
