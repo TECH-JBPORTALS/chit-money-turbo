@@ -4,6 +4,7 @@ import {
   desc,
   eq,
   exists,
+  getTableColumns,
   ilike,
   inArray,
   lte,
@@ -19,6 +20,33 @@ import { payoutInsertSchema, payoutUpdateSchema } from "@cmt/db/schema";
 import { getClerkUser, getQueryUserIds } from "../utils/clerk";
 
 export const payoutsRouter = {
+  /** Get list of requests */
+  getRequests: protectedProcedure
+    .input(z.object({ batchId: z.string() }))
+    .query(async ({ ctx, input }) =>
+      ctx.db
+        .select({
+          ...getTableColumns(schema.payouts),
+          subscriber: getTableColumns(schema.subscribers),
+          subscriberToBatch: getTableColumns(schema.subscribersToBatches),
+        })
+        .from(schema.payouts)
+        .innerJoin(
+          schema.subscribersToBatches,
+          eq(schema.subscribersToBatches.id, schema.payouts.subscriberToBatchId)
+        )
+        .innerJoin(
+          schema.subscribers,
+          eq(schema.subscribers.id, schema.subscribersToBatches.subscriberId)
+        )
+        .where(
+          and(
+            eq(schema.subscribersToBatches.batchId, input.batchId),
+            inArray(schema.payouts.payoutStatus, ["requested", "rejected"])
+          )
+        )
+    ),
+
   /** Create payout for subscribersToBatchId with approved status
    * @context collector
    */

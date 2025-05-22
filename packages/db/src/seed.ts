@@ -6,6 +6,8 @@ import { schema } from "@/client";
 import { addMonths } from "date-fns";
 import { eq } from "drizzle-orm";
 
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+
 async function main() {
   //Check for seed mode
   if (!process.env.SEED_MODE)
@@ -98,22 +100,20 @@ async function main() {
       userId: user.id,
     });
 
-    const startsOn = f.date.future({ years: 2 });
-    const scheme = f.number.int({ min: 20, max: 30 }); // Number of months
+    const startsOn = f.date.past({ years: 1 });
+    const scheme = f.number.int({ min: 14, max: 20 }); // Number of months
     const endsOn = addMonths(startsOn, scheme);
 
     // Batches
     for (let index = 0; index < 5; index++) {
       await db.insert(schema.batches).values({
-        name: `${f.company.buzzNoun()} ${f.date.between({ from: Date.now(), to: "2030-01-01" }).getFullYear()}`,
+        name: `${capitalize(f.company.catchPhraseNoun())} ${f.date.between({ from: Date.now(), to: "2030-01-01" }).getFullYear()}`,
         defaultCommissionRate: f.number.float({ min: 2, max: 8 }),
-        dueOn: f.helpers.arrayElement([10, 1, 5, 20]).toString(),
+        dueOn: f.helpers.arrayElement([10, 1, 15, 20]).toString(),
         startsOn: startsOn,
         endsOn: endsOn.toDateString(),
         scheme: scheme,
-        fundAmount: f.helpers.arrayElement([
-          100000, 200000, 500000, 600000, 100000, 1500000, 200000,
-        ]),
+        fundAmount: f.helpers.arrayElement([100000, 200000, 500000, 600000]),
         batchStatus: "active",
         batchType: "interest",
         collectorId: user.id,
@@ -210,79 +210,81 @@ async function main() {
 
   const subscribers = await db.query.subscribers.findMany();
 
+  // Create chits, payouts, payments
   await Promise.all(
     batches.map(async (batch) => {
       const randomSubs = f.helpers.arrayElements(subscribers, {
-        min: 20,
-        max: batch.scheme,
+        min: batch.scheme,
+        max: batch.scheme, // To make sure all batches fulfill the subscriber based on the scheme
       });
 
       console.log(`${randomSubs.length} subscribers joining ${batch.name} 👥`);
 
-      console.log(`Subscriber making few payments for ${batch.name} \n`);
-
-      const runwayDates = Array.from({ length: 10 }).map((_, i) => {
-        return addMonths(batch.startsOn, i);
-      });
-
-      //Payouts
+      // Create chits
       await Promise.all(
-        randomSubs.map(async (sub, index) => {
-          const subscribersToBatch = await db
+        randomSubs.map(async (sub) =>
+          db
             .insert(schema.subscribersToBatches)
             .values({
               subscriberId: sub.id,
               batchId: batch.id,
               commissionRate: batch.defaultCommissionRate,
             })
-            .returning();
-        })
+            .returning()
+        )
       );
 
-      //Get chits
+      // Get 10 runway months of batch
+      const runwayDates = Array.from({
+        length: f.helpers.rangeToNumber({ min: 1, max: batch.scheme }), //Make sure it ranges within the batch scheme
+      }).map((_, i) => {
+        return addMonths(batch.startsOn, i);
+      });
 
+      //Get chits
       const subscribersToBatcheData =
         await db.query.subscribersToBatches.findMany({
           where: eq(schema.subscribersToBatches.batchId, batch.id),
         });
 
-      runwayDates.map(async (rd, i) => {
-        const amount = batch.fundAmount;
-        const deductions = Math.ceil(
-          (subscribersToBatcheData.at(i)!.commissionRate / 100) * amount
-        );
-        const payoutStatus = f.helpers.arrayElement([
-          // "requested",
-          // "accepted",
-          // "rejected",
-          // "cancelled",
-          "disbursed",
-          "approved",
-        ]);
+      // Payouts
+      console.log(`Making few payouts for subscribers from ${batch.name} \n`);
+      await Promise.all(
+        runwayDates.map(async (rd, i) => {
+          const amount = batch.fundAmount;
+          const deductions = Math.ceil(
+            (subscribersToBatcheData.at(i)!.commissionRate / 100) * amount
+          );
+          const payoutStatus = f.helpers.arrayElement([
+            "requested",
+            "rejected",
+            "cancelled",
+            "disbursed",
+            "approved",
+          ]);
 
-        await db.insert(schema.payouts).values({
-          amount,
-          month: rd,
-          subscriberToBatchId: subscribersToBatcheData.at(i)!.id,
-          deductions,
-          totalAmount: amount - deductions,
-          payoutStatus,
-          paymentMode: "cash",
-          appliedCommissionRate: subscribersToBatcheData.at(i)!.commissionRate,
-        });
-      });
+          await db.insert(schema.payouts).values({
+            amount,
+            month: rd,
+            subscriberToBatchId: subscribersToBatcheData.at(i)!.id,
+            deductions,
+            totalAmount: amount - deductions,
+            payoutStatus,
+            paymentMode: "cash",
+            appliedCommissionRate:
+              subscribersToBatcheData.at(i)!.commissionRate,
+          });
+        })
+      );
+
+      console.log(
+        "\n======================================================================\n"
+      );
+
       //Payments
-      randomSubs.map(async (sub, index) => {
-        randomSubs.map(async (sub, index) => {
-          const subscribersToBatch = await db
-            .insert(schema.subscribersToBatches)
-            .values({
-              subscriberId: sub.id,
-              batchId: batch.id,
-              commissionRate: batch.defaultCommissionRate,
-            })
-            .returning();
-
+      console.log(`Subscriber making few payments for ${batch.name} \n`);
+      await Promise.all(
+        subscribersToBatcheData.map(async (sub) => {
           const randomDates = f.helpers.arrayElements(runwayDates, 10);
 
           //Payments
@@ -320,7 +322,7 @@ async function main() {
                 creditScoreAffected,
                 paidOn: paidOn,
                 subscriptionAmount,
-                subscriberToBatchId: subscribersToBatch.at(0)!.id,
+                subscriberToBatchId: sub.id,
                 totalAmount,
                 paymentMode,
                 transactionId,
@@ -328,10 +330,8 @@ async function main() {
               });
             })
           );
-
-          //Payouts ...
-        });
-      });
+        })
+      );
     })
   );
 }
@@ -339,6 +339,7 @@ async function main() {
 main()
   .then(() => console.log("Seed completed successfully ✅"))
   .catch((e) => console.error(e))
-  .finally(() =>
-    console.log("\n\n...................NAMASTE 🙏.....................\n\n")
-  );
+  .finally(() => {
+    console.log("\n\n...................NAMASTE 🙏.....................\n\n");
+    process.exit(0);
+  });

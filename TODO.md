@@ -1,3 +1,4 @@
+- [ ] List payouts in notifications
 - [ ] Request payout
 - [x] Overall analytics on home screen (mobile)
 - [ ] Upcoming payments (mobile)
