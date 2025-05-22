@@ -10,9 +10,20 @@ import {
 } from "@cmt/validators";
 import { TRPCError } from "@trpc/server";
 import { customAlphabet } from "nanoid";
-import { ilike, inArray, eq, or } from "@cmt/db";
+import {
+  ilike,
+  inArray,
+  eq,
+  or,
+  and,
+  getTableColumns,
+  count,
+  countDistinct,
+} from "@cmt/db";
 import { z } from "zod";
-import { getQueryUserIds } from "../utils/clerk";
+import { getClerkUser, getQueryUserIds } from "../utils/clerk";
+import { getPagination, paginateInputSchema } from "../utils/paginate";
+import { getTotalCreditScore } from "../utils/actions";
 
 const {
   subscribers,
@@ -83,6 +94,86 @@ export const subscribersRouter = {
         lastName: user.lastName,
         imageUrl: user.imageUrl,
         primaryEmailAddress: user.primaryEmailAddress,
+      };
+    }),
+
+  /** Get all subscribers involved in current collector's organization
+   * @context Collector
+   */
+  getOfCollector: protectedProcedure
+    .input(paginateInputSchema.and(z.object({ query: z.string().optional() })))
+    .query(async ({ ctx, input }) => {
+      const subIds = await getQueryUserIds(input.query);
+      const pageIndex = input.pageIndex;
+      const pageSize = input.pageSize;
+
+      const { offset } = getPagination(pageIndex, pageSize);
+
+      const queryCond = input.query
+        ? or(ilike(schema.subscribers.faceId, `%${input.query}%`))
+        : undefined;
+
+      const [subscribers, total] = await Promise.all([
+        ctx.db
+          .select({ ...getTableColumns(schema.subscribers) })
+          .from(schema.subscribersToBatches)
+          .innerJoin(
+            schema.subscribers,
+            eq(schema.subscribers.id, schema.subscribersToBatches.subscriberId)
+          )
+          .innerJoin(
+            schema.batches,
+            eq(schema.batches.id, schema.subscribersToBatches.batchId)
+          )
+          .where(
+            and(
+              eq(schema.batches.collectorId, ctx.session.userId),
+              or(
+                queryCond,
+                subIds ? inArray(schema.subscribers.id, subIds) : undefined
+              )
+            )
+          )
+          .groupBy(schema.subscribers.id)
+          .offset(offset)
+          .limit(pageSize),
+        ctx.db
+          .select({ count: countDistinct(schema.subscribers.id) })
+          .from(schema.subscribersToBatches)
+          .innerJoin(
+            schema.subscribers,
+            eq(schema.subscribers.id, schema.subscribersToBatches.subscriberId)
+          )
+          .innerJoin(
+            schema.batches,
+            eq(schema.batches.id, schema.subscribersToBatches.batchId)
+          )
+          .where(
+            and(eq(schema.batches.collectorId, ctx.session.userId), queryCond)
+          ),
+      ]);
+
+      const mappedItems = await Promise.all(
+        subscribers.map(async (sub) => {
+          const clerkUser = await getClerkUser(sub.id);
+          const { totalCreditScore } = await getTotalCreditScore({
+            ctx,
+            subscriberId: sub.id,
+          });
+
+          return {
+            ...sub,
+            ...clerkUser,
+            totalCreditScore,
+          };
+        })
+      );
+
+      return {
+        items: mappedItems,
+        pageSize,
+        pageIndex,
+        total: total.at(0)?.count ?? 0,
       };
     }),
 

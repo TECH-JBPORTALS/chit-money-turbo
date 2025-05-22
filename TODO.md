@@ -1,18 +1,18 @@
 ## On-Progress Tasks
 
-- [x] Reject payout request
-- [x] Accept payout request
 - [ ] Update commission rate for subscriber
-- [ ] Subscribers list in organization
-- [ ] Search subscribers in organization
-- [ ] Upcoming payments (mobile)
 - [ ] Batch dashboard this month payments
 - [ ] Batch dashboard this month payouts
 - [ ] Batch dashboard analytics
+- [ ] Upcoming payments (mobile)
 - [ ] Request payout
 
 ## Completed Tasks
 
+- [x] Reject payout request
+- [x] Accept payout request
+- [x] Subscribers list in organization
+- [x] Search subscribers in organization
 - [x] List payouts in notifications
 - [x] Overall analytics on home screen (mobile)
 - [x] Fix batch creating

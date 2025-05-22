@@ -8,8 +8,10 @@ import {
   gt,
   ilike,
   inArray,
+  lt,
   lte,
   or,
+  sum,
 } from "@cmt/db";
 import { schema } from "@cmt/db/client";
 import { AuthedContext } from "../trpc";
@@ -165,4 +167,114 @@ export async function getSubscribersByBatchId({
   );
 
   return { items, total, pageSize, pageIndex };
+}
+
+export async function getTotalCreditScore({
+  subscriberId,
+  ctx,
+}: {
+  ctx: AuthedContext;
+  subscriberId: string;
+}) {
+  const subscriberToBatch = await ctx.db.query.subscribersToBatches.findMany({
+    where: eq(schema.subscribersToBatches.subscriberId, subscriberId),
+  });
+
+  const totalCreditScore = await ctx.db
+    .select({
+      total: sum(schema.payments.creditScoreAffected).mapWith(Number),
+    })
+    .from(schema.payments)
+    .where(
+      inArray(
+        schema.payments.subscriberToBatchId,
+        subscriberToBatch.flatMap((s) => s.id)
+      )
+    )
+    .then((r) => r.at(0)?.total ?? 0);
+
+  return { totalCreditScore };
+}
+
+export async function getCreditScoreMeta({
+  subscriberId,
+  ctx,
+}: {
+  ctx: AuthedContext;
+  subscriberId: string;
+}) {
+  const subscriberToBatch = await ctx.db.query.subscribersToBatches.findMany({
+    where: eq(schema.subscribersToBatches.subscriberId, subscriberId),
+  });
+
+  const { totalCreditScore } = await getTotalCreditScore({ ctx, subscriberId });
+
+  const prePaymentsCount = await ctx.db
+    .select({
+      count: count().mapWith(Number),
+    })
+    .from(schema.payments)
+    .where(
+      and(
+        inArray(
+          schema.payments.subscriberToBatchId,
+          subscriberToBatch.flatMap((s) => s.id)
+        ),
+        lt(schema.payments.paidOn, schema.payments.runwayDate)
+      )
+    )
+    .then((r) => r.at(0)?.count ?? 0);
+
+  const latePaymentsCount = await ctx.db
+    .select({
+      count: count().mapWith(Number),
+    })
+    .from(schema.payments)
+    .where(
+      and(
+        inArray(
+          schema.payments.subscriberToBatchId,
+          subscriberToBatch.flatMap((s) => s.id)
+        ),
+        gt(schema.payments.paidOn, schema.payments.runwayDate)
+      )
+    )
+    .then((r) => r.at(0)?.count ?? 0);
+
+  const onTimePaymentsCount = await ctx.db
+    .select({
+      count: count().mapWith(Number),
+    })
+    .from(schema.payments)
+    .where(
+      and(
+        inArray(
+          schema.payments.subscriberToBatchId,
+          subscriberToBatch.flatMap((s) => s.id)
+        ),
+        eq(schema.payments.paidOn, schema.payments.runwayDate)
+      )
+    )
+    .then((r) => r.at(0)?.count ?? 0);
+
+  const item = await ctx.db.query.payments.findFirst({
+    where: inArray(
+      schema.payments.subscriberToBatchId,
+      subscriberToBatch.flatMap((s) => s.id)
+    ),
+    columns: {
+      id: true,
+      paidOn: true,
+      creditScoreAffected: true,
+    },
+    orderBy: ({ paidOn }, { desc }) => [desc(paidOn)],
+  });
+
+  return {
+    totalCreditScore,
+    prePaymentsCount,
+    latePaymentsCount,
+    onTimePaymentsCount,
+    lastUpdatedCreditScore: item?.creditScoreAffected,
+  };
 }

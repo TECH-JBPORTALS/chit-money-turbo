@@ -1,33 +1,5 @@
-import EmptyState from "@/components/empty-state";
-import { columns, Subscriber } from "./columns";
-import { DataTable } from "../../../../components/data-table";
-import { Input } from "@cmt/ui/components/input";
-import { SearchIcon } from "lucide-react";
-import SearchInput from "@/components/search-input";
-
-const data: Subscriber[] = [
-  {
-    id: "1",
-    email: "jhon@gmail.com",
-    full_name: "Jhon Abraham",
-    credit_score: "23",
-    joined_on: new Date(2024, 2, 12),
-  },
-  {
-    id: "1",
-    email: "jhon@gmail.com",
-    full_name: "Jhon Abraham",
-    credit_score: "23",
-    joined_on: new Date(2024, 2, 12),
-  },
-  {
-    id: "1",
-    email: "jhon@gmail.com",
-    full_name: "Jhon Abraham",
-    credit_score: "23",
-    joined_on: new Date(2024, 2, 12),
-  },
-];
+import { DataTableClient } from "./datatable-client";
+import SearchClient from "./search-client";
 
 export default function Page() {
   return (
@@ -41,14 +13,8 @@ export default function Page() {
           All subscribers in this chit fund house
         </p>
       </div>
-
-      {/** Content */}
-      {/* <EmptyState
-        title="No Subscribers"
-        description="As soon as subscribers start participating in on of your batches they will appear over here"
-      /> */}
-      <SearchInput placeholder="Search..." className="w-[600px]" />
-      <DataTable columns={columns} data={data} />
+      <SearchClient />
+      <DataTableClient />
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { schema } from "@cmt/db/client";
 import { addMonths, format } from "date-fns";
 import { paginateInputSchema } from "../utils/paginate";
-import { getSubscribersByBatchId } from "../utils/actions";
+import { getCreditScoreMeta, getSubscribersByBatchId } from "../utils/actions";
 import { generateChitId } from "@cmt/db/utils";
 import { paymentInsertSchema, paymentUpdateSchema } from "@cmt/db/schema";
 
@@ -229,91 +229,7 @@ export const paymentsRouter = {
       };
     }),
 
-  getCreditScoreMeta: protectedProcedure.query(async ({ ctx }) => {
-    const subscriberToBatch = await ctx.db.query.subscribersToBatches.findMany({
-      where: eq(schema.subscribersToBatches.subscriberId, ctx.session.userId),
-    });
-
-    const totalCreditScore = await ctx.db
-      .select({
-        total: sum(schema.payments.creditScoreAffected).mapWith(Number),
-      })
-      .from(schema.payments)
-      .where(
-        inArray(
-          schema.payments.subscriberToBatchId,
-          subscriberToBatch.flatMap((s) => s.id)
-        )
-      )
-      .then((r) => r.at(0)?.total ?? 0);
-
-    const prePaymentsCount = await ctx.db
-      .select({
-        count: count().mapWith(Number),
-      })
-      .from(schema.payments)
-      .where(
-        and(
-          inArray(
-            schema.payments.subscriberToBatchId,
-            subscriberToBatch.flatMap((s) => s.id)
-          ),
-          lt(schema.payments.paidOn, schema.payments.runwayDate)
-        )
-      )
-      .then((r) => r.at(0)?.count ?? 0);
-
-    const latePaymentsCount = await ctx.db
-      .select({
-        count: count().mapWith(Number),
-      })
-      .from(schema.payments)
-      .where(
-        and(
-          inArray(
-            schema.payments.subscriberToBatchId,
-            subscriberToBatch.flatMap((s) => s.id)
-          ),
-          gt(schema.payments.paidOn, schema.payments.runwayDate)
-        )
-      )
-      .then((r) => r.at(0)?.count ?? 0);
-
-    const onTimePaymentsCount = await ctx.db
-      .select({
-        count: count().mapWith(Number),
-      })
-      .from(schema.payments)
-      .where(
-        and(
-          inArray(
-            schema.payments.subscriberToBatchId,
-            subscriberToBatch.flatMap((s) => s.id)
-          ),
-          eq(schema.payments.paidOn, schema.payments.runwayDate)
-        )
-      )
-      .then((r) => r.at(0)?.count ?? 0);
-
-    const item = await ctx.db.query.payments.findFirst({
-      where: inArray(
-        schema.payments.subscriberToBatchId,
-        subscriberToBatch.flatMap((s) => s.id)
-      ),
-      columns: {
-        id: true,
-        paidOn: true,
-        creditScoreAffected: true,
-      },
-      orderBy: ({ paidOn }, { desc }) => [desc(paidOn)],
-    });
-
-    return {
-      totalCreditScore,
-      prePaymentsCount,
-      latePaymentsCount,
-      onTimePaymentsCount,
-      lastUpdatedCreditScore: item?.creditScoreAffected,
-    };
-  }),
+  getCreditScoreMeta: protectedProcedure.query(({ ctx }) =>
+    getCreditScoreMeta({ ctx, subscriberId: ctx.session.userId })
+  ),
 };
