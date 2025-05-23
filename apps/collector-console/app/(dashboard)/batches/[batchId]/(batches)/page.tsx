@@ -213,6 +213,56 @@ async function GetFundProgressFooter({ batchId }: { batchId: string }) {
   );
 }
 
+async function GetPaymentsProgress({ batchId }: { batchId: string }) {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getThisMonthPaymentsProgressOfBatch.queryOptions({
+      batchId,
+    })
+  );
+
+  return (
+    <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+      {data.paymentsDone} / {data.totalPaymentsToBeCollected}
+    </CardTitle>
+  );
+}
+
+async function GetPaymentsProgressFooter({ batchId }: { batchId: string }) {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getThisMonthPendingPaymentsOfBatch.queryOptions({
+      batchId,
+    })
+  );
+
+  return (
+    <CardFooter className="flex-col items-start gap-2.5 text-sm">
+      <div className="inline-flex gap-1">
+        <div className="inline-flex -space-x-3">
+          {data.pendingUsers.map((user) => (
+            <Avatar className="border-3 border-card size-5" key={user.id}>
+              <AvatarImage
+                src={user.imageUrl}
+                alt={user.firstName + " " + user.lastName}
+              />
+              <AvatarFallback>
+                {user.firstName?.charAt(0) + "" + user.lastName?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+          ))}
+        </div>
+        <span className="text-sm text-muted-foreground">
+          {data.totalPaymentsToBeCollected - data.paymentsDone} pending payments
+        </span>
+      </div>
+      <Button variant={"outline"} className="w-full">
+        View Payments
+      </Button>
+    </CardFooter>
+  );
+}
+
 export default async function Page({
   params,
 }: {
@@ -298,31 +348,13 @@ export default async function Page({
         <Card className="@container/card">
           <CardHeader className="relative">
             <CardDescription>This Month Payments</CardDescription>
-            <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              7/20
-            </CardTitle>
+            <Suspense fallback={<SpinnerPage className="min-h-full block" />}>
+              <GetPaymentsProgress batchId={batchId} />
+            </Suspense>
           </CardHeader>
-          <CardFooter className="flex-col items-start gap-2.5 text-sm">
-            <div className="inline-flex gap-1">
-              <div className="inline-flex -space-x-3">
-                {Array.from({ length: 2 }).map((_, i) => (
-                  <Avatar className="border-3 border-card size-5" key={i}>
-                    <AvatarImage
-                      src="https://github.com/shadcn.png"
-                      alt="@shadcn"
-                    />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
-                ))}
-              </div>
-              <span className="text-sm text-muted-foreground">
-                2 pending payments
-              </span>
-            </div>
-            <Button variant={"outline"} className="w-full">
-              View Payments
-            </Button>
-          </CardFooter>
+          <Suspense fallback={<SpinnerPage className="min-h-full block" />}>
+            <GetPaymentsProgressFooter batchId={batchId} />
+          </Suspense>
         </Card>
         <Card className="@container/card">
           <CardHeader className="relative">

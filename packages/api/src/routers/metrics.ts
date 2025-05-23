@@ -2,23 +2,21 @@ import { z } from "zod";
 import {
   and,
   count,
-  desc,
+  countDistinct,
   eq,
   getTableColumns,
   gt,
-  gte,
   inArray,
   lt,
   lte,
   notExists,
-  or,
+  notInArray,
   sql,
   sum,
 } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { schema } from "@cmt/db/client";
-import { differenceInCalendarMonths, startOfToday } from "date-fns";
-import { TRPCError } from "@trpc/server";
+import { startOfToday } from "date-fns";
 import { getBatchById } from "../utils/actions";
 import { getClerkUser } from "../utils/clerk";
 
@@ -205,7 +203,138 @@ export const metricsRouter = {
    */
   getThisMonthPaymentsProgressOfBatch: protectedProcedure
     .input(z.object({ batchId: z.string() }))
-    .query(async ({ ctx, input }) => {}),
+    .query(async ({ ctx, input }) => {
+      const batch = await getBatchById(input.batchId, ctx.db);
+
+      const totalPaymentsToBeCollected = await ctx.db
+        .select({ count: countDistinct(schema.subscribersToBatches.id) })
+        .from(schema.subscribersToBatches)
+        .where(eq(schema.subscribersToBatches.batchId, batch.id))
+        .then((r) => r.at(0)?.count ?? 0);
+
+      const paymentsDone = await ctx.db
+        .select({ count: countDistinct(schema.payments.subscriberToBatchId) })
+        .from(schema.payments)
+        .innerJoin(
+          schema.subscribersToBatches,
+          eq(
+            schema.subscribersToBatches.id,
+            schema.payments.subscriberToBatchId
+          )
+        )
+        .where(
+          and(
+            eq(schema.subscribersToBatches.batchId, batch.id),
+            eq(
+              sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate})`,
+              new Date().getMonth() + 1
+            ),
+            eq(
+              sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate})`,
+              new Date().getFullYear()
+            )
+          )
+        )
+        .then((r) => r[0]?.count ?? 0);
+
+      return {
+        totalPaymentsToBeCollected,
+        paymentsDone,
+      };
+    }),
+
+  /** ## Get's this month pending payments
+   * Returns total pending payments count and 3 users
+   */
+  getThisMonthPendingPaymentsOfBatch: protectedProcedure
+    .input(z.object({ batchId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const batch = await getBatchById(input.batchId, ctx.db);
+
+      const totalPaymentsToBeCollected = await ctx.db
+        .select({ count: countDistinct(schema.subscribersToBatches.id) })
+        .from(schema.subscribersToBatches)
+        .where(eq(schema.subscribersToBatches.batchId, batch.id))
+        .then((r) => r.at(0)?.count ?? 0);
+
+      const paymentsDone = await ctx.db
+        .select({ count: countDistinct(schema.payments.subscriberToBatchId) })
+        .from(schema.payments)
+        .innerJoin(
+          schema.subscribersToBatches,
+          eq(
+            schema.subscribersToBatches.id,
+            schema.payments.subscriberToBatchId
+          )
+        )
+        .where(
+          and(
+            eq(schema.subscribersToBatches.batchId, batch.id),
+            eq(
+              sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate})`,
+              new Date().getMonth() + 1
+            ),
+            eq(
+              sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate})`,
+              new Date().getFullYear()
+            )
+          )
+        )
+        .then((r) => r[0]?.count ?? 0);
+
+      const paidIds = await ctx.db
+        .select({ id: schema.payments.subscriberToBatchId })
+        .from(schema.payments)
+        .innerJoin(
+          schema.subscribersToBatches,
+          eq(
+            schema.subscribersToBatches.id,
+            schema.payments.subscriberToBatchId
+          )
+        )
+        .where(
+          and(
+            eq(schema.subscribersToBatches.batchId, batch.id),
+            eq(
+              sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate})`,
+              new Date().getMonth() + 1
+            ),
+            eq(
+              sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate})`,
+              new Date().getFullYear()
+            )
+          )
+        );
+
+      const paidIdList = paidIds.map((r) => r.id);
+
+      const pendingSubs = await ctx.db
+        .select()
+        .from(schema.subscribersToBatches)
+        .where(
+          and(
+            eq(schema.subscribersToBatches.batchId, batch.id),
+            notInArray(schema.subscribersToBatches.id, paidIdList)
+          )
+        )
+        .limit(3);
+
+      const pendingSubsWithClerkUsers = await Promise.all(
+        pendingSubs.map(async (s) => {
+          const clerkUser = await getClerkUser(s.subscriberId);
+
+          return {
+            ...clerkUser,
+          };
+        })
+      );
+
+      return {
+        totalPaymentsToBeCollected,
+        paymentsDone,
+        pendingUsers: pendingSubsWithClerkUsers,
+      };
+    }),
 
   /** Total collection of payments from batch  */
   getTotalCollectionOfBatch: protectedProcedure
