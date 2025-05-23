@@ -15,7 +15,11 @@ import { protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { db, schema } from "@cmt/db/client";
-import { getPagination, paginateInputSchema } from "../utils/paginate";
+import {
+  cursorPaginateInputSchema,
+  getPagination,
+  paginateInputSchema,
+} from "../utils/paginate";
 import { payoutInsertSchema, payoutUpdateSchema } from "@cmt/db/schema";
 import { getClerkUser, getQueryUserIds } from "../utils/clerk";
 
@@ -352,6 +356,84 @@ export const payoutsRouter = {
         total,
         pageIndex,
         pageSize,
+      };
+    }),
+
+  /** Get list subscribers who has approved or disubursed payouts with cursor based pagination
+   * @context collector
+   */
+  ofBatchInfinite: protectedProcedure
+    .input(
+      cursorPaginateInputSchema.and(
+        z.object({
+          batchId: z.string(),
+          query: z.string().optional(),
+        })
+      )
+    )
+    .query(async ({ ctx, input }) => {
+      const subIds = await getQueryUserIds(input.query);
+      const limit = input.limit ?? 10;
+
+      const queryCond = input.query
+        ? ilike(schema.subscribersToBatches.chitId, `%${input.query}%`)
+        : undefined;
+
+      const cursorCond = input.cursor
+        ? lte(schema.payouts.id, input.cursor)
+        : undefined;
+
+      const sb = await ctx.db.query.subscribersToBatches.findMany({
+        where: and(
+          eq(schema.subscribersToBatches.batchId, input.batchId),
+          or(
+            subIds
+              ? inArray(schema.subscribersToBatches.subscriberId, subIds)
+              : undefined,
+            queryCond
+          )
+        ),
+      });
+
+      const payouts = await ctx.db.query.payouts.findMany({
+        where: and(
+          inArray(
+            schema.payouts.subscriberToBatchId,
+            sb.map((v) => v.id)
+          ),
+          inArray(schema.payouts.payoutStatus, ["approved", "disbursed"]),
+          cursorCond
+        ),
+        with: {
+          subscribersToBatches: true,
+        },
+        orderBy: ({ month, id }) => [desc(id), desc(month)],
+        limit: limit + 1,
+      });
+
+      const mappedItems = await Promise.all(
+        payouts.map(async (p) => {
+          const sub = await ctx.clerk.users.getUser(
+            p.subscribersToBatches.subscriberId
+          );
+
+          return {
+            ...p,
+            subscriber: {
+              firstName: sub.firstName,
+              lastName: sub.lastName,
+              imageUrl: sub.imageUrl,
+            },
+          };
+        })
+      );
+
+      const nextCursor =
+        mappedItems.length > limit ? mappedItems.pop()?.id : undefined;
+
+      return {
+        items: mappedItems,
+        nextCursor,
       };
     }),
 

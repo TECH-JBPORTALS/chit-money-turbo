@@ -31,8 +31,9 @@ import { trpc } from "@/trpc/server";
 import React, { Suspense } from "react";
 import { SpinnerPage } from "@/components/spinner-page";
 import { format } from "date-fns";
-import { ThisMonthPayouts } from "./payments-client";
+import { ThisMonthPayments } from "./payments-client";
 import SearchClient from "./search-client";
+import { ThisMonthPayouts } from "./payouts-client";
 
 async function GetTotalCollectedPayments({
   forThisMonth = false,
@@ -400,7 +401,7 @@ export default async function Page({
             <SearchClient />
           </CardHeader>
           <CardContent className="h-full max-h-full pb-16">
-            <ThisMonthPayouts batchId={batchId} />
+            <ThisMonthPayments batchId={batchId} />
           </CardContent>
         </Card>
 
@@ -414,38 +415,7 @@ export default async function Page({
             </CardHeader>
             <CardContent className="h-full max-h-full">
               <TabsContent value="payouts" className="h-full">
-                <ScrollArea className="h-full pr-4 pb-8">
-                  {Array.from({ length: 20 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between py-2"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Avatar className="border-3 border-card size-10">
-                          <AvatarImage
-                            src="https://github.com/shadcn.png"
-                            alt="@shadcn"
-                          />
-                          <AvatarFallback>CN</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <b>Jhon Snow</b>
-                          <p className="text-sm text-muted-foreground">
-                            #738392J
-                          </p>
-                        </div>
-                      </div>
-                      <div>
-                        <Badge variant={"secondary"}>1. Jan 2024</Badge>
-                      </div>
-                      <div>
-                        <Button variant={"secondary"}>
-                          <ArrowUpRightIcon /> Payout
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </ScrollArea>
+                <ThisMonthPayouts batchId={batchId} />
               </TabsContent>
               <TabsContent value="requests" className="h-full">
                 <div className="h-full flex items-center justify-center">

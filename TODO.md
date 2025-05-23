@@ -2,7 +2,7 @@
 
 - [x] Update commission rate for subscriber
 - [x] Batch dashboard this month payments
-- [ ] Batch dashboard this month payouts
+- [x] Batch dashboard this month payouts
 - [ ] Upcoming payments (mobile)
 - [ ] Request payout
 

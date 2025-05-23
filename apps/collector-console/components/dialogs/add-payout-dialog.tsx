@@ -316,6 +316,8 @@ function PayoutSummaryForm(
   );
 }
 
+type Payout = RouterOutputs["payouts"]["ofBatch"]["items"][number];
+
 /**
  * ### Disburse the payout for approved person
  */
@@ -324,7 +326,7 @@ export function AddPayoutDialog({
   data,
 }: {
   children: React.ReactNode;
-  data: RouterOutputs["payouts"]["ofBatch"]["items"][number];
+  data: Payout;
 }) {
   const { current: currentStep, total } = useSteps();
   const [globalState, setGlobalState] = useState<

@@ -1,6 +1,7 @@
 "use client";
 
 import { AddPaymentDialog } from "@/components/dialogs/add-payemnt-dialog";
+import { AddPayoutDialog } from "@/components/dialogs/add-payout-dialog";
 import EmptyState from "@/components/empty-state";
 import { SpinnerPage } from "@/components/spinner-page";
 import { useTRPC } from "@/trpc/react";
@@ -9,17 +10,17 @@ import { Badge } from "@cmt/ui/components/badge";
 import { Button } from "@cmt/ui/components/button";
 import { ScrollArea } from "@cmt/ui/components/scroll-area";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { formatDistanceToNow } from "date-fns";
-import { PlusIcon } from "lucide-react";
+import { format, formatDistanceToNow } from "date-fns";
+import { ArrowUpRightIcon, PlusIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
-export function ThisMonthPayments({ batchId }: { batchId: string }) {
+export function ThisMonthPayouts({ batchId }: { batchId: string }) {
   const trpc = useTRPC();
   const searchParams = useSearchParams();
   const query = searchParams.get("q") ?? "";
   const { data, isLoading, fetchNextPage, isFetchingNextPage, hasNextPage } =
     useInfiniteQuery(
-      trpc.payments.ofBatchThisMonth.infiniteQueryOptions(
+      trpc.payouts.ofBatchInfinite.infiniteQueryOptions(
         {
           batchId,
           query,
@@ -55,36 +56,25 @@ export function ThisMonthPayments({ batchId }: { batchId: string }) {
               <b>
                 {s.subscriber.firstName} {s.subscriber.lastName}
               </b>
-              <p className="text-sm text-muted-foreground">{s.chitId}</p>
+              <p className="text-sm text-muted-foreground">
+                {s.subscribersToBatches.chitId}
+              </p>
             </div>
           </div>
-          <div className="flex-1 flex justify-end px-8">
-            <Badge variant={"secondary"}>
-              {s.payment.subscriptionAmount.toLocaleString("en-IN", {
-                style: "currency",
-                currency: "INR",
-                maximumFractionDigits: 0,
-              })}
-            </Badge>
+          <div className="flex flex-1 px-8 justify-end">
+            <Badge variant={"secondary"}>{format(s.month, "MMM yyyy")}</Badge>
           </div>
           <div className="w-32 text-right">
-            {s.payment.status === "not paid" ? (
-              <AddPaymentDialog
-                data={{
-                  payment: s.payment,
-                  subscriber: s.subscriber,
-                  chitId: s.chitId,
-                  id: s.id,
-                }}
-              >
+            {s.payoutStatus === "approved" ? (
+              <AddPayoutDialog data={s}>
                 <Button variant={"secondary"}>
-                  <PlusIcon /> Collect
+                  <ArrowUpRightIcon /> Payout
                 </Button>
-              </AddPaymentDialog>
+              </AddPayoutDialog>
             ) : (
-              <p className="text-xs text-muted-foreground text-right">
-                Updated{" "}
-                {formatDistanceToNow(s.payment.updatedAt!, { addSuffix: true })}
+              <p className="text-xs text-right text-muted-foreground">
+                Disbursed{" "}
+                {formatDistanceToNow(s.disbursedAt!, { addSuffix: true })}
               </p>
             )}
           </div>
