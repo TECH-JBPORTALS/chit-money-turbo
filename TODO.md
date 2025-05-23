@@ -3,12 +3,12 @@
 - [ ] Update commission rate for subscriber
 - [ ] Batch dashboard this month payments
 - [ ] Batch dashboard this month payouts
-- [ ] Batch dashboard analytics
 - [ ] Upcoming payments (mobile)
 - [ ] Request payout
 
 ## Completed Tasks
 
+- [x] Batch dashboard analytics
 - [x] Reject payout request
 - [x] Accept payout request
 - [x] Subscribers list in organization
