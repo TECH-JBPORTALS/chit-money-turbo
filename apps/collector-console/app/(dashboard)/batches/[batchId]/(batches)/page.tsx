@@ -31,36 +31,68 @@ import {
 import Link from "next/link";
 import { ScrollArea } from "@cmt/ui/components/scroll-area";
 import SearchInput from "@/components/search-input";
+import { createQueryClient } from "@/trpc/query-client";
+import { trpc } from "@/trpc/server";
 
-export default async function Page({ params }: { params: Promise<{ batchId: string }> }) {
-  const { batchId } = await params; 
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ batchId: string }>;
+}) {
+  const { batchId } = await params;
+  const client = createQueryClient();
+  const batch = await client.fetchQuery(
+    trpc.batches.getById.queryOptions({ batchId })
+  );
+
+  if (!batch) throw new Error("Can't able to fetch batch data");
+
   return (
     <div className="flex flex-col gap-8">
       {/* Batch Title */}
       <div className="inline-flex justify-between">
         <div>
           <h2 className="scroll-m-20 pb-2 text-3xl font-bold tracking-tight first:mt-0">
-            January 2024
+            {batch.name}
           </h2>
           <div className="space-x-2">
             <Badge
               variant={"secondary"}
               className=" font-semibold rounded-full"
             >
-              ₹1,00,000
+              {batch.fundAmount.toLocaleString("en-IN", {
+                style: "currency",
+                currency: "INR",
+                maximumFractionDigits: 0,
+              })}{" "}
+              Fund Amount
             </Badge>
 
             <Badge
               variant={"secondary"}
               className=" font-semibold rounded-full"
             >
-              20 Months Fund
+              {batch?.scheme} Months Fund
             </Badge>
             <Badge
               variant={"secondary"}
               className=" font-semibold rounded-full"
             >
-              ₹ 5,000 / Month
+              {Math.floor(batch.fundAmount / batch.scheme).toLocaleString(
+                "en-IN",
+                {
+                  style: "currency",
+                  currency: "INR",
+                  maximumFractionDigits: 0,
+                }
+              )}{" "}
+              / Month
+            </Badge>
+            <Badge
+              variant={"secondary"}
+              className=" font-semibold rounded-full"
+            >
+              {`Due ( Every Month ${batch.dueOn} )`}
             </Badge>
           </div>
         </div>

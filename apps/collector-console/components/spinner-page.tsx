@@ -9,14 +9,14 @@ export function SpinnerPage({
   return (
     <div
       className={cn(
-        "h-full w-full flex py-40 items-center justify-center",
+        "h-full min-h-svh w-full flex items-center justify-center",
         className
       )}
       {...props}
     >
       <LoaderCircle
         strokeWidth={1.25}
-        className="text-foreground/60 animate-spin size-8"
+        className="text-foreground/60 top-[50%] bottom-[50%] animate-spin size-8"
       />
     </div>
   );
