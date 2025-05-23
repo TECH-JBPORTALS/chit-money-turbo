@@ -1,12 +1,14 @@
 ## On-Progress Tasks
 
-- [x] Update commission rate for subscriber
-- [x] Batch dashboard this month payments
-- [x] Batch dashboard this month payouts
 - [ ] Upcoming payments (mobile)
 - [ ] Request payout
 
 ## Completed Tasks
+
+- [x] Update commission rate for subscriber
+- [x] Batch dashboard this month payments
+- [x] Batch dashboard this month payouts
+- [x] Batch dashboard this month payouts requests
 
 - [x] Batch dashboard analytics
 - [x] Reject payout request

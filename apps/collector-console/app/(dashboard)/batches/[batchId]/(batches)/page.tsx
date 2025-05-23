@@ -34,6 +34,7 @@ import { format } from "date-fns";
 import { ThisMonthPayments } from "./payments-client";
 import SearchClient from "./search-client";
 import { ThisMonthPayouts } from "./payouts-client";
+import { PayoutRequests } from "./payout-requests";
 
 async function GetTotalCollectedPayments({
   forThisMonth = false,
@@ -414,16 +415,11 @@ export default async function Page({
               </TabsList>
             </CardHeader>
             <CardContent className="h-full max-h-full">
-              <TabsContent value="payouts" className="h-full">
+              <TabsContent value="payouts" className="h-full pb-16">
                 <ThisMonthPayouts batchId={batchId} />
               </TabsContent>
               <TabsContent value="requests" className="h-full">
-                <div className="h-full flex items-center justify-center">
-                  <EmptyState
-                    title="No Requests"
-                    description="Any request for payouts can be seen here"
-                  />
-                </div>
+                <PayoutRequests />
               </TabsContent>
             </CardContent>
           </Tabs>
