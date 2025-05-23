@@ -1,5 +1,6 @@
 "use client";
 
+import EditCommisionsDialog from "@/components/dialogs/edit-commission-dialog";
 import { RouterOutputs } from "@cmt/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Button } from "@cmt/ui/components/button";
@@ -94,6 +95,7 @@ export const columns: ColumnDef<Subscriber>[] = [
   {
     id: "more-actions",
     cell(props) {
+      const row = props.row.original;
       return (
         <div className="text-right px-4">
           <DropdownMenu>
@@ -106,10 +108,15 @@ export const columns: ColumnDef<Subscriber>[] = [
               <DropdownMenuItem>
                 <ArrowUpRightIcon /> Payment History
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <PercentIcon />
-                Edit Commision
-              </DropdownMenuItem>
+              <EditCommisionsDialog
+                subscriberToBatchId={row.id}
+                defaultCommisionRate={row.commissionRate}
+              >
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <PercentIcon />
+                  Edit Commision
+                </DropdownMenuItem>
+              </EditCommisionsDialog>
               <DropdownMenuItem variant="destructive">
                 <DeleteIcon />
                 Remove

@@ -72,6 +72,24 @@ export const batchesRouter = {
     }),
 
   /**
+   * Update commision rate of chit
+   * @context collector
+   */
+  updateCommissionRate: protectedProcedure
+    .input(
+      z.object({
+        subscriberToBatchId: z.string(),
+        newCommissionRate: z.number(),
+      })
+    )
+    .mutation(({ ctx, input }) =>
+      ctx.db
+        .update(schema.subscribersToBatches)
+        .set({ commissionRate: input.newCommissionRate })
+        .where(eq(schema.subscribersToBatches.id, input.subscriberToBatchId))
+    ),
+
+  /**
    * Get's batches the subscriber involved in a particular collector's org
    * @context collector
    */
