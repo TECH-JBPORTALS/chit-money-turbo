@@ -33,7 +33,7 @@ import { ScrollArea } from "@cmt/ui/components/scroll-area";
 import SearchInput from "@/components/search-input";
 import { createQueryClient } from "@/trpc/query-client";
 import { trpc } from "@/trpc/server";
-import { Suspense } from "react";
+import React, { Suspense } from "react";
 import { SpinnerPage } from "@/components/spinner-page";
 import { format } from "date-fns";
 
@@ -60,6 +60,77 @@ async function GetTotalCollectedPayments({
         maximumFractionDigits: 0,
       })}
     </CardTitle>
+  );
+}
+
+async function GetThisMonthPayout({ batchId }: { batchId: string }) {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getThisMonthPayoutOfBatch.queryOptions({
+      batchId,
+    })
+  );
+
+  if (!data)
+    return (
+      <div className="inline-flex items-center gap-2">
+        <p className="text-sm text-muted-foreground">
+          There no one approved for this month
+        </p>
+      </div>
+    );
+
+  return (
+    <React.Fragment>
+      <div className="inline-flex items-center gap-2">
+        <Avatar className="border-3 border-card size-10">
+          <AvatarImage
+            src={data?.subscriber.imageUrl}
+            alt={data?.subscriber.firstName ?? "Payout User Avatar"}
+          />
+          <AvatarFallback>
+            {data?.subscriber.firstName?.charAt(0)}
+          </AvatarFallback>
+        </Avatar>
+        <div>
+          <b>
+            {data?.subscriber.firstName} {data?.subscriber.lastName}
+          </b>
+          <p className="text-sm text-muted-foreground">
+            {data?.subscriberToBatch.chitId}
+          </p>
+        </div>
+      </div>
+      <div className="text-sm text-muted-foreground">
+        Recieves{" "}
+        {data.fundAmount.toLocaleString("en-IN", {
+          style: "currency",
+          currency: "INR",
+          maximumFractionDigits: 2,
+          minimumFractionDigits: 0,
+          notation: "compact",
+        })}
+      </div>
+    </React.Fragment>
+  );
+}
+
+async function GetThisMonthPayoutFooter({ batchId }: { batchId: string }) {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getThisMonthPayoutOfBatch.queryOptions({
+      batchId,
+    })
+  );
+
+  if (!data) return null;
+
+  return (
+    <CardFooter>
+      <Button className="w-full" variant={"outline"}>
+        <BadgeCheckIcon /> Payout
+      </Button>
+    </CardFooter>
   );
 }
 
@@ -256,26 +327,13 @@ export default async function Page({
         <Card className="@container/card">
           <CardHeader className="relative">
             <CardDescription>This Month Chit Holder</CardDescription>
-            <div className="inline-flex items-center gap-2">
-              <Avatar className="border-3 border-card size-10">
-                <AvatarImage
-                  src="https://github.com/shadcn.png"
-                  alt="@shadcn"
-                />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
-              <div>
-                <b>Jhon Snow</b>
-                <p className="text-sm text-muted-foreground">#738392J</p>
-              </div>
-            </div>
-            <div className="text-sm text-muted-foreground">Recieves 1 lakh</div>
+            <Suspense fallback={<SpinnerPage className="min-h-full block" />}>
+              <GetThisMonthPayout batchId={batchId} />
+            </Suspense>
           </CardHeader>
-          <CardFooter>
-            <Button className="w-full" variant={"outline"}>
-              <BadgeCheckIcon /> Payout
-            </Button>
-          </CardFooter>
+          <Suspense fallback={<SpinnerPage className="min-h-full block" />}>
+            <GetThisMonthPayoutFooter batchId={batchId} />
+          </Suspense>
         </Card>
 
         <Card className="@container/card">

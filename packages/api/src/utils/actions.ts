@@ -3,7 +3,6 @@ import {
   count,
   desc,
   eq,
-  exists,
   getTableColumns,
   gt,
   ilike,
@@ -19,6 +18,7 @@ import { getPagination, paginateInputSchema } from "./paginate";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { getQueryUserIds } from "./clerk";
+import type { NeonDb } from "@cmt/db/client";
 
 export async function getSubscriberBatchesWithPagination({
   input,
@@ -277,4 +277,15 @@ export async function getCreditScoreMeta({
     onTimePaymentsCount,
     lastUpdatedCreditScore: item?.creditScoreAffected,
   };
+}
+
+export async function getBatchById(batchId: string, db: NeonDb) {
+  const batch = await db.query.batches.findFirst({
+    where: eq(schema.batches.id, batchId),
+  });
+
+  if (!batch)
+    throw new TRPCError({ message: "No batch found", code: "NOT_FOUND" });
+
+  return batch;
 }

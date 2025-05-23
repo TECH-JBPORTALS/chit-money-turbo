@@ -34,3 +34,4 @@ const db = drizzle(client, {
 });
 
 export { schema, db };
+export type NeonDb = typeof db;

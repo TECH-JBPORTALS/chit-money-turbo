@@ -4,8 +4,10 @@ import {
   count,
   desc,
   eq,
+  getTableColumns,
   gt,
   gte,
+  inArray,
   lt,
   lte,
   notExists,
@@ -17,6 +19,8 @@ import { protectedProcedure } from "../trpc";
 import { schema } from "@cmt/db/client";
 import { differenceInCalendarMonths, startOfToday } from "date-fns";
 import { TRPCError } from "@trpc/server";
+import { getBatchById } from "../utils/actions";
+import { getClerkUser } from "../utils/clerk";
 
 export const metricsRouter = {
   /** Get total batches of organization */
@@ -138,12 +142,7 @@ export const metricsRouter = {
   getFundProgressOfBatch: protectedProcedure
     .input(z.object({ batchId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const batch = await ctx.db.query.batches.findFirst({
-        where: eq(schema.batches.id, input.batchId),
-      });
-
-      if (!batch)
-        throw new TRPCError({ message: "No batch found", code: "NOT_FOUND" });
+      const batch = await getBatchById(input.batchId, ctx.db);
 
       const totalMonths = batch.scheme;
       const completedMonths =
@@ -159,7 +158,47 @@ export const metricsRouter = {
   /** Get's this month approved or disbursed payout */
   getThisMonthPayoutOfBatch: protectedProcedure
     .input(z.object({ batchId: z.string() }))
-    .query(async ({ ctx, input }) => {}),
+    .query(async ({ ctx, input }) => {
+      const batch = await getBatchById(input.batchId, ctx.db);
+
+      const payout = await ctx.db
+        .select({
+          ...getTableColumns(schema.payouts),
+          subscriberToBatch: getTableColumns(schema.subscribersToBatches),
+        })
+        .from(schema.payouts)
+        .innerJoin(
+          schema.subscribersToBatches,
+          eq(schema.subscribersToBatches.id, schema.payouts.subscriberToBatchId)
+        )
+        .where(
+          and(
+            eq(schema.subscribersToBatches.batchId, batch.id),
+            eq(
+              sql`EXTRACT(MONTH FROM ${schema.payouts.month})`,
+              new Date().getMonth()
+            ),
+            eq(
+              sql`EXTRACT(YEAR FROM ${schema.payouts.month})`,
+              new Date().getFullYear()
+            ),
+            inArray(schema.payouts.payoutStatus, ["approved", "disbursed"])
+          )
+        )
+        .then((r) => r.at(0));
+
+      if (!payout) return null;
+
+      const clerkUser = await getClerkUser(
+        payout.subscriberToBatch.subscriberId
+      );
+
+      return {
+        ...payout,
+        subscriber: clerkUser,
+        fundAmount: batch.fundAmount,
+      };
+    }),
 
   /** ## Get's this month payments progress
    * Returns total payments should be collected and number of payments done in the batch
