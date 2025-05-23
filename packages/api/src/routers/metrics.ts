@@ -15,7 +15,8 @@ import {
 } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { schema } from "@cmt/db/client";
-import { differenceInCalendarMonths } from "date-fns";
+import { differenceInCalendarMonths, startOfToday } from "date-fns";
+import { TRPCError } from "@trpc/server";
 
 export const metricsRouter = {
   /** Get total batches of organization */
@@ -74,9 +75,7 @@ export const metricsRouter = {
     return subsWithClerkUser;
   }),
 
-  /** Total collection of payments from active batches
-   * :TODO
-   */
+  /** Total collection of payments from active batches  */
   getTotalCollectionOfOrganization: protectedProcedure
     .input(z.object({ forThisMonth: z.boolean() }).optional())
     .query(async ({ ctx, input }) => {
@@ -135,9 +134,41 @@ export const metricsRouter = {
       };
     }),
 
-  /** Total collection of payments from batch
-   * :TODO
+  /** Get's current batch fund progress till today */
+  getFundProgressOfBatch: protectedProcedure
+    .input(z.object({ batchId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const batch = await ctx.db.query.batches.findFirst({
+        where: eq(schema.batches.id, input.batchId),
+      });
+
+      if (!batch)
+        throw new TRPCError({ message: "No batch found", code: "NOT_FOUND" });
+
+      const totalMonths = batch.scheme;
+      const completedMonths =
+        (startOfToday().getFullYear() - batch.startsOn.getFullYear()) * 12 +
+        (startOfToday().getMonth() - batch.startsOn.getMonth() - 1); // Except this month still to be done
+
+      return {
+        totalMonths,
+        completedMonths,
+      };
+    }),
+
+  /** Get's this month approved or disbursed payout */
+  getThisMonthPayoutOfBatch: protectedProcedure
+    .input(z.object({ batchId: z.string() }))
+    .query(async ({ ctx, input }) => {}),
+
+  /** ## Get's this month payments progress
+   * Returns total payments should be collected and number of payments done in the batch
    */
+  getThisMonthPaymentsProgressOfBatch: protectedProcedure
+    .input(z.object({ batchId: z.string() }))
+    .query(async ({ ctx, input }) => {}),
+
+  /** Total collection of payments from batch  */
   getTotalCollectionOfBatch: protectedProcedure
     .input(
       z.object({ forThisMonth: z.boolean().optional(), batchId: z.string() })

@@ -35,6 +35,7 @@ import { createQueryClient } from "@/trpc/query-client";
 import { trpc } from "@/trpc/server";
 import { Suspense } from "react";
 import { SpinnerPage } from "@/components/spinner-page";
+import { format } from "date-fns";
 
 async function GetTotalCollectedPayments({
   forThisMonth = false,
@@ -103,6 +104,44 @@ async function GetTotalCollectedPaymentsFooter({
   );
 }
 
+async function GetFundProgress({ batchId }: { batchId: string }) {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getFundProgressOfBatch.queryOptions({
+      batchId,
+    })
+  );
+
+  return (
+    <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+      {data.completedMonths} / {data.totalMonths}
+    </CardTitle>
+  );
+}
+
+async function GetFundProgressFooter({ batchId }: { batchId: string }) {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getFundProgressOfBatch.queryOptions({
+      batchId,
+    })
+  );
+
+  return (
+    <CardFooter className="flex-col items-start gap-1 text-sm">
+      <div className="w-full">
+        <Progress
+          value={Math.floor((data.completedMonths / data.totalMonths) * 100)}
+        />
+      </div>
+      <div className="text-muted-foreground">
+        {data.completedMonths} out of {data.totalMonths} months are completed,
+        still {data.totalMonths - data.completedMonths} months to go
+      </div>
+    </CardFooter>
+  );
+}
+
 export default async function Page({
   params,
 }: {
@@ -162,6 +201,12 @@ export default async function Page({
               className=" font-semibold rounded-full"
             >
               {`Due ( Every Month ${batch.dueOn} )`}
+            </Badge>
+            <Badge
+              variant={"secondary"}
+              className=" font-semibold rounded-full"
+            >
+              {`Started on ${format(batch.startsOn, "dd, MMM yyyy")}`}
             </Badge>
           </div>
         </div>
@@ -248,18 +293,13 @@ export default async function Page({
         <Card className="@container/card">
           <CardHeader className="relative">
             <CardDescription>{"Fund Progress"}</CardDescription>
-            <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              2 / 20
-            </CardTitle>
+            <Suspense fallback={<SpinnerPage className="min-h-full block" />}>
+              <GetFundProgress batchId={batchId} />
+            </Suspense>
           </CardHeader>
-          <CardFooter className="flex-col items-start gap-1 text-sm">
-            <div className="w-full">
-              <Progress value={80} />
-            </div>
-            <div className="text-muted-foreground">
-              2 out of 20 months are completed, still 18 months to go
-            </div>
-          </CardFooter>
+          <Suspense fallback={<SpinnerPage className="min-h-full block" />}>
+            <GetFundProgressFooter batchId={batchId} />
+          </Suspense>
         </Card>
       </div>
 
