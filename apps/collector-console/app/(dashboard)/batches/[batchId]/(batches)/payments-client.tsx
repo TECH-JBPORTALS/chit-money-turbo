@@ -8,18 +8,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Badge } from "@cmt/ui/components/badge";
 import { Button } from "@cmt/ui/components/button";
 import { ScrollArea } from "@cmt/ui/components/scroll-area";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { PlusIcon } from "lucide-react";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 export function ThisMonthPayouts({ batchId }: { batchId: string }) {
   const trpc = useTRPC();
+  const searchParams = useSearchParams();
+  const query = searchParams.get("q") ?? "";
   const { data, isLoading, fetchNextPage, isFetchingNextPage, hasNextPage } =
     useInfiniteQuery(
       trpc.payments.ofBatchThisMonth.infiniteQueryOptions(
         {
           batchId,
+          query,
         },
         {
           getNextPageParam: ({ nextCursor }) => nextCursor,

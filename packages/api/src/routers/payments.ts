@@ -1,4 +1,17 @@
-import { and, count, desc, eq, gt, inArray, lt, lte, sql, sum } from "@cmt/db";
+import {
+  or,
+  and,
+  count,
+  desc,
+  eq,
+  gt,
+  ilike,
+  inArray,
+  lt,
+  lte,
+  sql,
+  sum,
+} from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
@@ -11,7 +24,7 @@ import {
 import { getCreditScoreMeta, getSubscribersByBatchId } from "../utils/actions";
 import { generateChitId } from "@cmt/db/utils";
 import { paymentInsertSchema, paymentUpdateSchema } from "@cmt/db/schema";
-import { getClerkUser } from "../utils/clerk";
+import { getClerkUser, getQueryUserIds } from "../utils/clerk";
 
 export const paymentsRouter = {
   /** Create payment for subscribersToBatchId
@@ -154,6 +167,17 @@ export const paymentsRouter = {
     .query(async ({ ctx, input }) => {
       const limit = input.limit ?? 10;
 
+      const subIds = await getQueryUserIds(input.query);
+
+      const queryCond = input.query
+        ? or(
+            subIds
+              ? inArray(schema.subscribersToBatches.subscriberId, subIds)
+              : undefined,
+            ilike(schema.subscribersToBatches.chitId, `%${input.query}%`)
+          )
+        : undefined;
+
       const cursorCond = input.cursor
         ? lte(schema.subscribersToBatches.id, input.cursor)
         : undefined;
@@ -161,6 +185,7 @@ export const paymentsRouter = {
       const subs = await ctx.db.query.subscribersToBatches.findMany({
         where: and(
           cursorCond,
+          queryCond,
           eq(schema.subscribersToBatches.batchId, input.batchId)
         ),
         with: {

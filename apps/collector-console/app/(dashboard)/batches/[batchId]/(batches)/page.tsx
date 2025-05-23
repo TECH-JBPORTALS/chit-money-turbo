@@ -32,6 +32,7 @@ import React, { Suspense } from "react";
 import { SpinnerPage } from "@/components/spinner-page";
 import { format } from "date-fns";
 import { ThisMonthPayouts } from "./payments-client";
+import SearchClient from "./search-client";
 
 async function GetTotalCollectedPayments({
   forThisMonth = false,
@@ -396,7 +397,7 @@ export default async function Page({
             <CardTitle className=" text-lg font-semibold tabular-nums">
               {"This Month's Payments"}
             </CardTitle>
-            <SearchInput placeholder="Search..." className="w-full" />
+            <SearchClient />
           </CardHeader>
           <CardContent className="h-full max-h-full pb-16">
             <ThisMonthPayouts batchId={batchId} />
