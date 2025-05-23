@@ -135,6 +135,69 @@ export const metricsRouter = {
       };
     }),
 
+  /** Total collection of payments from batch
+   * :TODO
+   */
+  getTotalCollectionOfBatch: protectedProcedure
+    .input(
+      z.object({ forThisMonth: z.boolean().optional(), batchId: z.string() })
+    )
+    .query(async ({ ctx, input }) => {
+      const thisMonthCondForCollectedAmount = input?.forThisMonth
+        ? and(
+            eq(
+              sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate})`,
+              new Date().getMonth()
+            ),
+            eq(
+              sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate})`,
+              new Date().getFullYear()
+            )
+          )
+        : undefined;
+
+      const totalAmountToBeCollected = await ctx.db
+        .select({
+          sum: input?.forThisMonth
+            ? sum(schema.batches.fundAmount).mapWith(Number)
+            : sql`SUM(${schema.batches.fundAmount}*${schema.batches.scheme})`.mapWith(
+                Number
+              ),
+        })
+        .from(schema.batches)
+        .where(eq(schema.batches.id, input.batchId))
+        .then((r) => r.at(0)?.sum ?? 0);
+
+      const collectedAmount = await ctx.db
+        .select({
+          sum: sum(schema.payments.subscriptionAmount).mapWith(Number),
+        })
+        .from(schema.subscribersToBatches)
+        .leftJoin(
+          schema.batches,
+          eq(schema.batches.id, schema.subscribersToBatches.batchId)
+        )
+        .leftJoin(
+          schema.payments,
+          eq(
+            schema.payments.subscriberToBatchId,
+            schema.subscribersToBatches.id
+          )
+        )
+        .where(
+          and(
+            eq(schema.batches.id, input.batchId),
+            thisMonthCondForCollectedAmount
+          )
+        )
+        .then((r) => r.at(0)?.sum ?? 0);
+
+      return {
+        totalAmountToBeCollected,
+        collectedAmount,
+      };
+    }),
+
   /** Get total penalty collected from all batches payments in organization */
   getTotalPenaltyCollectedInOrganization: protectedProcedure
     .input(z.object({ forThisMonth: z.boolean() }).optional())

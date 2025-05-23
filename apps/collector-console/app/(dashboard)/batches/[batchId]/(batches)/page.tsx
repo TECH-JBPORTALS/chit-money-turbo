@@ -33,6 +33,75 @@ import { ScrollArea } from "@cmt/ui/components/scroll-area";
 import SearchInput from "@/components/search-input";
 import { createQueryClient } from "@/trpc/query-client";
 import { trpc } from "@/trpc/server";
+import { Suspense } from "react";
+import { SpinnerPage } from "@/components/spinner-page";
+
+async function GetTotalCollectedPayments({
+  forThisMonth = false,
+  batchId,
+}: {
+  forThisMonth?: boolean;
+  batchId: string;
+}) {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getTotalCollectionOfBatch.queryOptions({
+      forThisMonth,
+      batchId,
+    })
+  );
+
+  return (
+    <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+      {data.collectedAmount.toLocaleString("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0,
+      })}
+    </CardTitle>
+  );
+}
+
+async function GetTotalCollectedPaymentsFooter({
+  forThisMonth = false,
+  batchId,
+}: {
+  forThisMonth?: boolean;
+  batchId: string;
+}) {
+  const client = createQueryClient();
+  const data = await client.fetchQuery(
+    trpc.metrics.getTotalCollectionOfBatch.queryOptions({
+      forThisMonth,
+      batchId,
+    })
+  );
+
+  const pendingAmount = data.totalAmountToBeCollected - data.collectedAmount;
+
+  return (
+    <CardFooter className="flex-col items-start gap-1 text-sm">
+      <div className="w-full">
+        <Progress
+          value={Math.floor(
+            (data.collectedAmount / data.totalAmountToBeCollected) * 100
+          )}
+        />
+      </div>
+      <div className="text-muted-foreground">
+        Still{" "}
+        <b>
+          {pendingAmount.toLocaleString("en-IN", {
+            style: "currency",
+            currency: "INR",
+            maximumFractionDigits: 0,
+          })}
+        </b>{" "}
+        payment pending this month
+      </div>
+    </CardFooter>
+  );
+}
 
 export default async function Page({
   params,
@@ -167,18 +236,13 @@ export default async function Page({
         <Card className="@container/card">
           <CardHeader className="relative">
             <CardDescription>{"This Month's Collection"}</CardDescription>
-            <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-              ₹85,000
-            </CardTitle>
+            <Suspense fallback={<SpinnerPage className="min-h-full block" />}>
+              <GetTotalCollectedPayments batchId={batchId} forThisMonth />
+            </Suspense>
           </CardHeader>
-          <CardFooter className="flex-col items-start gap-1 text-sm">
-            <div className="w-full">
-              <Progress value={80} />
-            </div>
-            <div className="text-muted-foreground">
-              Still <b>₹15,000</b> payment pending this month
-            </div>
-          </CardFooter>
+          <Suspense fallback={<SpinnerPage className="min-h-full block" />}>
+            <GetTotalCollectedPaymentsFooter batchId={batchId} forThisMonth />
+          </Suspense>
         </Card>
 
         <Card className="@container/card">
