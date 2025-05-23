@@ -9,3 +9,8 @@ export const getPagination = (pageIndex: number, pageSize: number) => ({
   offset: pageIndex * pageSize,
   pageSize,
 });
+
+export const cursorPaginateInputSchema = z.object({
+  cursor: z.string().optional(),
+  limit: z.number().optional(),
+});

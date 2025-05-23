@@ -202,9 +202,17 @@ function PaymentSummaryForm(
 
   const { mutateAsync: createPayment, isPending } = useMutation(
     trpc.payments.create.mutationOptions({
-      onSuccess: async (data) => {
-        await queryClient.invalidateQueries(trpc.payments.pathFilter());
+      onSuccess: () => {
         toast.success("Payment details added");
+      },
+      async onSettled() {
+        await queryClient.invalidateQueries(trpc.payments.pathFilter());
+        await queryClient.invalidateQueries(
+          trpc.metrics.getThisMonthPaymentsProgressOfBatch.queryFilter()
+        );
+        await queryClient.invalidateQueries(
+          trpc.metrics.getTotalCollectionOfBatch.queryFilter()
+        );
       },
       onError: async (d, v) => {
         console.log(d.message);
@@ -324,21 +332,22 @@ function PaymentSummaryForm(
   );
 }
 
+type Payment =
+  RouterOutputs["payments"]["ofBatchSelectedRunway"]["items"][number];
+
 export function AddPaymentDialog({
   children,
   data,
 }: {
   children: React.ReactNode;
-  data: RouterOutputs["payments"]["ofBatchSelectedRunway"]["items"][number];
+  data: {
+    payment: Payment["payment"];
+    subscriber: Payment["subscriber"];
+    id: Payment["id"];
+    chitId: Payment["chitId"];
+  };
 }) {
-  const {
-    current: currentStep,
-    total,
-    prev,
-    next,
-    hasPrev,
-    hasNext,
-  } = useSteps();
+  const { current: currentStep, total } = useSteps();
 
   const [globalState, setGlobalState] = useState<
     z.infer<typeof paymentDetailsForm & typeof paymentSummaryForm>

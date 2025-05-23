@@ -49,8 +49,7 @@ import { useDebounce } from "@uidotdev/usehooks";
 const addSubscribersSchema = z.object({
   subIds: z
     .array(z.string())
-    .min(1, "Atleast one subscriber is required move forward")
-    .default([]),
+    .min(1, "Atleast one subscriber is required move forward"),
 });
 
 type Subscriber = RouterOutputs["subscribers"]["search"][number];

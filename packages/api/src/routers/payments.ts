@@ -1,13 +1,17 @@
-import { and, count, eq, gt, inArray, lt, lte, sql, sum } from "@cmt/db";
+import { and, count, desc, eq, gt, inArray, lt, lte, sql, sum } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { schema } from "@cmt/db/client";
 import { addMonths, format } from "date-fns";
-import { paginateInputSchema } from "../utils/paginate";
+import {
+  cursorPaginateInputSchema,
+  paginateInputSchema,
+} from "../utils/paginate";
 import { getCreditScoreMeta, getSubscribersByBatchId } from "../utils/actions";
 import { generateChitId } from "@cmt/db/utils";
 import { paymentInsertSchema, paymentUpdateSchema } from "@cmt/db/schema";
+import { getClerkUser } from "../utils/clerk";
 
 export const paymentsRouter = {
   /** Create payment for subscribersToBatchId
@@ -133,6 +137,85 @@ export const paymentsRouter = {
       );
 
       return { ...subs, items: mappedItems };
+    }),
+
+  /** Get list subscribers for runway with the status of payment paid or not paid
+   * @context collector
+   */
+  ofBatchThisMonth: protectedProcedure
+    .input(
+      cursorPaginateInputSchema.and(
+        z.object({
+          batchId: z.string(),
+          query: z.string().optional(),
+        })
+      )
+    )
+    .query(async ({ ctx, input }) => {
+      const limit = input.limit ?? 10;
+
+      const cursorCond = input.cursor
+        ? lte(schema.subscribersToBatches.id, input.cursor)
+        : undefined;
+
+      const subs = await ctx.db.query.subscribersToBatches.findMany({
+        where: and(
+          cursorCond,
+          eq(schema.subscribersToBatches.batchId, input.batchId)
+        ),
+        with: {
+          subscriber: true,
+        },
+        limit: limit + 1,
+        orderBy: desc(schema.subscribersToBatches.id),
+      });
+
+      const runwayDate = new Date();
+      const { batch } = await generateChitId(input.batchId);
+      const subscriptionAmount = Math.ceil(batch.fundAmount / batch.scheme);
+
+      const mappedItems = await Promise.all(
+        subs.flatMap(async (sub) => {
+          let status: "paid" | "not paid" = "not paid";
+
+          const inputMonth = runwayDate.getMonth() + 1; // JavaScript months are 0-indexed
+          const inputYear = runwayDate.getFullYear();
+
+          // Check if: subscriber paid for given runway date
+          const payment = await ctx.db.query.payments.findFirst({
+            where: and(
+              eq(schema.payments.subscriberToBatchId, sub.id),
+              sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate}) = ${inputMonth}`,
+              sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate}) = ${inputYear}`
+            ),
+          });
+
+          const subscriber = await getClerkUser(sub.subscriberId);
+
+          if (payment) status = "paid";
+
+          return {
+            ...sub,
+            payment: {
+              ...payment,
+              subscriptionAmount:
+                payment?.subscriptionAmount ?? subscriptionAmount,
+              status,
+              runwayDate: runwayDate.toDateString(),
+            },
+            subscriber: {
+              ...subscriber,
+              ...sub.subscriber,
+              primaryEmailAddress: subscriber.primaryEmailAddress?.emailAddress,
+            },
+          };
+        })
+      );
+
+      const nextCursor =
+        mappedItems.length > limit ? mappedItems.pop()?.id : undefined;
+
+      return { nextCursor, items: mappedItems };
     }),
 
   /** Get payment details by paymentID

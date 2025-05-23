@@ -17,12 +17,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@cmt/ui/components/tabs";
-import {
-  ArrowUpRightIcon,
-  BadgeCheckIcon,
-  PlusIcon,
-  SettingsIcon,
-} from "lucide-react";
+import { ArrowUpRightIcon, BadgeCheckIcon, SettingsIcon } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -36,6 +31,7 @@ import { trpc } from "@/trpc/server";
 import React, { Suspense } from "react";
 import { SpinnerPage } from "@/components/spinner-page";
 import { format } from "date-fns";
+import { ThisMonthPayouts } from "./payments-client";
 
 async function GetTotalCollectedPayments({
   forThisMonth = false,
@@ -403,33 +399,7 @@ export default async function Page({
             <SearchInput placeholder="Search..." className="w-full" />
           </CardHeader>
           <CardContent className="h-full max-h-full pb-16">
-            <ScrollArea className="h-full pr-4 ">
-              {Array.from({ length: 20 }).map((_, i) => (
-                <div key={i} className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-2">
-                    <Avatar className="border-3 border-card size-10">
-                      <AvatarImage
-                        src="https://github.com/shadcn.png"
-                        alt="@shadcn"
-                      />
-                      <AvatarFallback>CN</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <b>Jhon Snow</b>
-                      <p className="text-sm text-muted-foreground">#738392J</p>
-                    </div>
-                  </div>
-                  <div>
-                    <Badge variant={"secondary"}>₹ 5,000</Badge>
-                  </div>
-                  <div>
-                    <Button variant={"secondary"}>
-                      <PlusIcon /> Collect
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </ScrollArea>
+            <ThisMonthPayouts batchId={batchId} />
           </CardContent>
         </Card>
 
