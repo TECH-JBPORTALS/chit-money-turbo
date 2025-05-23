@@ -85,7 +85,7 @@ export const metricsRouter = {
         ? and(
             eq(
               sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate})`,
-              new Date().getMonth()
+              new Date().getMonth() + 1
             ),
             eq(
               sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate})`,
@@ -145,7 +145,7 @@ export const metricsRouter = {
       const totalMonths = batch.scheme;
       const completedMonths =
         (startOfToday().getFullYear() - batch.startsOn.getFullYear()) * 12 +
-        (startOfToday().getMonth() - batch.startsOn.getMonth() - 1); // Except this month still to be done
+        (startOfToday().getMonth() + 1 - batch.startsOn.getMonth() + 1 - 1); // Except this month still to be done
 
       return {
         totalMonths,
@@ -174,7 +174,7 @@ export const metricsRouter = {
             eq(schema.subscribersToBatches.batchId, batch.id),
             eq(
               sql`EXTRACT(MONTH FROM ${schema.payouts.month})`,
-              new Date().getMonth()
+              new Date().getMonth() + 1
             ),
             eq(
               sql`EXTRACT(YEAR FROM ${schema.payouts.month})`,
@@ -346,7 +346,7 @@ export const metricsRouter = {
         ? and(
             eq(
               sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate})`,
-              new Date().getMonth()
+              new Date().getMonth() + 1
             ),
             eq(
               sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate})`,
@@ -405,7 +405,7 @@ export const metricsRouter = {
         ? and(
             eq(
               sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate})`,
-              new Date().getMonth()
+              new Date().getMonth() + 1
             ),
             eq(
               sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate})`,
@@ -497,7 +497,7 @@ export const metricsRouter = {
    * @context Subscriber
    */
   getPaymentsDuesCount: protectedProcedure.query(async ({ ctx }) => {
-    const currentRunwayMonth = new Date().getMonth();
+    const currentRunwayMonth = new Date().getMonth() + 1;
     const currentRunwayYear = new Date().getFullYear();
 
     return await ctx.db
