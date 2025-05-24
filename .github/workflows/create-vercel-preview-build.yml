@@ -131,7 +131,6 @@ jobs:
         if: steps.build_type.outputs.action == 'build'
         id: eas-build
         run: |
-          export EAS_CHANNEL=${{ github.head_ref }}
           EAS_OUTPUT=$( eas build --platform android --profile preview --non-interactive --json )
           BUILD_URL=$(echo $EAS_OUTPUT | jq -r '.[0].artifacts.buildUrl')
           echo "build_url=$BUILD_URL" >> $GITHUB_OUTPUT
