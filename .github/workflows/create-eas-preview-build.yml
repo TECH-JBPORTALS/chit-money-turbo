@@ -1,14 +1,14 @@
 name: Create EAS Preview Build
 on:
   pull_request:
-    branches-ignore: [main]
+    branches: [preview]
     types:
       - labeled
-      - synchronize
 
 jobs:
   eas_build_or_update:
     name: EAS Build or Update
+    if: github.event.label == 'eas-build'
     runs-on: ubuntu-latest
 
     env:
