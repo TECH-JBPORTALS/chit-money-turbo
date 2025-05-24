@@ -20,6 +20,8 @@ export default async function Layout({
     trpc.subscribers.getById.queryOptions({ subscriberId })
   );
 
+  const creditScore = 700;
+
   return (
     <section className="w-full h-full flex">
       <ScrollArea className="flex-1">
@@ -57,7 +59,7 @@ export default async function Layout({
           </div>
 
           <h1 className="scroll-m-20 text-center text-4xl font-extrabold tracking-tight lg:text-5xl">
-            264
+            {creditScore}
           </h1>
           <div className="flex gap-0.5">
             <div className="w-full rounded-sm bg-primary/20 h-8" />
