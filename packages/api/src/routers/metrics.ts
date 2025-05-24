@@ -17,7 +17,11 @@ import {
 import { protectedProcedure } from "../trpc";
 import { schema } from "@cmt/db/client";
 import { startOfToday } from "date-fns";
-import { getBatchById } from "../utils/actions";
+import {
+  getBatchById,
+  getFundProgressOfBatch,
+  getPaymentProgressOfMonth,
+} from "../utils/actions";
 import { getClerkUser } from "../utils/clerk";
 
 export const metricsRouter = {
@@ -139,19 +143,9 @@ export const metricsRouter = {
   /** Get's current batch fund progress till today */
   getFundProgressOfBatch: protectedProcedure
     .input(z.object({ batchId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const batch = await getBatchById(input.batchId, ctx.db);
-
-      const totalMonths = batch.scheme;
-      const completedMonths =
-        (startOfToday().getFullYear() - batch.startsOn.getFullYear()) * 12 +
-        (startOfToday().getMonth() + 1 - batch.startsOn.getMonth() + 1 - 1); // Except this month still to be done
-
-      return {
-        totalMonths,
-        completedMonths,
-      };
-    }),
+    .query(async ({ ctx, input }) =>
+      getFundProgressOfBatch(new Date(), input.batchId, ctx.db)
+    ),
 
   /** Get's this month approved or disbursed payout */
   getThisMonthPayoutOfBatch: protectedProcedure
@@ -203,45 +197,9 @@ export const metricsRouter = {
    */
   getThisMonthPaymentsProgressOfBatch: protectedProcedure
     .input(z.object({ batchId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const batch = await getBatchById(input.batchId, ctx.db);
-
-      const totalPaymentsToBeCollected = await ctx.db
-        .select({ count: countDistinct(schema.subscribersToBatches.id) })
-        .from(schema.subscribersToBatches)
-        .where(eq(schema.subscribersToBatches.batchId, batch.id))
-        .then((r) => r.at(0)?.count ?? 0);
-
-      const paymentsDone = await ctx.db
-        .select({ count: countDistinct(schema.payments.subscriberToBatchId) })
-        .from(schema.payments)
-        .innerJoin(
-          schema.subscribersToBatches,
-          eq(
-            schema.subscribersToBatches.id,
-            schema.payments.subscriberToBatchId
-          )
-        )
-        .where(
-          and(
-            eq(schema.subscribersToBatches.batchId, batch.id),
-            eq(
-              sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate})`,
-              new Date().getMonth() + 1
-            ),
-            eq(
-              sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate})`,
-              new Date().getFullYear()
-            )
-          )
-        )
-        .then((r) => r[0]?.count ?? 0);
-
-      return {
-        totalPaymentsToBeCollected,
-        paymentsDone,
-      };
-    }),
+    .query(async ({ ctx, input }) =>
+      getPaymentProgressOfMonth(new Date(), input.batchId, ctx.db)
+    ),
 
   /** ## Get's this month pending payments
    * Returns total pending payments count and 3 users

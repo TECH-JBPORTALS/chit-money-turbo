@@ -1,6 +1,7 @@
 import {
   and,
   count,
+  countDistinct,
   desc,
   eq,
   getTableColumns,
@@ -10,6 +11,7 @@ import {
   lt,
   lte,
   or,
+  sql,
   sum,
 } from "@cmt/db";
 import { schema } from "@cmt/db/client";
@@ -19,6 +21,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { getQueryUserIds } from "./clerk";
 import type { NeonDb } from "@cmt/db/client";
+import { startOfDay, startOfToday } from "date-fns";
 
 export async function getSubscriberBatchesWithPagination({
   input,
@@ -288,4 +291,63 @@ export async function getBatchById(batchId: string, db: NeonDb) {
     throw new TRPCError({ message: "No batch found", code: "NOT_FOUND" });
 
   return batch;
+}
+
+export async function getPaymentProgressOfMonth(
+  date: Date,
+  batchId: string,
+  db: NeonDb
+) {
+  const batch = await getBatchById(batchId, db);
+
+  const totalPaymentsToBeCollected = await db
+    .select({ count: countDistinct(schema.subscribersToBatches.id) })
+    .from(schema.subscribersToBatches)
+    .where(eq(schema.subscribersToBatches.batchId, batch.id))
+    .then((r) => r.at(0)?.count ?? 0);
+
+  const paymentsDone = await db
+    .select({ count: countDistinct(schema.payments.subscriberToBatchId) })
+    .from(schema.payments)
+    .innerJoin(
+      schema.subscribersToBatches,
+      eq(schema.subscribersToBatches.id, schema.payments.subscriberToBatchId)
+    )
+    .where(
+      and(
+        eq(schema.subscribersToBatches.batchId, batch.id),
+        eq(
+          sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate})`,
+          date.getMonth() + 1
+        ),
+        eq(
+          sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate})`,
+          date.getFullYear()
+        )
+      )
+    )
+    .then((r) => r[0]?.count ?? 0);
+
+  return {
+    totalPaymentsToBeCollected,
+    paymentsDone,
+  };
+}
+
+export async function getFundProgressOfBatch(
+  date: Date,
+  batchId: string,
+  db: NeonDb
+) {
+  const batch = await getBatchById(batchId, db);
+
+  const totalMonths = batch.scheme;
+  const completedMonths =
+    (startOfDay(date).getFullYear() - batch.startsOn.getFullYear()) * 12 +
+    (startOfDay(date).getMonth() + 1 - batch.startsOn.getMonth() + 1 - 1); // Except this month still to be done
+
+  return {
+    totalMonths,
+    completedMonths,
+  };
 }

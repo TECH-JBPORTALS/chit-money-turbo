@@ -11,17 +11,23 @@ import {
   lte,
   sql,
   sum,
+  notExists,
 } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { schema } from "@cmt/db/client";
-import { addMonths, format } from "date-fns";
+import { addMonths, format, setDate } from "date-fns";
 import {
   cursorPaginateInputSchema,
   paginateInputSchema,
 } from "../utils/paginate";
-import { getCreditScoreMeta, getSubscribersByBatchId } from "../utils/actions";
+import {
+  getCreditScoreMeta,
+  getFundProgressOfBatch,
+  getPaymentProgressOfMonth,
+  getSubscribersByBatchId,
+} from "../utils/actions";
 import { generateChitId } from "@cmt/db/utils";
 import { paymentInsertSchema, paymentUpdateSchema } from "@cmt/db/schema";
 import { getClerkUser, getQueryUserIds } from "../utils/clerk";
@@ -340,4 +346,87 @@ export const paymentsRouter = {
   getCreditScoreMeta: protectedProcedure.query(({ ctx }) =>
     getCreditScoreMeta({ ctx, subscriberId: ctx.session.userId })
   ),
+
+  /** Get upcoming payments due of subscriber */
+  getUpcomingDues: protectedProcedure
+    .input(cursorPaginateInputSchema.optional())
+    .query(async ({ ctx, input }) => {
+      const nextMonth = addMonths(new Date(), 1);
+      const limit = input?.limit ?? 10;
+      const cursorCond = input?.cursor
+        ? lte(schema.subscribersToBatches.id, input.cursor)
+        : undefined;
+
+      const paymentsNotExists = (alias: typeof schema.subscribersToBatches) =>
+        notExists(
+          ctx.db
+            .select()
+            .from(schema.payments)
+            .where(
+              and(
+                eq(schema.payments.subscriberToBatchId, alias.id), // correlate here
+                eq(
+                  sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate})`,
+                  nextMonth.getMonth() + 1
+                ),
+                eq(
+                  sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate})`,
+                  nextMonth.getFullYear()
+                )
+              )
+            )
+        );
+
+      const dues = await ctx.db
+        .select({
+          id: schema.subscribersToBatches.id,
+          batchId: schema.batches.id,
+          batchName: schema.batches.name,
+          batchDueOn: schema.batches.dueOn,
+          totalAmount: schema.batches.fundAmount,
+          orgName: schema.collectors.orgName,
+          chitId: schema.subscribersToBatches.chitId,
+        })
+        .from(schema.subscribersToBatches)
+        .innerJoin(
+          schema.batches,
+          eq(schema.batches.id, schema.subscribersToBatches.batchId)
+        )
+        .innerJoin(
+          schema.collectors,
+          eq(schema.collectors.id, schema.batches.collectorId)
+        )
+        .where(
+          and(
+            cursorCond,
+            paymentsNotExists(schema.subscribersToBatches),
+            eq(schema.subscribersToBatches.subscriberId, ctx.session.userId)
+          )
+        )
+        .limit(limit + 1)
+        .orderBy(desc(schema.subscribersToBatches.id));
+
+      const mappedItems = await Promise.all(
+        dues.map(async (d) => {
+          const fundProgress = await getFundProgressOfBatch(
+            nextMonth,
+            d.batchId,
+            ctx.db
+          );
+          return {
+            ...d,
+            dueOn: setDate(nextMonth, parseInt(d.batchDueOn)),
+            fundProgress,
+          };
+        })
+      );
+
+      const nextCursor =
+        mappedItems.length > limit ? mappedItems.pop()?.id : undefined;
+
+      return {
+        items: mappedItems,
+        nextCursor,
+      };
+    }),
 };
