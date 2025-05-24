@@ -61,7 +61,22 @@ const documentKeys = Object.keys(documentsSchema.shape) as [
 
 export const DocumentKeysEnum = z.enum(documentKeys);
 
-export const batchSchema = batchUpdateSchema;
+export const batchSchema = batchUpdateSchema
+  .and(
+    z.object({
+      canCompleteBatch: z.boolean(),
+      canUpdateFundAmount: z.boolean(),
+      minSchemaValue: z.number(),
+      canUpdateStartsOn: z.boolean(),
+    })
+  )
+  .refine(
+    (v) => v.scheme >= v.minSchemaValue,
+    ({ minSchemaValue }) => ({
+      message: `Scheme must be minimum ${minSchemaValue} months, becuase it's batch completed ${minSchemaValue} months.`,
+      path: ["scheme"],
+    })
+  );
 
 /* Subscriber Onboarding Schema's */
 export const subscriberPersonalInfoSchema = subscribersInsertSchema

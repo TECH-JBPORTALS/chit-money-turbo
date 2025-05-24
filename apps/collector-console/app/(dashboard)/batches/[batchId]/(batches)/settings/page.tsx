@@ -14,20 +14,96 @@ import {
 import { Input } from "@cmt/ui/components/input";
 import { Separator } from "@cmt/ui/components/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/react";
+import { SpinnerPage } from "@/components/spinner-page";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@cmt/ui/components/popover";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@cmt/ui/components/calendar";
+import { cn } from "@cmt/ui/lib/utils";
+import { format } from "date-fns";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@cmt/ui/components/select";
+import { toast } from "sonner";
 
 export default function Page() {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const { batchId } = useParams<{ batchId: string }>();
   const form = useForm<z.infer<typeof batchSchema>>({
     resolver: zodResolver(batchSchema),
+    async defaultValues() {
+      const batch = await queryClient.fetchQuery(
+        trpc.batches.getById.queryOptions({ batchId })
+      );
+
+      return {
+        ...batch,
+        batchId: batch?.id ?? "",
+        defaultCommissionRate: batch?.defaultCommissionRate ?? 2,
+        dueOn: batch?.dueOn ?? "",
+        fundAmount: batch?.fundAmount ?? 0,
+        name: batch?.name ?? "",
+        scheme: batch?.scheme ?? 0,
+        startsOn: batch?.startsOn ?? new Date(),
+        batchStatus: batch?.batchStatus ?? "active",
+        batchType: batch?.batchType ?? "interest",
+      };
+    },
   });
 
-  const router = useRouter();
+  const { mutateAsync: updateBatch, isPending } = useMutation(
+    trpc.batches.update.mutationOptions({
+      onSuccess() {
+        toast.info("Batch details updated");
+      },
+      async onSettled() {
+        //Refresh all batch details
+        await queryClient.invalidateQueries(trpc.batches.getById.queryFilter());
+
+        //new updated details
+        const batch = await queryClient.fetchQuery(
+          trpc.batches.getById.queryOptions({ batchId })
+        );
+
+        form.reset({
+          ...batch,
+          batchId: batch?.id ?? "",
+          defaultCommissionRate: batch?.defaultCommissionRate ?? 2,
+          dueOn: batch?.dueOn ?? "",
+          fundAmount: batch?.fundAmount ?? 0,
+          name: batch?.name ?? "",
+          scheme: batch?.scheme ?? 0,
+          startsOn: batch?.startsOn ?? new Date(),
+          batchStatus: batch?.batchStatus ?? "active",
+          batchType: batch?.batchType ?? "interest",
+        });
+      },
+      onError() {
+        toast.error("Something went wront, Try again");
+      },
+    })
+  );
 
   async function onSubmit(values: z.infer<typeof batchSchema>) {
-    console.log(values);
+    await updateBatch(values);
   }
+
+  if (form.formState.isLoading) return <SpinnerPage />;
+
+  const formValues = form.getValues();
 
   return (
     <div className="flex flex-col gap-8 pr-72">
@@ -50,6 +126,43 @@ export default function Page() {
                   <Input {...field} />
                 </FormControl>
                 <FormMessage />
+                <FormDescription>
+                  Give the batch a clear, memorable name — including the year at
+                  the end is recommended.
+                </FormDescription>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="fundAmount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Target Fund Amount</FormLabel>
+                <FormControl>
+                  <Input
+                    disabled={!formValues.canUpdateFundAmount}
+                    type="number"
+                    {...field}
+                    value={field.value || ""}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      const parsed = parseInt(raw || "0", 10); // parse to number
+                      field.onChange(isNaN(parsed) ? 0 : parsed);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+                {formValues.canUpdateFundAmount ? (
+                  <FormDescription>
+                    Target amount for every month
+                  </FormDescription>
+                ) : (
+                  <FormDescription className="text-orange-500">
+                    Can't update fund amount once the batch is started
+                  </FormDescription>
+                )}
               </FormItem>
             )}
           />
@@ -64,13 +177,19 @@ export default function Page() {
                   <Input
                     type="number"
                     {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value))}
+                    value={field.value || ""}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      const parsed = parseInt(raw || "0", 10); // parse to number
+                      field.onChange(isNaN(parsed) ? 0 : parsed);
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
                 <FormDescription>
-                  Number of months defines number of subscribers fit into this
-                  batch.
+                  Changing the number of months will reset the batch. Only data
+                  matching the new scheme will be kept — all existing payouts or
+                  payments will be permanently deleted.
                 </FormDescription>
               </FormItem>
             )}
@@ -84,12 +203,49 @@ export default function Page() {
                 <FormLabel>Batch Start Month</FormLabel>
                 <FormControl>
                   {/** TODO */}
-                  <Input {...field} />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          disabled={!formValues.canUpdateStartsOn}
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value ?? new Date()}
+                        onSelect={field.onChange}
+                        disabled={(date) =>
+                          date.getDate() < new Date().getDate()
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </FormControl>
                 <FormMessage />
-                <FormDescription>
-                  This will be considered as a start month of the batch
-                </FormDescription>
+                {formValues.canUpdateStartsOn ? (
+                  <FormDescription>
+                    This will be considered as a start month of the batch
+                  </FormDescription>
+                ) : (
+                  <FormDescription className="text-orange-500">
+                    Can't update batch starts month once the batch is started
+                  </FormDescription>
+                )}
               </FormItem>
             )}
           />
@@ -101,7 +257,21 @@ export default function Page() {
               <FormItem>
                 <FormLabel>Batch Due Date</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={"1"}>Every month 1st</SelectItem>
+                      <SelectItem value={"5"}>Every month 5th</SelectItem>
+                      <SelectItem value={"10"}>Every month 10th</SelectItem>
+                      <SelectItem value={"15"}>Every month 15th</SelectItem>
+                      <SelectItem value={"20"}>Every month 20th</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
                 <FormDescription>
@@ -111,7 +281,9 @@ export default function Page() {
             )}
           />
 
-          <Button>Update Details</Button>
+          <Button isLoading={isPending} disabled={!form.formState.isDirty}>
+            Update Details
+          </Button>
         </form>
       </Form>
       <Separator />
@@ -125,7 +297,11 @@ export default function Page() {
           archived and read only. You can't mark batch as completed until all
           the transaction are settled.`}
         </p>
-        <Button variant={"secondary"} className="w-fit">
+        <Button
+          disabled={!formValues.canCompleteBatch}
+          variant={"default"}
+          className="w-fit"
+        >
           Mark as Completed
         </Button>
       </section>

@@ -1,4 +1,8 @@
-import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-zod";
 import { batches, payments, payouts, subscribersToBatches } from ".";
 import { z } from "zod";
 
@@ -11,7 +15,14 @@ export const batchInsertSchema = createInsertSchema(batches).omit({
   batchStatus: true,
 });
 
-export const batchUpdateSchema = createInsertSchema(batches)
+export const batchSelectSchema = createSelectSchema(batches);
+
+export const batchUpdateSchema = createInsertSchema(batches, {
+  scheme: z.number().min(1, "Scheme must be atleast 1 month"),
+  fundAmount: z.number().min(1, "Fund Amount can not be zero"),
+  name: z.string().min(1, "Batch name is required"),
+  defaultCommissionRate: z.number(),
+})
   .omit({
     id: true,
     collectorId: true,
