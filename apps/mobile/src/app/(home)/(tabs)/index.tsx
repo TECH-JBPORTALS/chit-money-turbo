@@ -129,7 +129,15 @@ export default function Page() {
               <Lead>Your Credit Score</Lead>
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center gap-3 ">
-                  <H1 className="text-6xl">
+                  <H1
+                    className={cn(
+                      "text-6xl",
+                      creditScore.data?.totalCreditScore &&
+                        creditScore.data?.totalCreditScore < 0
+                        ? "text-destructive"
+                        : "text-foreground"
+                    )}
+                  >
                     {creditScore.data?.totalCreditScore}
                   </H1>
                   <P
