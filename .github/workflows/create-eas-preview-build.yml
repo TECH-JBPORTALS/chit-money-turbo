@@ -64,6 +64,8 @@ jobs:
         working-directory: apps/mobile
         if: steps.build_type.outputs.action == 'build'
         id: eas-build
+        env:
+          GIT_BRANCH: ${{ github.head_ref }}
         run: |
           EAS_OUTPUT=$( eas build --platform android --profile preview --non-interactive --json )
           BUILD_URL=$(echo $EAS_OUTPUT | jq -r '.[0].artifacts.buildUrl')
