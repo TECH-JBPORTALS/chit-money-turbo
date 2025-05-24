@@ -37,6 +37,8 @@ import {
   SelectValue,
 } from "@cmt/ui/components/select";
 import { toast } from "sonner";
+import DeleteBatchAlertDialog from "@/components/alert-dialogs/delete-batch-alertdialog";
+import CompleteBatchAlertDialog from "@/components/alert-dialogs/complete-batch-alertdialog copy";
 
 export default function Page() {
   const trpc = useTRPC();
@@ -297,13 +299,15 @@ export default function Page() {
           archived and read only. You can't mark batch as completed until all
           the transaction are settled.`}
         </p>
-        <Button
-          disabled={!formValues.canCompleteBatch}
-          variant={"default"}
-          className="w-fit"
-        >
-          Mark as Completed
-        </Button>
+        <CompleteBatchAlertDialog batchId={batchId}>
+          <Button
+            disabled={!formValues.canCompleteBatch}
+            variant={"default"}
+            className="w-fit"
+          >
+            Mark as Completed
+          </Button>
+        </CompleteBatchAlertDialog>
       </section>
 
       <Separator />
@@ -315,9 +319,11 @@ export default function Page() {
         <p className="text-sm text-muted-foreground">
           {`Once you delete the batch it will cause all data lose related or associated within this batch. So be sure before continue.`}
         </p>
-        <Button variant={"destructive"} className="w-fit">
-          Delete Batch
-        </Button>
+        <DeleteBatchAlertDialog batchId={batchId}>
+          <Button variant={"destructive"} className="w-fit">
+            Delete Batch
+          </Button>
+        </DeleteBatchAlertDialog>
       </section>
     </div>
   );

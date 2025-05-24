@@ -223,6 +223,21 @@ export const batchesRouter = {
       return newBatch.at(0);
     }),
 
+  delete: protectedProcedure
+    .input(z.object({ batchId: z.string() }))
+    .mutation(({ ctx, input }) =>
+      ctx.db.delete(schema.batches).where(eq(schema.batches.id, input.batchId))
+    ),
+
+  markAsCompleted: protectedProcedure
+    .input(z.object({ batchId: z.string() }))
+    .mutation(({ ctx, input }) =>
+      ctx.db
+        .update(schema.batches)
+        .set({ batchStatus: "completed" })
+        .where(eq(schema.batches.id, input.batchId))
+    ),
+
   /**
    * Add subscriber
    * @context collector

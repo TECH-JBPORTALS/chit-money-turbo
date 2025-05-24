@@ -1,11 +1,11 @@
 ## On-Progress Tasks
 
-- [ ] Complete batch
-- [ ] Delete batch
 - [ ] Request payout
 
 ## Completed Tasks
 
+- [x] Complete batch
+- [x] Delete batch
 - [x] Update commission rate for subscriber
 - [x] Batch dashboard this month payments
 - [x] Batch dashboard this month payouts
