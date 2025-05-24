@@ -11,6 +11,8 @@ import {
 } from "@cmt/validators";
 import { TRPCError } from "@trpc/server";
 import { eq } from "@cmt/db";
+import { z } from "zod";
+import { getClerkUser } from "../utils/clerk";
 
 const {
   collectors,
@@ -61,6 +63,36 @@ export const collectorsRouter = {
         return collector;
       })
     ),
+
+  /**
+   * ### Get collector profile info
+   * Returns the collector profile info of given collector id
+   */
+  getById: protectedProcedure
+    .input(z.string())
+    .query(async ({ ctx, input }) => {
+      const profile = await ctx.db.query.collectors.findFirst({
+        where: eq(schema.collectors.id, input),
+        with: {
+          bankAccount: true,
+          contact: true,
+          address: true,
+        },
+      });
+
+      if (!profile)
+        throw new TRPCError({
+          message: "No collector profile found",
+          code: "NOT_FOUND",
+        });
+
+      const clerkUser = await getClerkUser(profile.id);
+
+      return {
+        ...clerkUser,
+        ...profile,
+      };
+    }),
 
   getOrgInfo: protectedProcedure.query(async ({ ctx }) => {
     const orgInfo = await ctx.db.query.collectors.findFirst({

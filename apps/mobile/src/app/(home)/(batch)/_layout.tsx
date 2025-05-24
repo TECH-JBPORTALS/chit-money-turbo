@@ -119,14 +119,10 @@ export default function BatchDetailsLayout() {
           </BatchCardContent>
 
           <BatchCardFooter className="px-0 pb-0">
-            <Link asChild href={`/cfh/2`}>
-              <Pressable>
-                <View className="flex-row items-center gap-2">
-                  <Skeleton className={"size-5 rounded-full"} />
-                  <Skeleton className={"h-2 w-28"} />
-                </View>
-              </Pressable>
-            </Link>
+            <View className="flex-row items-center gap-2">
+              <Skeleton className={"size-5 rounded-full"} />
+              <Skeleton className={"h-2 w-28"} />
+            </View>
           </BatchCardFooter>
         </BatchCard>
       ) : (
@@ -180,7 +176,10 @@ export default function BatchDetailsLayout() {
           </BatchCardContent>
 
           <BatchCardFooter className="px-0 pb-0">
-            <Link asChild href={`/cfh/2`}>
+            <Link
+              asChild
+              href={`/cfh/${chit?.batch.collectorId}?chitId=${chit.chitId}`}
+            >
               <Pressable>
                 <View className="flex-row items-center gap-2">
                   <Avatar

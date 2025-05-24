@@ -1,12 +1,12 @@
 ## On-Progress Tasks
 
-- [ ] Upcoming payments (mobile)
+- [ ] Chit fund proifle details (mobile)
+- [ ] Get QR code out of UPI id (mobile)
+- [x] Upcoming payments (mobile)
 - [ ] Request payout
 - [ ] Batch settings update details
 - [ ] Complete batch
 - [ ] Delete batch
-- [ ] Chit fund proifle details (mobile)
-- [ ] Get QR code out of UPI id (mobile)
 
 ## Completed Tasks
 

@@ -10,17 +10,18 @@ import {
 import { batches } from "../public";
 
 export const collectorsRelations = relations(collectors, ({ one, many }) => ({
-  orgAddress: one(collectorsAddresses, {
+  address: one(collectorsAddresses, {
     fields: [collectors.id],
     references: [collectorsAddresses.userId],
-    relationName: "collector_orgAddress",
   }),
-  collectorsBankAccount: one(collectorsBankAccounts, {
+  bankAccount: one(collectorsBankAccounts, {
     fields: [collectors.id],
     references: [collectorsBankAccounts.userId],
-    relationName: "collector_bankAccount",
   }),
-  contact: one(collectorsContacts),
+  contact: one(collectorsContacts, {
+    fields: [collectors.id],
+    references: [collectorsContacts.userId],
+  }),
   batches: many(batches),
 }));
 
