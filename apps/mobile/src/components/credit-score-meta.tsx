@@ -19,7 +19,7 @@ export function CreditScoreMeta() {
   const lateRatio = data.latePaymentsCount / total || 0.01;
 
   return (
-    <View className="gap-6 px-4 py-6">
+    <View className="gap-6 py-6">
       <View className="flex-row justify-center items-center gap-3 ">
         <H1
           className={cn(

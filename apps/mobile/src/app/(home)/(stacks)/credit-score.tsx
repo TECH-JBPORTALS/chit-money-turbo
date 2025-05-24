@@ -32,7 +32,7 @@ export default function CreditScore() {
     refetch,
   } = useInfiniteQuery(
     trpc.payments.getCreditScoreHistory.infiniteQueryOptions(
-      { limit: 20 },
+      { limit: 10 },
       {
         getNextPageParam: ({ nextCursor }) => nextCursor,
       }
@@ -68,9 +68,8 @@ export default function CreditScore() {
         }
         progressViewOffset={12}
         showsVerticalScrollIndicator={false}
-        centerContent
         ListHeaderComponent={<CreditScoreMeta />}
-        estimatedItemSize={80}
+        estimatedItemSize={48}
         data={items}
         onEndReachedThreshold={0.5}
         onEndReached={() => hasNextPage && fetchNextPage()}
@@ -97,7 +96,8 @@ export default function CreditScore() {
             )}
           </View>
         )}
-        keyExtractor={(b) => b.id}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
+        keyExtractor={(b) => `${b.id}-${b.runwayDate}`}
         ListFooterComponent={() =>
           isFetchingNextPage ? (
             <View className="justify-center items-center pb-3">
@@ -106,7 +106,7 @@ export default function CreditScore() {
           ) : null
         }
         renderItem={({ item }) => (
-          <View className="flex-row py-2 items-center justify-between">
+          <View className="flex-row h-12 items-center justify-between">
             {item.paidOn ? (
               <Muted>{format(item.paidOn, "dd MMM, yyyy")}</Muted>
             ) : null}

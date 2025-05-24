@@ -301,13 +301,16 @@ export const paymentsRouter = {
   getCreditScoreHistory: protectedProcedure
     .input(
       z
-        .object({ limit: z.number().optional(), cursor: z.string().optional() })
+        .object({
+          limit: z.number().optional(),
+          cursor: z.string().optional(),
+        })
         .optional()
     )
     .query(async ({ ctx, input }) => {
       const limit = input?.limit ?? 10;
       const cursorCond = input?.cursor
-        ? lte(schema.payments.id, input.cursor)
+        ? or(lt(schema.payments.id, input.cursor))
         : undefined;
 
       const subscriberToBatch =
@@ -322,7 +325,7 @@ export const paymentsRouter = {
         where: and(
           inArray(
             schema.payments.subscriberToBatchId,
-            subscriberToBatch.flatMap((s) => s.id)
+            subscriberToBatch.map((s) => s.id)
           ),
           cursorCond
         ),
@@ -330,9 +333,10 @@ export const paymentsRouter = {
           id: true,
           paidOn: true,
           creditScoreAffected: true,
+          runwayDate: true,
         },
-        orderBy: ({ paidOn }, { desc }) => [desc(paidOn)],
         limit: limit + 1,
+        orderBy: ({ paidOn, id }, { desc, asc }) => [desc(id), asc(paidOn)],
       });
 
       const nextCursor = items.length > limit ? items.pop()?.id : undefined;
