@@ -654,7 +654,7 @@ function BankInfoForm() {
     const token = await getToken();
     try {
       // 1. Create profile
-      await createProfile({ ...state, bankInfo });
+      await createProfile({ ...state, bankInfo: values });
 
       // 2. Update onboarding state
       await fetch("/api/onboarding", {

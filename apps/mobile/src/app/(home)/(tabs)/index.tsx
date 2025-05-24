@@ -212,7 +212,7 @@ export default function Page() {
         }
         data={dues}
         ListEmptyComponent={
-          <View className="h-full gap-3.5 items-center justify-center">
+          <View className="h-64 gap-3.5 items-center justify-center">
             {isLoading ? (
               <SpinnerView />
             ) : (
