@@ -8,7 +8,7 @@ on:
 jobs:
   eas_build_or_update:
     name: EAS Build or Update
-    if: github.event.label == 'eas-build'
+    if: github.event.label.name == 'eas-build'
     runs-on: ubuntu-latest
 
     env:
