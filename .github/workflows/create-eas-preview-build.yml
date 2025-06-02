@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      EXPO_PUBLIC_SERVER_URL: ${{ needs.deploy_to_vercel.outputs.preview_url }}
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
     steps:
@@ -39,7 +38,7 @@ jobs:
 
       - name: Update EAS preview env variables
         working-directory: apps/mobile
-        run: eas env:update --variable-name EXPO_PUBLIC_SERVER_URL --value chit-money-collector-console--${{ github.head_ref }}.vercel.app --visibility plaintext --variable-environment preview --non-interactive
+        run: eas env:update --variable-name EXPO_PUBLIC_SERVER_URL --value https://chit-money-collector-console--${{ github.head_ref }}.vercel.app --visibility plaintext --variable-environment preview --non-interactive
 
       - name: 🔪 Decide Build or Update
         id: build_type
