@@ -20,5 +20,5 @@ export const getBaseUrl = () => {
     return process.env.EXPO_PUBLIC_SERVER_URL;
   }
 
-  return `https://chit-money-collector-console--preview.vercel.app`;
+  return `http://${localhost}:3000`;
 };
