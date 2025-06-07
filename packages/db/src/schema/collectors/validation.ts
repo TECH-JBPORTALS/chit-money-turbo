@@ -43,6 +43,11 @@ export const collectorsBankAccountsInsertSchema = createInsertSchema(
       .min(3, "UPI ID too short")
       .max(50, "UPI ID too long")
       .regex(/^[\w.-]+@[\w.-]+$/, "Invalid UPI ID"),
+    pincode: z
+      .string()
+      .regex(/^[0-9]+/)
+      .min(6, "Pincode must be minimum 6 digits")
+      .max(6, "Pincode must be maximum 6 digits"),
   }
 ).omit({
   userId: true,

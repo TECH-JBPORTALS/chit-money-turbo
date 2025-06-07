@@ -3,7 +3,10 @@ import { z } from "zod";
 export const personalInfoSchema = z.object({
   firstName: z.string().trim().min(2, "Enter valid name"),
   lastName: z.string().trim().min(2, "Enter valid name"),
-  dateOfBirth: z.string().trim().min(2, "Enter valid date of birth"),
+  dateOfBirth: z
+    .string()
+    .trim()
+    .refine((v) => new Date(v), { message: "Invalid date of birth" }),
 });
 
 export const contactInfoSchema = z.object({
