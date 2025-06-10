@@ -6,6 +6,7 @@ import {
   collectorsContacts,
 } from ".";
 import { z } from "zod";
+import { allowValidPhoneNumberRegex } from "@cmt/db/utils";
 
 export const collectorsInsertSchema = createInsertSchema(collectors, {
   orgName: z.string().min(1, "Required"),
@@ -68,11 +69,47 @@ export const collectorsBankAccountsUpdateSchema = createUpdateSchema(
 export const collectorsContactInsertSchema = createInsertSchema(
   collectorsContacts,
   {
-    secondaryPhoneNumber: z.string().optional(),
+    secondaryPhoneNumber: z
+      .string()
+      .regex(
+        allowValidPhoneNumberRegex,
+        "Invlaid phone number. Must be 10 digits and starts with 9 to 6."
+      )
+      .optional(),
+    primaryPhoneNumber: z
+      .string()
+      .regex(
+        allowValidPhoneNumberRegex,
+        "Invlaid phone number. Must be 10 digits and starts with 9 to 6."
+      ),
   }
-).omit({
-  userId: true,
-});
+)
+  .omit({
+    userId: true,
+  })
+  .refine((v) => v.primaryPhoneNumber !== v.secondaryPhoneNumber, {
+    message: "Primary and Secondary phone numbers can't be same",
+    path: ["secondaryPhoneNumber"],
+  });
 
-export const collectorsContactUpdateSchema =
-  createUpdateSchema(collectorsContacts);
+export const collectorsContactUpdateSchema = createUpdateSchema(
+  collectorsContacts,
+  {
+    secondaryPhoneNumber: z
+      .string()
+      .regex(
+        allowValidPhoneNumberRegex,
+        "Invlaid phone number. Must be 10 digits and starts with 9 to 6."
+      )
+      .optional(),
+    primaryPhoneNumber: z
+      .string()
+      .regex(
+        allowValidPhoneNumberRegex,
+        "Invlaid phone number. Must be 10 digits and starts with 9 to 6."
+      ),
+  }
+).refine((v) => v.primaryPhoneNumber !== v.secondaryPhoneNumber, {
+  message: "Primary and Secondary phone numbers can't be same",
+  path: ["secondaryPhoneNumber"],
+});

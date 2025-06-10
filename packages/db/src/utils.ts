@@ -22,3 +22,5 @@ export async function generateChitId(batchId: string) {
     batch,
   };
 }
+
+export const allowValidPhoneNumberRegex = /^[6-9]\d{9}$/;

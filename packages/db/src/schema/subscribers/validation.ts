@@ -6,6 +6,7 @@ import {
   subscribersContacts,
 } from ".";
 import { z } from "zod";
+import { allowValidPhoneNumberRegex } from "@cmt/db/utils";
 
 export const subscribersAddressInsertSchema = createInsertSchema(
   subscribersAddresses
@@ -44,13 +45,50 @@ export const subscribersBankAccountUpdateSchema = createUpdateSchema(
 export const subscribersContactInsertSchema = createInsertSchema(
   subscribersContacts,
   {
-    secondaryPhoneNumber: z.string().optional(),
+    secondaryPhoneNumber: z
+      .string()
+      .regex(
+        allowValidPhoneNumberRegex,
+        "Invlaid phone number. Must be 10 digits and starts with 9 to 6."
+      )
+      .optional(),
+    primaryPhoneNumber: z
+      .string()
+      .regex(
+        allowValidPhoneNumberRegex,
+        "Invlaid phone number. Must be 10 digits and starts with 9 to 6."
+      ),
   }
-).omit({
-  userId: true,
+)
+  .omit({
+    userId: true,
+  })
+  .refine((v) => v.primaryPhoneNumber !== v.secondaryPhoneNumber, {
+    message: "Primary and Secondary phone numbers can't be same",
+    path: ["secondaryPhoneNumber"],
+  });
+
+export const subscribersContactUpdateSchema = createUpdateSchema(
+  subscribersContacts,
+  {
+    secondaryPhoneNumber: z
+      .string()
+      .regex(
+        allowValidPhoneNumberRegex,
+        "Invlaid phone number. Must be 10 digits and starts with 9 to 6."
+      )
+      .optional(),
+    primaryPhoneNumber: z
+      .string()
+      .regex(
+        allowValidPhoneNumberRegex,
+        "Invlaid phone number. Must be 10 digits and starts with 9 to 6."
+      ),
+  }
+).refine((v) => v.primaryPhoneNumber !== v.secondaryPhoneNumber, {
+  message: "Primary and Secondary phone numbers can't be same",
+  path: ["secondaryPhoneNumber"],
 });
-export const subscribersContactUpdateSchema =
-  createUpdateSchema(subscribersContacts);
 
 export const subscribersInsertSchema = createInsertSchema(subscribers, {
   faceId: z.string().min(1, "Required"),
