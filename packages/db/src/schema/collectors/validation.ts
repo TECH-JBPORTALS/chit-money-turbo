@@ -9,7 +9,10 @@ import { z } from "zod";
 import { allowValidPhoneNumberRegex } from "@cmt/db/utils";
 
 export const collectorsInsertSchema = createInsertSchema(collectors, {
-  orgName: z.string().min(1, "Required"),
+  orgName: z
+    .string()
+    .regex(allowValidPhoneNumberRegex, { message: "Allowed only alphabets" })
+    .min(1, "Required"),
   orgCertificateKey: z.string().min(1, "Required"),
   aadharBackFileKey: z.string().min(1, "Required"),
   aadharFrontFileKey: z.string().min(1, "Required"),

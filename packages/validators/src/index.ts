@@ -9,10 +9,8 @@ import {
   subscribersContactInsertSchema,
   subscribersInsertSchema,
 } from "@cmt/db/schema";
+import { onlyAlphaSpaceAllowedRegex } from "@cmt/db/utils";
 import { z } from "zod";
-
-/* Regexes */
-export const onlyAlphaSpaceAllowedRegex = /^[A-Za-z\s]+$/;
 
 /* Collector Onboardng Schema */
 export const personalInfoSchema = collectorsInsertSchema
