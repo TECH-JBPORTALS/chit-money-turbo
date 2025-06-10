@@ -61,9 +61,11 @@ export const subscribersToBatchUpdateSchema = createInsertSchema(
 
 export const paymentInsertSchema = createInsertSchema(payments, {
   penalty: z.number({ invalid_type_error: "Invalid penalty" }),
-  subscriptionAmount: z.number({
-    invalid_type_error: "Invalid subscription amount",
-  }),
+  subscriptionAmount: z
+    .number({
+      invalid_type_error: "Invalid subscription amount",
+    })
+    .max(10000, "Maximum should be equal to 1 lakh rupees"),
   paidOn: z.date({ required_error: "Payment date is required" }),
   transactionId: z.string().optional(),
 }).omit({

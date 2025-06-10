@@ -34,8 +34,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Steps, useSteps } from "react-step-builder";
 import { z } from "zod";
-import SearchInput from "../search-input";
-import { ScrollArea } from "@cmt/ui/components/scroll-area";
 import { Separator } from "@cmt/ui/components/separator";
 import { paymentInsertSchema } from "@cmt/db/schema";
 import { RouterOutputs } from "@cmt/api";
@@ -51,11 +49,16 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@cmt/ui/components/calendar";
 
-const paymentDetailsForm = paymentInsertSchema.pick({
-  subscriptionAmount: true,
-  penalty: true,
-  paidOn: true,
-});
+const paymentDetailsForm = paymentInsertSchema
+  .pick({
+    subscriptionAmount: true,
+    penalty: true,
+    paidOn: true,
+  })
+  .refine((v) => v.penalty <= v.subscriptionAmount, {
+    message: "Penaly can not be exceed more than subscription amount",
+    path: ["penalty"],
+  });
 
 function PaymentDetailsForm(
   props: StepProps<z.infer<typeof paymentDetailsForm>>
