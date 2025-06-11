@@ -11,7 +11,8 @@
       "types": "./dist/index.d.ts",
       "default": "./src/index.ts"
     },
-    "./uploadthing": "./src/uploadthing.ts"
+    "./uploadthing": "./src/uploadthing.ts",
+    "./utils/*": "./src/utils/*.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "catalog:",

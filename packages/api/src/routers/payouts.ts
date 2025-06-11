@@ -514,7 +514,7 @@ export const payoutsRouter = {
         ? lte(schema.subscribersToBatches.id, cursor)
         : undefined;
 
-      // List out the not paid subscribers
+      // List out the not-paid subscribers
       const notPaidCond = and(
         ...(cursorCond ? [cursorCond] : []),
         not(

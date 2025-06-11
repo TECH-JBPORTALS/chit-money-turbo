@@ -13,6 +13,9 @@ export function DataTableClient() {
   const query = searchParams.get("q") ?? "";
   const pageSize = searchParams.get("pageSize") ?? "10";
   const pageIndex = searchParams.get("pageIndex") ?? "0";
+  const paymentStatus = (searchParams.get("stat") ?? "all") as
+    | "not-paid"
+    | "all";
   const currentRunway =
     searchParams.get("currentRunway") ?? new Date().toDateString();
 
@@ -24,6 +27,7 @@ export function DataTableClient() {
       pageSize: parseInt(pageSize),
       query,
       runwayDate: currentRunway,
+      paymentStatus,
     })
   );
 

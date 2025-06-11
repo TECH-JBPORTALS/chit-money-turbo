@@ -24,3 +24,5 @@ export async function getClerkUser(userId: string) {
     primaryEmailAddress,
   };
 }
+
+export type ClerkUserType = Awaited<ReturnType<typeof getClerkUser>>;
