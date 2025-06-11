@@ -252,7 +252,7 @@ async function GetPaymentsProgressFooter({ batchId }: { batchId: string }) {
           {data.totalPaymentsToBeCollected - data.paymentsDone} pending payments
         </span>
       </div>
-      <Button variant={"outline"} className="w-full">
+      <Button asChild variant={"outline"} className="w-full">
         <Link href={`/batches/${batchId}/payments?stat=not-paid`}>
           View Payments
         </Link>

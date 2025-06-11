@@ -1,16 +1,13 @@
 import {
   or,
   and,
-  count,
   desc,
   eq,
-  gt,
   ilike,
   inArray,
   lt,
   lte,
   sql,
-  sum,
   notExists,
   getTableColumns,
 } from "@cmt/db";
@@ -21,15 +18,9 @@ import { schema } from "@cmt/db/client";
 import { addMonths, format, setDate } from "date-fns";
 import {
   cursorPaginateInputSchema,
-  getPagination,
   paginateInputSchema,
 } from "../utils/paginate";
-import {
-  getCreditScoreMeta,
-  getFundProgressOfBatch,
-  getPaymentProgressOfMonth,
-  getSubscribersByBatchId,
-} from "../utils/actions";
+import { getCreditScoreMeta, getFundProgressOfBatch } from "../utils/actions";
 import { generateChitId } from "@cmt/db/utils";
 import { paymentInsertSchema, paymentUpdateSchema } from "@cmt/db/schema";
 import { getClerkUser, getQueryUserIds } from "../utils/clerk";
