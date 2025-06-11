@@ -98,7 +98,7 @@ export const paymentsRouter = {
       const startsOn = new Date(batch.startsOn);
 
       const months = Array.from({ length: scheme }, (_, index) => {
-        const date = addMonths(startsOn, index);
+        const date = setDate(addMonths(startsOn, index), parseInt(batch.dueOn));
         return {
           value: format(date, "yyyy-MM-dd"),
           label: format(date, "MMM yyyy"),

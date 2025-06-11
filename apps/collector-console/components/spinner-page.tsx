@@ -9,7 +9,7 @@ export function SpinnerPage({
   return (
     <div
       className={cn(
-        "h-full min-h-svh w-full flex items-center justify-center",
+        "h-full flex-1 w-full flex items-center justify-center",
         className
       )}
       {...props}
