@@ -304,21 +304,21 @@ export const paymentsRouter = {
         .object({
           limit: z.number().optional(),
           cursor: z.string().optional(),
+          subscriberId: z.string().optional(),
         })
+        .partial()
         .optional()
     )
     .query(async ({ ctx, input }) => {
       const limit = input?.limit ?? 10;
+      const subscriberId = input?.subscriberId ?? ctx.session.userId;
       const cursorCond = input?.cursor
         ? or(lt(schema.payments.id, input.cursor))
         : undefined;
 
       const subscriberToBatch =
         await ctx.db.query.subscribersToBatches.findMany({
-          where: eq(
-            schema.subscribersToBatches.subscriberId,
-            ctx.session.userId
-          ),
+          where: eq(schema.subscribersToBatches.subscriberId, subscriberId),
         });
 
       const items = await ctx.db.query.payments.findMany({
@@ -334,6 +334,15 @@ export const paymentsRouter = {
           paidOn: true,
           creditScoreAffected: true,
           runwayDate: true,
+          subscriptionAmount: true,
+        },
+        with: {
+          subscribersToBatches: {
+            columns: { chitId: true },
+            with: {
+              batch: true,
+            },
+          },
         },
         limit: limit + 1,
         orderBy: ({ paidOn, id }, { desc, asc }) => [desc(id), asc(paidOn)],
@@ -347,9 +356,14 @@ export const paymentsRouter = {
       };
     }),
 
-  getCreditScoreMeta: protectedProcedure.query(({ ctx }) =>
-    getCreditScoreMeta({ ctx, subscriberId: ctx.session.userId })
-  ),
+  getCreditScoreMeta: protectedProcedure
+    .input(z.object({ subscriberId: z.string() }).optional())
+    .query(({ ctx, input }) =>
+      getCreditScoreMeta({
+        ctx,
+        subscriberId: input?.subscriberId ?? ctx.session.userId,
+      })
+    ),
 
   /** Get upcoming payments due of subscriber */
   getUpcomingDues: protectedProcedure
