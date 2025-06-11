@@ -119,6 +119,18 @@ export const paymentsRouter = {
       const { batch } = await generateChitId(input.batchId);
       const subscriptionAmount = Math.ceil(batch.fundAmount / batch.scheme);
       const { pageIndex, pageSize } = input;
+      const query = input.query;
+
+      const afterQueriedUserIds = await getQueryUserIds(query);
+      const queryCond = query
+        ? or(
+            ilike(schema.subscribersToBatches.chitId, `%${query}%`),
+            inArray(
+              schema.subscribersToBatches.subscriberId,
+              afterQueriedUserIds ?? []
+            )
+          )
+        : undefined;
 
       const inputMonth = runwayDate.getMonth() + 1; // JavaScript months are 0-indexed
       const inputYear = runwayDate.getFullYear();
@@ -149,6 +161,7 @@ export const paymentsRouter = {
         .where(
           and(
             eq(schema.subscribersToBatches.batchId, batch.id),
+            queryCond,
             paymentStatus === "not-paid"
               ? sql`${schema.payments.id} IS NULL`
               : undefined
