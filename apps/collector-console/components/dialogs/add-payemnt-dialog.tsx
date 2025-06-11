@@ -380,7 +380,7 @@ export function AddPaymentDialog({
           <DialogDescription>{data.chitId}</DialogDescription>
           <span className="inline-flex gap-1.5 text-lg text-muted-foreground font-semibold">
             <Badge variant={"secondary"} className="border-primary">
-              {formatDate(data.runwayDate, "MMM yyyy")}
+              {formatDate(data.runwayDate, "dd MMM yyyy")}
             </Badge>
             Payment
           </span>

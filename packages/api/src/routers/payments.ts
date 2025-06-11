@@ -15,7 +15,7 @@ import { protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { schema } from "@cmt/db/client";
-import { addMonths, format, setDate } from "date-fns";
+import { addMonths, differenceInDays, format, setDate } from "date-fns";
 import {
   cursorPaginateInputSchema,
   paginateInputSchema,
@@ -34,18 +34,44 @@ export const paymentsRouter = {
     .input(
       paymentInsertSchema.omit({ totalAmount: true, creditScoreAffected: true })
     )
-    .mutation(({ ctx, input }) =>
-      ctx.db
+    .mutation(async ({ ctx, input }) => {
+      const calculatedCreditScore = () => {
+        // Payment is delayed
+        if (input.paidOn > new Date(input.runwayDate)) {
+          const numberOfDaysDelayed = differenceInDays(
+            input.paidOn,
+            input.runwayDate
+          );
+          return numberOfDaysDelayed * -5;
+        }
+
+        // Payment is before time
+        if (input.paidOn < new Date(input.runwayDate)) {
+          const numberOfDaysPre = differenceInDays(
+            input.runwayDate,
+            input.paidOn
+          );
+          return numberOfDaysPre + 10;
+        }
+
+        // Payment is on-time
+        if (input.paidOn === new Date(input.runwayDate)) {
+          return 10;
+        }
+
+        return 0;
+      };
+
+      return ctx.db
         .insert(schema.payments)
         .values({
           ...input,
           totalAmount: input.subscriptionAmount + input.penalty,
-          creditScoreAffected:
-            input.paidOn > new Date(input.runwayDate) ? -10 : 10,
+          creditScoreAffected: calculatedCreditScore(),
         })
         .returning()
-        .then((v) => v.at(0))
-    ),
+        .then((v) => v.at(0));
+    }),
 
   /** Delete payment for paymentId
    * @context collector
@@ -115,8 +141,11 @@ export const paymentsRouter = {
     )
     .query(async ({ ctx, input }) => {
       const paymentStatus = input.paymentStatus ?? "all";
-      const runwayDate = new Date(input.runwayDate);
       const { batch } = await generateChitId(input.batchId);
+      const runwayDate = setDate(
+        new Date(input.runwayDate),
+        parseInt(batch.dueOn)
+      );
       const subscriptionAmount = Math.ceil(batch.fundAmount / batch.scheme);
       const { pageIndex, pageSize } = input;
       const query = input.query;
@@ -188,7 +217,8 @@ export const paymentsRouter = {
               ...sp?.payment,
               subscriptionAmount:
                 sp?.payment?.subscriptionAmount ?? subscriptionAmount,
-              runwayDate: sp?.payment?.runwayDate ?? input.runwayDate,
+              runwayDate:
+                sp?.payment?.runwayDate ?? format(runwayDate, "yyyy-MM-dd"),
               status: sp?.payemntStatus ?? "not-paid",
             },
           };

@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "next/navigation";
 import { DataTable } from "@/components/data-table";
 import { SpinnerPage } from "@/components/spinner-page";
+import { format, setDate, startOfToday } from "date-fns";
 
 export function DataTableClient() {
   const trpc = useTRPC();
