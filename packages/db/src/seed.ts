@@ -1,8 +1,7 @@
 import { fakerEN_IN } from "@faker-js/faker";
 import { createClerkClient } from "@clerk/backend";
-import { db } from "./client";
+import { db, schema } from "./client";
 import { reset } from "drizzle-seed";
-import { schema } from "@/client";
 import { addMonths } from "date-fns";
 import { eq } from "drizzle-orm";
 
