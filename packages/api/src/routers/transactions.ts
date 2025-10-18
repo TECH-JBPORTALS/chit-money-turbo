@@ -1,6 +1,18 @@
 import { schema } from "@cmt/db/client";
 import { protectedProcedure } from "../trpc";
-import { and, desc, eq, inArray, lt, lte, sql, unionAll } from "@cmt/db";
+import {
+  and,
+  desc,
+  eq,
+  getTableColumns,
+  ilike,
+  inArray,
+  lt,
+  lte,
+  or,
+  sql,
+  unionAll,
+} from "@cmt/db";
 import { z } from "zod";
 
 export const transactionsRouter = {
@@ -16,6 +28,7 @@ export const transactionsRouter = {
           limit: z.number().optional(),
           cursor: z.string().optional(),
           type: z.enum(["payouts", "all"]).optional(),
+          query: z.string().optional(),
           /** Fetch transaction based on current chit */
           subToBatchId: z.string().optional(),
         })
@@ -24,17 +37,33 @@ export const transactionsRouter = {
     .query(async ({ ctx, input }) => {
       const limit = input?.limit ?? 10;
       const cursor = input?.cursor;
+      const query = input?.query;
+
+      const queryCond = query
+        ? or(
+            ilike(schema.batches.name, `%${query}%`),
+            ilike(schema.subscribersToBatches.chitId, `%${query}%`)
+          )
+        : undefined;
 
       const subToBatchCond = input?.subToBatchId
         ? eq(schema.subscribersToBatches.id, input.subToBatchId)
         : undefined;
 
-      const subToBatch = await ctx.db.query.subscribersToBatches.findMany({
-        where: and(
-          eq(schema.subscribersToBatches.subscriberId, ctx.session.userId),
-          subToBatchCond
-        ),
-      });
+      const subToBatch = await ctx.db
+        .select({ ...getTableColumns(schema.subscribersToBatches) })
+        .from(schema.subscribersToBatches)
+        .leftJoin(
+          schema.batches,
+          eq(schema.batches.id, schema.subscribersToBatches.batchId)
+        )
+        .where(
+          and(
+            eq(schema.subscribersToBatches.subscriberId, ctx.session.userId),
+            subToBatchCond,
+            queryCond
+          )
+        );
 
       const payments = ctx.db
         .select({

@@ -1,4 +1,3 @@
-import EmptyState from "@/components/empty-state";
 import { Avatar, AvatarFallback, AvatarImage } from "@cmt/ui/components/avatar";
 import { Button } from "@cmt/ui/components/button";
 import {
@@ -17,15 +16,13 @@ import {
   TabsList,
   TabsTrigger,
 } from "@cmt/ui/components/tabs";
-import { ArrowUpRightIcon, BadgeCheckIcon, SettingsIcon } from "lucide-react";
+import { BadgeCheckIcon, SettingsIcon } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@cmt/ui/components/tooltip";
 import Link from "next/link";
-import { ScrollArea } from "@cmt/ui/components/scroll-area";
-import SearchInput from "@/components/search-input";
 import { createQueryClient } from "@/trpc/query-client";
 import { trpc } from "@/trpc/server";
 import React, { Suspense } from "react";
@@ -255,8 +252,10 @@ async function GetPaymentsProgressFooter({ batchId }: { batchId: string }) {
           {data.totalPaymentsToBeCollected - data.paymentsDone} pending payments
         </span>
       </div>
-      <Button variant={"outline"} className="w-full">
-        View Payments
+      <Button asChild variant={"outline"} className="w-full">
+        <Link href={`/batches/${batchId}/payments?stat=not-paid`}>
+          View Payments
+        </Link>
       </Button>
     </CardFooter>
   );

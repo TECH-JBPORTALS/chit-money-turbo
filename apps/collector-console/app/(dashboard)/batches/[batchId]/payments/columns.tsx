@@ -93,8 +93,16 @@ export const columns: ColumnDef<
       const original = props.row.original;
       return (
         <div className="text-right">
-          {original.payment.status === "not paid" ? (
-            <AddPaymentDialog data={original}>
+          {original.payment.status === "not-paid" ? (
+            <AddPaymentDialog
+              data={{
+                payment: original.payment,
+                runwayDate: original.payment.runwayDate,
+                chitId: original.chitId,
+                subscriberToBatchId: original.id,
+                subscriber: original.subscriber,
+              }}
+            >
               <Button variant={"secondary"}>
                 <PlusIcon /> Collect
               </Button>

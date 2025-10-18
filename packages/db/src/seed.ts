@@ -1,8 +1,7 @@
 import { fakerEN_IN } from "@faker-js/faker";
 import { createClerkClient } from "@clerk/backend";
-import { db } from "./client";
+import { db, schema } from "./client";
 import { reset } from "drizzle-seed";
-import { schema } from "@/client";
 import { addMonths } from "date-fns";
 import { eq } from "drizzle-orm";
 
@@ -33,8 +32,9 @@ async function main() {
   for (let index = 0; index < 5; index++) {
     const firstName = f.person.firstName("male");
     const lastName = f.person.firstName("male");
+    const email = f.internet.email({ firstName, lastName });
     const user = await clerk.users.createUser({
-      emailAddress: [f.internet.email({ firstName, lastName })],
+      emailAddress: [email.split("@").join("+clerk_test@")],
       firstName,
       lastName,
       password: "test1234.com",
@@ -127,8 +127,9 @@ async function main() {
   for (let index = 0; index < 30; index++) {
     const firstName = f.person.firstName();
     const lastName = f.person.firstName();
+    const email = f.internet.email({ firstName, lastName });
     const user = await clerk.users.createUser({
-      emailAddress: [f.internet.email({ firstName, lastName })],
+      emailAddress: [email.split("@").join("+clerk_test@")],
       firstName,
       lastName,
       password: "test1234.com",
@@ -204,6 +205,8 @@ async function main() {
       userId: user.id,
     });
   }
+
+  return;
 
   // Subscriber joining the batches
   const batches = await db.query.batches.findMany();

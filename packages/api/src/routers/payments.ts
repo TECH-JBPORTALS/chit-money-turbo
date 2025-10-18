@@ -1,36 +1,30 @@
 import {
   or,
   and,
-  count,
   desc,
   eq,
-  gt,
   ilike,
   inArray,
   lt,
   lte,
   sql,
-  sum,
   notExists,
+  getTableColumns,
 } from "@cmt/db";
 import { protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { schema } from "@cmt/db/client";
-import { addMonths, format, setDate } from "date-fns";
+import { addMonths, differenceInDays, format, setDate } from "date-fns";
 import {
   cursorPaginateInputSchema,
   paginateInputSchema,
 } from "../utils/paginate";
-import {
-  getCreditScoreMeta,
-  getFundProgressOfBatch,
-  getPaymentProgressOfMonth,
-  getSubscribersByBatchId,
-} from "../utils/actions";
+import { getCreditScoreMeta, getFundProgressOfBatch } from "../utils/actions";
 import { generateChitId } from "@cmt/db/utils";
 import { paymentInsertSchema, paymentUpdateSchema } from "@cmt/db/schema";
 import { getClerkUser, getQueryUserIds } from "../utils/clerk";
+import { withPagination } from "../utils/dynamic";
 
 export const paymentsRouter = {
   /** Create payment for subscribersToBatchId
@@ -40,18 +34,44 @@ export const paymentsRouter = {
     .input(
       paymentInsertSchema.omit({ totalAmount: true, creditScoreAffected: true })
     )
-    .mutation(({ ctx, input }) =>
-      ctx.db
+    .mutation(async ({ ctx, input }) => {
+      const calculatedCreditScore = () => {
+        // Payment is delayed
+        if (input.paidOn > new Date(input.runwayDate)) {
+          const numberOfDaysDelayed = differenceInDays(
+            input.paidOn,
+            input.runwayDate
+          );
+          return numberOfDaysDelayed * -5;
+        }
+
+        // Payment is before time
+        if (input.paidOn < new Date(input.runwayDate)) {
+          const numberOfDaysPre = differenceInDays(
+            input.runwayDate,
+            input.paidOn
+          );
+          return numberOfDaysPre + 10;
+        }
+
+        // Payment is on-time
+        if (input.paidOn === new Date(input.runwayDate)) {
+          return 10;
+        }
+
+        return 0;
+      };
+
+      return ctx.db
         .insert(schema.payments)
         .values({
           ...input,
           totalAmount: input.subscriptionAmount + input.penalty,
-          creditScoreAffected:
-            input.paidOn > new Date(input.runwayDate) ? -10 : 10,
+          creditScoreAffected: calculatedCreditScore(),
         })
         .returning()
-        .then((v) => v.at(0))
-    ),
+        .then((v) => v.at(0));
+    }),
 
   /** Delete payment for paymentId
    * @context collector
@@ -95,7 +115,7 @@ export const paymentsRouter = {
       const startsOn = new Date(batch.startsOn);
 
       const months = Array.from({ length: scheme }, (_, index) => {
-        const date = addMonths(startsOn, index);
+        const date = setDate(addMonths(startsOn, index), parseInt(batch.dueOn));
         return {
           value: format(date, "yyyy-MM-dd"),
           label: format(date, "MMM yyyy"),
@@ -105,7 +125,7 @@ export const paymentsRouter = {
       return { batch, months };
     }),
 
-  /** Get list subscribers for runway with the status of payment paid or not paid
+  /** Get list subscribers for runway with the status of payment paid or not-paid
    * @context collector
    */
   ofBatchSelectedRunway: protectedProcedure
@@ -115,50 +135,100 @@ export const paymentsRouter = {
           batchId: z.string(),
           query: z.string().optional(),
           runwayDate: z.string(),
+          paymentStatus: z.enum(["all", "not-paid"]).optional(),
         })
       )
     )
     .query(async ({ ctx, input }) => {
-      const subs = await getSubscribersByBatchId({ ctx, input });
-      const runwayDate = new Date(input.runwayDate);
+      const paymentStatus = input.paymentStatus ?? "all";
       const { batch } = await generateChitId(input.batchId);
+      const runwayDate = setDate(
+        new Date(input.runwayDate),
+        parseInt(batch.dueOn)
+      );
       const subscriptionAmount = Math.ceil(batch.fundAmount / batch.scheme);
+      const { pageIndex, pageSize } = input;
+      const query = input.query;
 
-      const mappedItems = await Promise.all(
-        subs.items.flatMap(async (sub) => {
-          let status: "paid" | "not paid" = "not paid";
+      const afterQueriedUserIds = await getQueryUserIds(query);
+      const queryCond = query
+        ? or(
+            ilike(schema.subscribersToBatches.chitId, `%${query}%`),
+            inArray(
+              schema.subscribersToBatches.subscriberId,
+              afterQueriedUserIds ?? []
+            )
+          )
+        : undefined;
 
-          const inputMonth = runwayDate.getMonth() + 1; // JavaScript months are 0-indexed
-          const inputYear = runwayDate.getFullYear();
+      const inputMonth = runwayDate.getMonth() + 1; // JavaScript months are 0-indexed
+      const inputYear = runwayDate.getFullYear();
 
-          // Check if: subscriber paid for given runway date
-          const payment = await ctx.db.query.payments.findFirst({
-            where: and(
-              eq(schema.payments.subscriberToBatchId, sub.id),
-              sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate}) = ${inputMonth}`,
-              sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate}) = ${inputYear}`
+      // Check if: subscriber paid for given runway date
+      type PaymentStatus = "paid" | "not-paid";
+      const baseQuery = ctx.db
+        .select({
+          ...getTableColumns(schema.subscribersToBatches),
+          payment: getTableColumns(schema.payments),
+          payemntStatus: sql<PaymentStatus>`CASE 
+                WHEN ${schema.payments.id} IS NOT NULL THEN 'paid'
+                ELSE 'not-paid'
+              END`,
+        })
+        .from(schema.subscribersToBatches)
+        .leftJoin(
+          schema.payments,
+          and(
+            eq(
+              schema.payments.subscriberToBatchId,
+              schema.subscribersToBatches.id
             ),
-          });
+            sql`EXTRACT(MONTH FROM ${schema.payments.runwayDate}) = ${inputMonth}`,
+            sql`EXTRACT(YEAR FROM ${schema.payments.runwayDate}) = ${inputYear}`
+          )
+        )
+        .where(
+          and(
+            eq(schema.subscribersToBatches.batchId, batch.id),
+            queryCond,
+            paymentStatus === "not-paid"
+              ? sql`${schema.payments.id} IS NULL`
+              : undefined
+          )
+        );
 
-          if (payment) status = "paid";
+      const dynamicQuery = baseQuery.$dynamic();
 
+      const subscriberPayments = await withPagination(
+        dynamicQuery,
+        pageIndex,
+        pageSize
+      );
+
+      const totalRecords = await ctx.db.$count(dynamicQuery);
+
+      const response = await Promise.all(
+        subscriberPayments.map(async (sp) => {
+          const subscriber = await getClerkUser(sp.subscriberId);
           return {
-            ...sub,
+            subscriber,
+            ...sp,
             payment: {
-              ...payment,
+              ...sp?.payment,
               subscriptionAmount:
-                payment?.subscriptionAmount ?? subscriptionAmount,
-              status,
-              runwayDate: payment?.runwayDate ?? input.runwayDate,
+                sp?.payment?.subscriptionAmount ?? subscriptionAmount,
+              runwayDate:
+                sp?.payment?.runwayDate ?? format(runwayDate, "yyyy-MM-dd"),
+              status: sp?.payemntStatus ?? "not-paid",
             },
           };
         })
       );
 
-      return { ...subs, items: mappedItems };
+      return { pageIndex, pageSize, items: response, total: totalRecords };
     }),
 
-  /** Get list subscribers for runway with the status of payment paid or not paid
+  /** Get list subscribers for runway with the status of payment paid or not-paid
    * @context collector
    */
   ofBatchThisMonth: protectedProcedure
@@ -207,7 +277,7 @@ export const paymentsRouter = {
 
       const mappedItems = await Promise.all(
         subs.flatMap(async (sub) => {
-          let status: "paid" | "not paid" = "not paid";
+          let status: "paid" | "not-paid" = "not-paid";
 
           const inputMonth = runwayDate.getMonth() + 1; // JavaScript months are 0-indexed
           const inputYear = runwayDate.getFullYear();
@@ -223,8 +293,6 @@ export const paymentsRouter = {
 
           const subscriber = await getClerkUser(sub.subscriberId);
 
-          if (payment) status = "paid";
-
           return {
             ...sub,
             payment: {
@@ -234,11 +302,7 @@ export const paymentsRouter = {
               status,
               runwayDate: runwayDate.toDateString(),
             },
-            subscriber: {
-              ...subscriber,
-              ...sub.subscriber,
-              primaryEmailAddress: subscriber.primaryEmailAddress?.emailAddress,
-            },
+            subscriber,
           };
         })
       );
@@ -304,21 +368,21 @@ export const paymentsRouter = {
         .object({
           limit: z.number().optional(),
           cursor: z.string().optional(),
+          subscriberId: z.string().optional(),
         })
+        .partial()
         .optional()
     )
     .query(async ({ ctx, input }) => {
       const limit = input?.limit ?? 10;
+      const subscriberId = input?.subscriberId ?? ctx.session.userId;
       const cursorCond = input?.cursor
         ? or(lt(schema.payments.id, input.cursor))
         : undefined;
 
       const subscriberToBatch =
         await ctx.db.query.subscribersToBatches.findMany({
-          where: eq(
-            schema.subscribersToBatches.subscriberId,
-            ctx.session.userId
-          ),
+          where: eq(schema.subscribersToBatches.subscriberId, subscriberId),
         });
 
       const items = await ctx.db.query.payments.findMany({
@@ -334,6 +398,15 @@ export const paymentsRouter = {
           paidOn: true,
           creditScoreAffected: true,
           runwayDate: true,
+          subscriptionAmount: true,
+        },
+        with: {
+          subscribersToBatches: {
+            columns: { chitId: true },
+            with: {
+              batch: true,
+            },
+          },
         },
         limit: limit + 1,
         orderBy: ({ paidOn, id }, { desc, asc }) => [desc(id), asc(paidOn)],
@@ -347,9 +420,14 @@ export const paymentsRouter = {
       };
     }),
 
-  getCreditScoreMeta: protectedProcedure.query(({ ctx }) =>
-    getCreditScoreMeta({ ctx, subscriberId: ctx.session.userId })
-  ),
+  getCreditScoreMeta: protectedProcedure
+    .input(z.object({ subscriberId: z.string() }).optional())
+    .query(({ ctx, input }) =>
+      getCreditScoreMeta({
+        ctx,
+        subscriberId: input?.subscriberId ?? ctx.session.userId,
+      })
+    ),
 
   /** Get upcoming payments due of subscriber */
   getUpcomingDues: protectedProcedure

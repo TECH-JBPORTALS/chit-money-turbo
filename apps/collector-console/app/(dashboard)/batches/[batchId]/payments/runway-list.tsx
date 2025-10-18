@@ -3,22 +3,29 @@
 import { RouterOutputs } from "@cmt/api";
 import { Button } from "@cmt/ui/components/button";
 import { cn } from "@cmt/ui/lib/utils";
+import { format, setDate, startOfToday } from "date-fns";
 import { parseAsString, useQueryState } from "nuqs";
+import { useEffect } from "react";
 
 export function RunwayList({
   runway,
 }: {
   runway: RouterOutputs["payments"]["getRunway"];
 }) {
+  const defaultBatchStartMonth = format(
+    setDate(startOfToday(), parseInt(runway.batch.dueOn)),
+    "yyyy-MM-dd"
+  );
+
   const defaultRunwayDate =
     new Date(runway.batch.startsOn) > new Date()
-      ? runway.months.at(0)?.value
-      : new Date().toDateString();
+      ? (runway.months.at(0)?.value ?? defaultBatchStartMonth)
+      : defaultBatchStartMonth;
 
   const [currentRunway, setCurrentRunway] = useQueryState(
     "currentRunway",
     parseAsString
-      .withDefault(defaultRunwayDate ?? new Date().toDateString())
+      .withDefault(defaultRunwayDate)
       .withOptions({ clearOnDefault: false })
   );
 

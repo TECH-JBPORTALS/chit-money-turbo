@@ -146,7 +146,7 @@ export const payoutsRouter = {
           amount: subToBatch.batch.fundAmount,
           appliedCommissionRate: subToBatch.commissionRate,
           totalAmount: subToBatch.batch.fundAmount + deductions,
-          payoutStatus: "approved",
+          payoutStatus: "requested",
           requestedAt: new Date(),
         })
         .onConflictDoUpdate({
@@ -155,7 +155,7 @@ export const payoutsRouter = {
             amount: subToBatch.batch.fundAmount,
             appliedCommissionRate: subToBatch.commissionRate,
             totalAmount: subToBatch.batch.fundAmount + deductions,
-            payoutStatus: "approved",
+            payoutStatus: "requested",
             requestedAt: new Date(),
           },
           target: schema.payouts.id,
@@ -514,7 +514,7 @@ export const payoutsRouter = {
         ? lte(schema.subscribersToBatches.id, cursor)
         : undefined;
 
-      // List out the not paid subscribers
+      // List out the not-paid subscribers
       const notPaidCond = and(
         ...(cursorCond ? [cursorCond] : []),
         not(

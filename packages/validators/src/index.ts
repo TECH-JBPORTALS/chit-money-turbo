@@ -9,17 +9,24 @@ import {
   subscribersContactInsertSchema,
   subscribersInsertSchema,
 } from "@cmt/db/schema";
+import { onlyAlphaSpaceAllowedRegex } from "@cmt/db/utils";
 import { z } from "zod";
 
+/* Collector Onboardng Schema */
 export const personalInfoSchema = collectorsInsertSchema
   .pick({ dateOfBirth: true })
   .and(
+    /** Fields for clerk user updation */
     z.object({
       firstName: z
         .string()
         .trim()
+        .regex(onlyAlphaSpaceAllowedRegex, "Only alphabets are allowed")
         .min(2, "First name must be at least 2 characters long"),
-      lastName: z.string().trim(),
+      lastName: z
+        .string()
+        .trim()
+        .regex(onlyAlphaSpaceAllowedRegex, "Only alphabets are allowed"),
     })
   );
 
@@ -61,7 +68,22 @@ const documentKeys = Object.keys(documentsSchema.shape) as [
 
 export const DocumentKeysEnum = z.enum(documentKeys);
 
-export const batchSchema = batchUpdateSchema;
+export const batchSchema = batchUpdateSchema
+  .and(
+    z.object({
+      canCompleteBatch: z.boolean(),
+      canUpdateFundAmount: z.boolean(),
+      minSchemaValue: z.number(),
+      canUpdateStartsOn: z.boolean(),
+    })
+  )
+  .refine(
+    (v) => v.scheme >= v.minSchemaValue,
+    ({ minSchemaValue }) => ({
+      message: `Scheme must be minimum ${minSchemaValue} months, becuase it's batch completed ${minSchemaValue} months.`,
+      path: ["scheme"],
+    })
+  );
 
 /* Subscriber Onboarding Schema's */
 export const subscriberPersonalInfoSchema = subscribersInsertSchema
@@ -71,21 +93,29 @@ export const subscriberPersonalInfoSchema = subscribersInsertSchema
       firstName: z
         .string()
         .trim()
-        .min(2, "First name must be at least 2 characters long"),
-      lastName: z.string().trim(),
+        .min(2, "First name must be at least 2 characters long")
+        .regex(onlyAlphaSpaceAllowedRegex, "Only alphabets are allowed"),
+      lastName: z
+        .string()
+        .trim()
+        .regex(onlyAlphaSpaceAllowedRegex, "Only alphabets are allowed"),
     })
   );
+
 export const nomineeInfoSchema = subscribersInsertSchema.pick({
   nomineeName: true,
   nomineeRelationship: true,
 });
+
 export const subscriberDocumentsSchema = subscribersInsertSchema.pick({
   aadharBackFileKey: true,
   aadharFrontFileKey: true,
   panCardNumber: true,
 });
+
 export const subscriberAddressInfoSchema = subscribersAddressInsertSchema;
 export const subscriberContactInfoSchema = subscribersContactInsertSchema;
+
 export const subscriberBankInfoSchema = subscribersBankAccountInsertSchema
   .and(z.object({ confirmAccountNumber: z.string().min(1) }))
   .refine((s) => s.accountNumber === s.confirmAccountNumber, {

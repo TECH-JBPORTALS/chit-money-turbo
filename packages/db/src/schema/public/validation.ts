@@ -1,4 +1,8 @@
-import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-zod";
 import { batches, payments, payouts, subscribersToBatches } from ".";
 import { z } from "zod";
 
@@ -11,7 +15,14 @@ export const batchInsertSchema = createInsertSchema(batches).omit({
   batchStatus: true,
 });
 
-export const batchUpdateSchema = createInsertSchema(batches)
+export const batchSelectSchema = createSelectSchema(batches);
+
+export const batchUpdateSchema = createInsertSchema(batches, {
+  scheme: z.number().min(1, "Scheme must be atleast 1 month"),
+  fundAmount: z.number().min(1, "Fund Amount can not be zero"),
+  name: z.string().min(1, "Batch name is required"),
+  defaultCommissionRate: z.number(),
+})
   .omit({
     id: true,
     collectorId: true,
@@ -50,9 +61,11 @@ export const subscribersToBatchUpdateSchema = createInsertSchema(
 
 export const paymentInsertSchema = createInsertSchema(payments, {
   penalty: z.number({ invalid_type_error: "Invalid penalty" }),
-  subscriptionAmount: z.number({
-    invalid_type_error: "Invalid subscription amount",
-  }),
+  subscriptionAmount: z
+    .number({
+      invalid_type_error: "Invalid subscription amount",
+    })
+    .max(10000, "Maximum should be equal to 1 lakh rupees"),
   paidOn: z.date({ required_error: "Payment date is required" }),
   transactionId: z.string().optional(),
 }).omit({

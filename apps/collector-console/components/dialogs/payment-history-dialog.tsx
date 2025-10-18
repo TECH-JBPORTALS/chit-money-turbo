@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@cmt/ui/components/dialog";
 import { ScrollArea } from "@cmt/ui/components/scroll-area";
-import PaymentCard from "../payment-card";
+import PaymentCard from "../../app/(dashboard)/s/[subscriberId]/payment-card";
 
 export default function PaymentHistoryDialog({
   children,

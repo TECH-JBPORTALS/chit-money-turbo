@@ -42,7 +42,7 @@ export default function Transactions() {
     isFetchingNextPage,
   } = useInfiniteQuery(
     trpc.transactions.getInfinitiyOfSubscriber.infiniteQueryOptions(
-      { type: selectedFilterType },
+      { type: selectedFilterType, query: debouncedQuery },
       {
         initialCursor: undefined,
         getNextPageParam: ({ nextCursor }) => nextCursor,

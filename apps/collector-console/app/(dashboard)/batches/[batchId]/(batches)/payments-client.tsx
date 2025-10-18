@@ -68,13 +68,14 @@ export function ThisMonthPayments({ batchId }: { batchId: string }) {
             </Badge>
           </div>
           <div className="w-32 text-right">
-            {s.payment.status === "not paid" ? (
+            {s.payment.status === "not-paid" ? (
               <AddPaymentDialog
                 data={{
                   payment: s.payment,
-                  subscriber: s.subscriber,
+                  runwayDate: s.payment.runwayDate,
                   chitId: s.chitId,
-                  id: s.id,
+                  subscriberToBatchId: s.id,
+                  subscriber: s.subscriber,
                 }}
               >
                 <Button variant={"secondary"}>

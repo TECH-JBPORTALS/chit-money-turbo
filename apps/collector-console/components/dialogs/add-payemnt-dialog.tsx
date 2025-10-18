@@ -34,11 +34,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Steps, useSteps } from "react-step-builder";
 import { z } from "zod";
-import SearchInput from "../search-input";
-import { ScrollArea } from "@cmt/ui/components/scroll-area";
 import { Separator } from "@cmt/ui/components/separator";
 import { paymentInsertSchema } from "@cmt/db/schema";
-import { RouterOutputs } from "@cmt/api";
+import { schema } from "@cmt/db/client";
 import { format, formatDate } from "date-fns";
 import { useTRPC } from "@/trpc/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -50,12 +48,18 @@ import {
 } from "@cmt/ui/components/popover";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@cmt/ui/components/calendar";
+import { ClerkUserType } from "@cmt/api/utils/clerk";
 
-const paymentDetailsForm = paymentInsertSchema.pick({
-  subscriptionAmount: true,
-  penalty: true,
-  paidOn: true,
-});
+const paymentDetailsForm = paymentInsertSchema
+  .pick({
+    subscriptionAmount: true,
+    penalty: true,
+    paidOn: true,
+  })
+  .refine((v) => v.penalty <= v.subscriptionAmount, {
+    message: "Penaly can not be exceed more than subscription amount",
+    path: ["penalty"],
+  });
 
 function PaymentDetailsForm(
   props: StepProps<z.infer<typeof paymentDetailsForm>>
@@ -332,8 +336,7 @@ function PaymentSummaryForm(
   );
 }
 
-type Payment =
-  RouterOutputs["payments"]["ofBatchSelectedRunway"]["items"][number];
+type Payment = Partial<typeof schema.payments.$inferSelect>;
 
 export function AddPaymentDialog({
   children,
@@ -341,10 +344,11 @@ export function AddPaymentDialog({
 }: {
   children: React.ReactNode;
   data: {
-    payment: Payment["payment"];
-    subscriber: Payment["subscriber"];
-    id: Payment["id"];
-    chitId: Payment["chitId"];
+    payment: Payment;
+    subscriberToBatchId: string;
+    chitId: string;
+    runwayDate: string;
+    subscriber: ClerkUserType;
   };
 }) {
   const { current: currentStep, total } = useSteps();
@@ -352,7 +356,7 @@ export function AddPaymentDialog({
   const [globalState, setGlobalState] = useState<
     z.infer<typeof paymentDetailsForm & typeof paymentSummaryForm>
   >({
-    subscriptionAmount: data.payment.subscriptionAmount,
+    subscriptionAmount: data.payment.subscriptionAmount ?? 0,
     penalty: data.payment.penalty ?? 0,
     paymentMode: data.payment.paymentMode ?? "cash",
     paidOn: data.payment.paidOn ?? new Date(),
@@ -376,7 +380,7 @@ export function AddPaymentDialog({
           <DialogDescription>{data.chitId}</DialogDescription>
           <span className="inline-flex gap-1.5 text-lg text-muted-foreground font-semibold">
             <Badge variant={"secondary"} className="border-primary">
-              {formatDate(data.payment.runwayDate, "MMM yyyy")}
+              {formatDate(data.runwayDate, "dd MMM yyyy")}
             </Badge>
             Payment
           </span>
@@ -409,8 +413,8 @@ export function AddPaymentDialog({
             subscriptionAmount={globalState.subscriptionAmount}
             penalty={globalState.penalty}
             paidOn={globalState.paidOn}
-            runwayDate={data.payment.runwayDate}
-            subscriberToBatchId={data.id}
+            runwayDate={data.runwayDate}
+            subscriberToBatchId={data.subscriberToBatchId}
           />
         </Steps>
       </DialogContent>
