@@ -10,7 +10,7 @@ export default ({ config }: ConfigContext) => {
     version: "1.0.0",
     scheme,
     orientation: "portrait",
-    owner: "jb-portals",
+    owner: "tech.jbportals.team",
     icon: "./assets/icon.png",
     assetBundlePatterns: ["**/*"],
     userInterfaceStyle: "automatic",
@@ -26,7 +26,7 @@ export default ({ config }: ConfigContext) => {
     },
     extra: {
       eas: {
-        projectId: "af73ccee-6f1b-4a7e-a1f7-4daeb769609f",
+        projectId: "a87bbda4-b855-4a9b-8946-50fc6e7799c2",
       },
     },
     android: {
