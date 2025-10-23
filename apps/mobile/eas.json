@@ -20,7 +20,8 @@
         "config": "android-build-with-credentials.yml",
         "buildType": "apk",
         "image": "latest"
-      }
+      },
+      "channel": "staging"
     },
     "production": {
       "environment": "production",

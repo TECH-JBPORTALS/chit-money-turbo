@@ -39,7 +39,7 @@ export default ({ config }: ConfigContext) => {
       edgeToEdgeEnabled: true,
     },
     updates: {
-      url: "https://u.expo.dev/af73ccee-6f1b-4a7e-a1f7-4daeb769609f",
+      url: "https://u.expo.dev/a87bbda4-b855-4a9b-8946-50fc6e7799c2",
     },
     runtimeVersion: {
       policy: "appVersion",
