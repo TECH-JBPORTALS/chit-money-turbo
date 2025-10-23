@@ -41,6 +41,7 @@ import { useMutation } from "@tanstack/react-query";
 import { trpc } from "~/utils/api";
 import { DatePicker } from "~/components/ui/date-picker";
 import React from "react";
+import { format } from "date-fns";
 
 function PersonalInfoForm() {
   const {
@@ -110,8 +111,12 @@ function PersonalInfoForm() {
                 <DatePicker
                   {...field}
                   value={new Date(field.value)}
-                  onChange={(event, date) =>
-                    field.onChange(date?.toDateString())
+                  onChange={(_e, date) =>
+                    field.onChange(
+                      date
+                        ? format(date, "yyyy-MM-dd")
+                        : format(new Date(), "yyyy-MM-dd")
+                    )
                   }
                 />
               </FormControl>
